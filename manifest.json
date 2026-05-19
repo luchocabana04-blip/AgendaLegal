@@ -1,13 +1,13 @@
 {
-  "name": "Mariana Sánchez & Asociados — Agenda",
+  "name": "Mariana Sánchez & Asociados — Suite Legal",
   "short_name": "Agenda MS&A",
-  "description": "Sistema de gestión de agenda — Mariana Sánchez & Asociados, Estudio Jurídico",
+  "description": "Sistema de gestión de agenda jurídica corporativa — Mariana Sánchez & Asociados",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#07090F",
   "theme_color": "#C9A84C",
-  "orientation": "landscape-primary",
+  "orientation": "portrait-primary",
   "lang": "es-AR",
   "categories": ["productivity", "business"],
   "icons": [
