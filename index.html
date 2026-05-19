@@ -56,10 +56,8 @@
     @keyframes pulsar    {0%,100%{opacity:1;transform:scale(1)}50%{opacity:.55;transform:scale(.9)}}
     @keyframes loginFade {from{opacity:0;transform:scale(.97) translateY(14px)}to{opacity:1;transform:scale(1) translateY(0)}}
     @keyframes spin      {to{transform:rotate(360deg)}}
-    @keyframes shimmer   {0%{background-position:-400px 0}100%{background-position:400px 0}}
 
     .fade-in{animation:fadeIn .3s ease}
-    .pulsar{animation:pulsar 1.8s infinite}
 
     /* SPLASH */
     #splash{position:fixed;inset:0;background:var(--bg);z-index:9999;
@@ -102,32 +100,33 @@
     .firma-sub{font-size:10px;color:var(--gold);text-align:center;letter-spacing:.22em;text-transform:uppercase;margin-top:5px;margin-bottom:28px}
     .divider{border:none;border-top:1px solid var(--bd2);margin:0 0 20px}
     .cita{font-family:'Georgia',serif;font-style:italic;font-size:13px;color:var(--tx2);text-align:center;line-height:1.75;margin-bottom:26px}
+    
+    /* BOTONES */
     .btn-gold{width:100%;padding:15px;background:linear-gradient(145deg,var(--gold3),var(--gold));
       border:none;border-radius:9px;color:#08060A;font-size:12.5px;font-weight:700;
       letter-spacing:.18em;text-transform:uppercase;transition:all .35s;
       box-shadow:0 5px 26px rgba(201,168,76,.3);display:inline-flex;align-items:center;justify-content:center;gap:8px}
     .btn-gold:hover:not(:disabled){box-shadow:0 8px 36px rgba(201,168,76,.44);transform:translateY(-2px);background:linear-gradient(145deg,var(--gold),var(--gold2))}
-    .btn-gold:active{transform:translateY(0)}
     .btn-gold:disabled{opacity:.5;cursor:not-allowed}
     .card-footer{text-align:center;margin-top:20px;font-size:10px;color:var(--tx3);letter-spacing:.04em}
 
+    /* ESTILOS DE BOTONES EN MODALES */
+    .btn-p{padding:10px 18px;background:linear-gradient(135deg,var(--gold3),var(--gold));color:#000;font-weight:600;font-size:12px;border-radius:6px;transition:all .2s}
+    .btn-p:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(201,168,76,0.3)}
+    .btn-d{padding:10px 14px;background:rgba(201,76,76,0.15);color:#FF8888;border:1px solid rgba(201,76,76,0.3);font-size:12px;border-radius:6px;transition:all .2s;margin-right:auto}
+    .btn-d:hover{background:rgba(201,76,76,0.25);color:#FFAAAA}
+    .btn-s{padding:10px 14px;background:var(--s3);color:var(--tx2);border:1px solid var(--bd2);font-size:12px;border-radius:6px;transition:all .2s}
+    .btn-s:hover{color:var(--tx);border-color:var(--bd)}
+
     .cfg-hdg{font-size:16px;font-family:'Playfair Display',serif;color:var(--tx);text-align:center;margin-bottom:4px}
     .cfg-sub{font-size:12px;color:var(--tx2);text-align:center;line-height:1.6;margin-bottom:18px}
-    .cfg-steps{background:var(--s2);border-radius:8px;padding:13px 15px;margin-bottom:16px;
-      font-size:11.5px;color:var(--tx2);line-height:1.85}
-    .cfg-steps b{color:var(--gold)}
     .f-grp{display:flex;flex-direction:column;margin-bottom:12px;position:relative}
     .f-lbl{font-size:10px;color:var(--tx2);text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:5px}
     .msg-err{background:rgba(201,76,76,.11);border:1px solid rgba(201,76,76,.33);border-radius:7px;
       padding:10px 14px;font-size:12px;color:#E07070;margin-bottom:12px;line-height:1.55}
 
-    .loading-full{height:100vh;display:flex;flex-direction:column;align-items:center;
-      justify-content:center;gap:18px;background:var(--bg)}
-    .spin-ring{width:32px;height:32px;border:2.5px solid var(--bd);border-top-color:var(--gold);
-      border-radius:50%;animation:spin .8s linear infinite}
-
     /* LAYOUT DINÁMICO */
-    .layout{display:grid;grid-template-columns:260px 1fr 300px;height:100vh;overflow:hidden}
+    .layout{display:grid;grid-template-columns:260px 1fr;height:100vh;overflow:hidden}
 
     /* SIDEBAR */
     .sidebar{background:var(--s1);border-right:1px solid var(--bd2);display:flex;flex-direction:column;overflow:hidden}
@@ -227,6 +226,7 @@
     /* VISTA DIA */
     .dia-hdr{padding:12px 14px;border-bottom:1px solid var(--bd2);
       font-family:'Playfair Display',serif;font-size:15px;color:var(--tx)}
+    .vacio{font-size:12px;color:var(--tx3);text-align:center;padding:24px;font-style:italic}
 
     /* VISTA LISTA */
     .list-view{display:flex;flex-direction:column;gap:10px}
@@ -239,23 +239,6 @@
     .list-bar{width:4px;border-radius:2px;min-height:36px;align-self:stretch;flex-shrink:0}
     .list-tit{font-size:13px;font-weight:500;color:var(--tx);margin-bottom:3px}
     .list-meta{font-size:11px;color:var(--tx2);display:flex;gap:9px;flex-wrap:wrap}
-
-    /* PANEL DERECHO */
-    .rpanel{background:var(--s1);border-left:1px solid var(--bd2);display:flex;flex-direction:column;overflow:hidden}
-    .rp-tabs{display:flex;border-bottom:1px solid var(--bd2)}
-    .rptab{flex:1;padding:12px 6px;border:none;background:transparent;color:var(--tx2);
-      font-size:10.5px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;
-      border-bottom:2px solid transparent;transition:all .2s}
-    .rptab.on{color:var(--gold);border-bottom-color:var(--gold)}
-    .rp-body{flex:1;overflow-y:auto;padding:13px}
-    
-    .up-item{padding:10px 11px;border:1px solid var(--bd2);border-radius:8px;margin-bottom:6px;
-      cursor:pointer;transition:all .2s;position:relative}
-    .up-item:hover{background:var(--s2)}
-    .up-dot{position:absolute;top:10px;right:10px;width:7px;height:7px;border-radius:50%}
-    .up-tit{font-size:12.5px;font-weight:500;color:var(--tx);margin-bottom:2px;
-      padding-right:18px;line-height:1.35}
-    .up-fecha{font-size:10.5px;color:var(--tx2)}
 
     /* MODALES MÁS ELEGANTES Y AMPLIADOS */
     .modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.82);display:flex;
@@ -270,7 +253,7 @@
     .modal-x:hover{color:var(--tx)}
     .modal-bd{padding:18px 20px;display:flex;flex-direction:column;gap:14px}
     .modal-ft{padding:12px 20px 16px;border-top:1px solid var(--bd2);
-      display:flex;gap:8px;justify-content:flex-end}
+      display:flex;gap:8px;justify-content:flex-end;align-items:center}
     .f-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     .m-lbl{font-size:10.5px;color:var(--tx2);text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:5px}
     
@@ -298,14 +281,12 @@
     .toast.err{border-color:#993333;background:#180D0D;color:#FFAAAA}
     .toast.ok{border-color:var(--green);background:#0A1810;color:#AAFFAA}
 
-    /* SECCIÓN EXPORTACIÓN IMPRESIÓN PDF OCULTA EN PANTALLA */
     #pdf-render-area{display:none}
 
     /* RESPONSIVE OPTIMIZATIONS TÁCTILES */
     @media(max-width:992px){
-      .layout{grid-template-columns:1fr;grid-template-rows:auto 1fr}
-      .sidebar{display:none} /* Ocultado dinámico para optimizar área táctil móvil */
-      .rpanel{display:none}
+      .layout{grid-template-columns:1fr}
+      .sidebar{display:none}
     }
   </style>
 </head>
@@ -319,21 +300,18 @@
 </div>
 
 <div id="root"></div>
-
 <div id="pdf-render-area"></div>
 
 <script type="text/babel">
-const { useState, useEffect, useRef, useCallback } = React;
+const { useState, useEffect } = React;
 const { createClient } = window.supabase;
 
-const FIRMA = { nombre:"MARIANA SÁNCHEZ & ASOCIADOS", sub:"Estudio Jurídico Premium" };
-
 const ABOGADOS = [
-  { id:"p",  nombre:"Dra. Mariana Sánchez", rol:"Socia Principal",   color:"#C9A84C", ini:"MS", principal:true  },
-  { id:"a1", nombre:"Dr. Carlos Mendoza",   rol:"Abogado Asociado",  color:"#5491C8", ini:"CM", principal:false },
-  { id:"a2", nombre:"Dra. Ana Rivas",       rol:"Abogada Asociada",  color:"#4DAAA0", ini:"AR", principal:false },
-  { id:"a3", nombre:"Dr. Pablo Torres",     rol:"Abogado Asociado",  color:"#8E6DC4", ini:"PT", principal:false },
-  { id:"a4", nombre:"Dra. Laura Vega",      rol:"Abogada Asociada",  color:"#C46D6D", ini:"LV", principal:false },
+  { id:"p",  nombre:"Dra. Mariana Sánchez", rol:"Socia Principal",   color:"#C9A84C", ini:"MS" },
+  { id:"a1", nombre:"Dr. Carlos Mendoza",   rol:"Abogado Asociado",  color:"#5491C8", ini:"CM" },
+  { id:"a2", nombre:"Dra. Ana Rivas",       rol:"Abogada Asociada",  color:"#4DAAA0", ini:"AR" },
+  { id:"a3", nombre:"Dr. Pablo Torres",     rol:"Abogado Asociado",  color:"#8E6DC4", ini:"PT" },
+  { id:"a4", nombre:"Dra. Laura Vega",      rol:"Abogada Asociada",  color:"#C46D6D", ini:"LV" },
 ];
 
 const TIPOS = [
@@ -345,21 +323,12 @@ const TIPOS = [
   { id:"otro",        label:"Otro",        icon:"📋" },
 ];
 
-const AL_OPTS = [
-  { id:"72h", label:"3 días antes",   h:72  },
-  { id:"48h", label:"2 días antes",   h:48  },
-  { id:"24h", label:"1 día antes",    h:24  },
-  { id:"12h", label:"12 horas antes", h:12  },
-  { id:"1h",  label:"1 hora antes",   h:1   },
-];
-
 const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 const DIAS = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
 
-const genId = () => `e_${Date.now()}_${Math.random().toString(36).slice(2,6)}`;
 const hoyStr = () => new Date().toISOString().split("T")[0];
 
-/* COMPONENTE DE CONFIGURACIÓN SUPABASE */
+/* CONFIGURACIÓN SUPABASE */
 function PantallaConfig({ onConectado }) {
   const [url, setUrl] = useState(localStorage.getItem("sb_url")||"");
   const [key, setKey] = useState(localStorage.getItem("sb_key")||"");
@@ -372,16 +341,14 @@ function PantallaConfig({ onConectado }) {
     setBusy(true);
     try {
       const sb = createClient(url.trim(), key.trim());
-      // Validar conexión básica e infraestructura de tabla eventos
       const { error } = await sb.from("eventos").select("id").limit(1);
-      if (error && error.code !== "PGRST116") {
-        throw new Error(error.message || "Fallo estructural en Supabase.");
-      }
+      if (error && error.code !== "PGRST116") throw new Error(error.message);
+      
       localStorage.setItem("sb_url", url.trim());
       localStorage.setItem("sb_key", key.trim());
       onConectado(sb);
     } catch(e) {
-      setErr(e.message);
+      setErr("Fallo de conexión: Estructura inválida o claves incorrectas.");
     } finally {
       setBusy(false);
     }
@@ -395,7 +362,7 @@ function PantallaConfig({ onConectado }) {
         <div className="firma-sub">Estudio Jurídico</div>
         <hr className="divider"/>
         <div className="cfg-hdg">Infraestructura Supabase</div>
-        <div className="cfg-sub">Vincule el clúster de base de datos seguro para sincronizar expedientes y audiencias legales.</div>
+        <div className="cfg-sub">Vincule el clúster seguro para sincronizar expedientes.</div>
         {err && <div className="msg-err">{err}</div>}
         <div className="f-grp">
           <label className="f-lbl">URL de Supabase</label>
@@ -406,15 +373,15 @@ function PantallaConfig({ onConectado }) {
           <input type="password" value={key} onChange={e=>setKey(e.target.value)} placeholder="eyJhbGciOiJIUzI1NiIsIn..." disabled={busy}/>
         </div>
         <button className="btn-gold" onClick={conectar} disabled={busy}>
-          {busy ? <div className="spin-ring" style={{width:16,height:16}}/> : "ESTABLECER CONEXIÓN"}
+          {busy ? "CONECTANDO..." : "ESTABLECER CONEXIÓN"}
         </button>
       </div>
     </div>
   );
 }
 
-/* PANTALLA INGRESO / LOGIN */
-function Ingreso({ alEntrar }) {
+/* LOGIN */
+function Ingreso({ alEntrar, alConfigurar }) {
   return (
     <div className="pant-bg">
       <div className="card">
@@ -422,20 +389,19 @@ function Ingreso({ alEntrar }) {
         <div className="firma">MARIANA SÁNCHEZ<br/>&amp; ASOCIADOS</div>
         <div className="firma-sub">Estudio Jurídico</div>
         <hr className="divider"/>
-        <p className="cita">"La justicia y la diligencia procesal sostienen la solidez de la República corporativa."</p>
-        <button className="btn-gold" onClick={alEntrar}>INGRESAR A LA AGENDA</button>
+        <p className="cita">"La justicia y la diligencia procesal sostienen la solidez del bufete corporativo."</p>
+        <button className="btn-gold" onClick={alEntrar} style={{marginBottom: 12}}>INGRESAR A LA AGENDA</button>
+        <button className="cfg-btn" onClick={alConfigurar}>⚙️ Reconfigurar Servidor</button>
         <div className="card-footer">Estudio Jurídico Multiusuario Premium · © {new Date().getFullYear()}</div>
       </div>
     </div>
   );
 }
 
-/* COMPONENTE SIDEBAR LATERAL PROFESIONAL */
+/* SIDEBAR */
 function Barra({ eventos, filtro, setFiltro, onCerrarSesion, perfilAlertas, setPerfilAlertas }) {
-  const hoy = hoyStr();
   const [showPerfil, setShowPerfil] = useState(false);
-
-  const cH = eventos.filter(e=>e.date===hoy).length;
+  const cH = eventos.filter(e=>e.date===hoyStr()).length;
   const cA = eventos.filter(e=>e.type==="audiencia").length;
 
   return (
@@ -455,7 +421,7 @@ function Barra({ eventos, filtro, setFiltro, onCerrarSesion, perfilAlertas, setP
         <div className="stat-row"><span className="stat-lbl">Total Audiencias</span><span className="stat-val">{cA}</span></div>
         
         <button className="cfg-btn" style={{marginTop:10}} onClick={() => setShowPerfil(!showPerfil)}>
-          🔔 Configurar Canales de Alerta
+          🔔 Canales de Alerta
         </button>
 
         {showPerfil && (
@@ -468,48 +434,40 @@ function Barra({ eventos, filtro, setFiltro, onCerrarSesion, perfilAlertas, setP
               <label className="f-lbl" style={{fontSize:9}}>Teléfono Móvil</label>
               <input value={perfilAlertas.telefono} onChange={e=>setPerfilAlertas({...perfilAlertas, telefono:e.target.value})} placeholder="+5492604..." style={{padding:6}}/>
             </div>
-            <div style={{fontSize:9, color: "var(--gold)", textAlign:"center"}}>Sincronizado automáticamente para alertas inmediatas.</div>
           </div>
         )}
 
-        <div className="sb-sec" style={{marginTop:16}}>Filtrar por Profesional</div>
+        <div className="sb-sec" style={{marginTop:16}}>Profesionales</div>
         <div className={`abg-row ${filtro===null?"on":""}`} onClick={()=>setFiltro(null)}>
           <div className="av" style={{background:"var(--s4)",color:"var(--tx2)"}}>∀</div>
-          <div><div className="a-nm">Todo el Bufete</div><div className="a-rl">{eventos.length} causas activas</div></div>
+          <div><div className="a-nm">Todo el Bufete</div><div className="a-rl">{eventos.length} causas</div></div>
         </div>
         {ABOGADOS.map(a=>{
           const cnt = eventos.filter(e=>e.lawyers?.includes(a.id)).length;
           return (
             <div key={a.id} className={`abg-row ${filtro===a.id?"on":""}`} onClick={()=>setFiltro(a.id)}>
               <div className="av" style={{background:a.color}}>{a.ini}</div>
-              <div>
-                <div className="a-nm">{a.nombre}</div>
-                <div className="a-rl">{a.rol} · {cnt} ítems</div>
-              </div>
+              <div><div className="a-nm">{a.nombre}</div><div className="a-rl">{cnt} asignados</div></div>
             </div>
           );
         })}
       </div>
       <div className="sb-ft">
-        <div className="sb-date">{new Date().toLocaleDateString("es-AR",{weekday:"long",day:"numeric",month:"long"})}</div>
         <div className="sync-row">
           <div className="sync-dot" style={{background:"var(--green)"}}/>
-          <span className="sync-lbl" style={{color:"var(--green)"}}>Conexión Encriptada Supabase</span>
+          <span className="sync-lbl" style={{color:"var(--green)"}}>Sincronizado Supabase</span>
         </div>
-        <button className="cfg-btn logout-btn" onClick={onCerrarSesion}>
-          🚪 Cerrar Sesión del Terminal
-        </button>
+        <button className="cfg-btn logout-btn" onClick={onCerrarSesion}>🚪 Cerrar Sesión</button>
       </div>
     </div>
   );
 }
 
-/* VISTAS DE AGENDA COMPATIBLES CON GOOGLE CALENDAR */
+/* VISTAS */
 function VistaMes({año,mes,eventos,alDia,alEv}) {
   const pri = new Date(año,mes,1).getDay();
   const dias = new Date(año,mes+1,0).getDate();
   const prev = new Date(año,mes,0).getDate();
-  const hoy = hoyStr();
   const celdas = [];
 
   for(let i=pri-1;i>=0;i--) celdas.push({d:prev-i,otra:true,m:mes-1});
@@ -524,21 +482,15 @@ function VistaMes({año,mes,eventos,alDia,alEv}) {
       {celdas.map((c,idx)=>{
         const ds = `${año}-${String(c.m+1).padStart(2,"0")}-${String(c.d).padStart(2,"0")}`;
         const des = eventos.filter(e=>e.date===ds);
-        const esHoy = ds === hoy && !c.otra;
         return (
-          <div key={idx} className={`cal-cell ${c.otra?"otra":""} ${esHoy?"hoy":""}`} onClick={()=>!c.otra && alDia(ds)}>
+          <div key={idx} className={`cal-cell ${c.otra?"otra":""} ${ds===hoyStr()?"hoy":""}`} onClick={()=>!c.otra && alDia(ds)}>
             <div className="dn">{c.d}</div>
             <div style={{flex:1,overflow:"hidden"}}>
-              {des.slice(0,3).map(e=>{
-                const typeOpt = TIPOS.find(t=>t.id===e.type);
-                const abg = ABOGADOS.find(a=>a.id===(e.lawyers?.[0]||"p"));
-                return (
-                  <div key={e.id} className="chip" style={{background:abg?.color||"var(--gold3)"}} onClick={(x)=>{x.stopPropagation(); alEv(e);}}>
-                    {typeOpt?.icon} {e.title}
-                  </div>
-                );
-              })}
-              {des.length>3 && <div style={{fontSize:9,color:"var(--gold)"}}>+{des.length-3} adicionales</div>}
+              {des.slice(0,3).map(e=>(
+                <div key={e.id} className="chip" style={{background:ABOGADOS.find(a=>a.id===(e.lawyers?.[0]||"p"))?.color}} onClick={(x)=>{x.stopPropagation(); alEv(e);}}>
+                  {e.title}
+                </div>
+              ))}
             </div>
           </div>
         );
@@ -548,48 +500,31 @@ function VistaMes({año,mes,eventos,alDia,alEv}) {
 }
 
 function VistaSemana({fecha,eventos,alEv,alSlot}) {
-  const inicio = new Date(fecha);
-  inicio.setDate(inicio.getDate() - inicio.getDay());
-  const diasArr = Array.from({length:7},(_,i)=>{
-    const d = new Date(inicio); d.setDate(d.getDate()+i); return d;
-  });
-  const hs = Array.from({length:15},(_,i)=>i+7); // 7:00 a 21:00
+  const inicio = new Date(fecha); inicio.setDate(inicio.getDate() - inicio.getDay());
+  const diasArr = Array.from({length:7},(_,i)=>{ const d = new Date(inicio); d.setDate(d.getDate()+i); return d; });
+  const hs = Array.from({length:12},(_,i)=>i+8); // 8:00 a 19:00
 
   return (
     <div className="wk-wrap fade-in">
       <div className="wk-hdr">
         <div className="wk-dhdr">Hora</div>
-        {diasArr.map((d,i)=>{
-          const ds = d.toISOString().split("T")[0];
-          const esHoy = ds===hoyStr();
-          return (
-            <div key={i} className={`wk-dhdr ${esHoy?"hoy-col":""}`}>
-              <div>{DIAS[d.getDay()]}</div>
-              <div style={{fontSize:13,fontWeight:600}}>{d.getDate()}</div>
-            </div>
-          );
-        })}
+        {diasArr.map((d,i)=><div key={i} className="wk-dhdr"><b>{DIAS[d.getDay()]}</b><br/>{d.getDate()}</div>)}
       </div>
       <div className="wk-body">
-        <div>{hs.map(h=><div key={h} className="wk-tlbl">{String(h).padStart(2,"0")}:00</div>)}</div>
+        <div>{hs.map(h=><div key={h} className="wk-tlbl">{h}:00</div>)}</div>
         {diasArr.map((d,i)=>{
           const ds = d.toISOString().split("T")[0];
-          const dEvs = eventos.filter(e=>e.date===ds);
           return (
             <div key={i} className="wk-dcol">
               {hs.map(h=>{
-                const hEvs = dEvs.filter(e=>parseInt(e.startTime?.split(":")[0]||0)===h);
+                const hEvs = eventos.filter(e=>e.date===ds && parseInt(e.startTime?.split(":")[0])===h);
                 return (
                   <div key={h} className="wk-hcel" onClick={()=>alSlot(ds)}>
-                    {hEvs.map(ev=>{
-                      const col = ABOGADOS.find(a=>a.id===(ev.lawyers?.[0]||"p"))?.color || "var(--gold)";
-                      return (
-                        <div key={ev.id} onClick={(e)=>{e.stopPropagation();alEv(ev);}} 
-                             style={{background:col+"CC", borderLeft:`3px solid ${col}`, borderRadius:4, padding:"2px 4px", fontSize:10, color:"#fff", marginBottom:2}}>
-                          <b>{ev.startTime}</b> {ev.title}
-                        </div>
-                      );
-                    })}
+                    {hEvs.map(ev=>(
+                      <div key={ev.id} className="chip" style={{background:ABOGADOS.find(a=>a.id===(ev.lawyers?.[0]||"p"))?.color}} onClick={(e)=>{e.stopPropagation();alEv(ev);}}>
+                        {ev.title}
+                      </div>
+                    ))}
                   </div>
                 );
               })}
@@ -603,203 +538,118 @@ function VistaSemana({fecha,eventos,alEv,alSlot}) {
 
 function VistaDay({fecha,eventos,alEv,alSlot}) {
   const ds = fecha.toISOString().split("T")[0];
-  const dEvs = eventos.filter(e=>e.date===ds).sort((a,b)=>a.startTime.localeCompare(b.startTime));
+  const dEvs = eventos.filter(e=>e.date===ds);
   return (
-    <div className="fade-in" style={{background:"var(--s1)", borderRadius:10, padding:12, border:"1px solid var(--bd2)"}}>
-      <div className="dia-hdr">
-        {fecha.toLocaleDateString("es-AR",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}
-      </div>
+    <div className="fade-in" style={{background:"var(--s1)", borderRadius:10, padding:12}}>
+      <div className="dia-hdr">{fecha.toLocaleDateString("es-AR",{weekday:"long",day:"numeric",month:"long"})}</div>
       <div style={{marginTop:10, display:"flex", flexDirection:"column", gap:8}}>
-        {dEvs.length===0 ? <div className="vacio">No hay audiencias o compromisos agendados para este día bursátil.</div> : 
-          dEvs.map(ev=>{
-            const abg = ABOGADOS.find(a=>a.id===(ev.lawyers?.[0]||"p"));
-            return (
-              <div key={ev.id} className="list-card" onClick={()=>alEv(ev)}>
-                <div className="list-bar" style={{background:abg?.color}}/>
-                <div style={{flex:1}}>
-                  <div className="list-tit">{ev.title}</div>
-                  <div className="list-meta">
-                    <span>⏱ {ev.startTime} a {ev.endTime||"--:--"} hs</span>
-                    {ev.expNum && <span>📁 Exp: {ev.expNum}</span>}
-                    {ev.court && <span>🏛 {ev.court}</span>}
-                  </div>
-                </div>
+        {dEvs.length===0 ? <div className="vacio">No hay compromisos procesales hoy.</div> : 
+          dEvs.map(ev=>(
+            <div key={ev.id} className="list-card" onClick={()=>alEv(ev)}>
+              <div className="list-bar" style={{background:ABOGADOS.find(a=>a.id===(ev.lawyers?.[0]||"p"))?.color}}/>
+              <div style={{flex:1}}>
+                <div className="list-tit">{ev.startTime} hs - {ev.title}</div>
+                <div className="list-meta">📁 Exp: {ev.expNum||"S/D"} | 🏛 {ev.court||"S/D"}</div>
               </div>
-            );
-          })
+            </div>
+          ))
         }
-        <button className="cfg-btn" style={{marginTop:8, borderStyle:"dashed"}} onClick={()=>alSlot(ds)}>+ Añadir ítem en esta fecha</button>
+        <button className="cfg-btn" style={{borderStyle:"dashed"}} onClick={()=>alSlot(ds)}>+ Añadir ítem</button>
       </div>
     </div>
   );
 }
 
 function VistaLista({eventos,alEv}) {
-  const prox = [...eventos].sort((a,b)=>a.date.localeCompare(b.date));
   return (
     <div className="list-view fade-in">
-      <div className="list-gt">Historial y Próximos Vencimientos Cronológicos</div>
-      {prox.length===0 ? <div className="vacio">Sin registros históricos en Supabase.</div> :
-        prox.map(ev=>{
-          const abg = ABOGADOS.find(a=>a.id===(ev.lawyers?.[0]||"p"));
-          return (
-            <div key={ev.id} className="list-card" onClick={()=>alEv(ev)}>
-              <div className="list-bar" style={{background:abg?.color}}/>
-              <div style={{flex:1}}>
-                <div className="list-tit">[{ev.date}] - {ev.title}</div>
-                <div className="list-meta">
-                  <span>⚖️ {TIPOS.find(t=>t.id===ev.type)?.label}</span>
-                  <span>💼 {abg?.nombre}</span>
-                </div>
-              </div>
-            </div>
-          );
-        })
-      }
+      <div className="list-gt">Historial Total del Servidor</div>
+      {eventos.map(ev=>(
+        <div key={ev.id} className="list-card" onClick={()=>alEv(ev)}>
+          <div className="list-bar" style={{background:ABOGADOS.find(a=>a.id===(ev.lawyers?.[0]||"p"))?.color}}/>
+          <div style={{flex:1}}>
+            <div className="list-tit">[{ev.date}] {ev.title}</div>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
 
-/* MODAL DE CAUSAS LEGALES, AUDIENCIAS Y ADJUNTACIÓN EN BASE64 COMPATIBLE */
+/* MODAL REVISADO */
 function ModalEv({evento,alGuardar,alEliminar,alCerrar,busy}) {
   const esEd = !!evento?.id;
   const [form,setForm] = useState({
     title:"",type:"audiencia",date:hoyStr(),startTime:"09:00",endTime:"10:00",
-    lawyers:["p"],notes:"",alerts:["24h"],court:"",expNum:"",docs:[],...evento
+    lawyers:["p"],notes:"",court:"",expNum:"",docs:[],...evento
   });
 
-  const set = (k,v) => setForm(f=>({...f,[k]:v}));
-  const tog = (k,v) => set(k,form[k].includes(v)?form[k].filter(x=>x!==v):[...form[k],v]);
-
-  // Conversión y procesamiento premium de documentos adjuntos a Base64 para almacenamiento Supabase
   const handleFileUpload = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+    const file = e.target.files[0]; if (!file) return;
     const reader = new FileReader();
     reader.onloadend = () => {
-      const nuevoDoc = {
-        name: file.name,
-        size: (file.size / 1024).toFixed(1) + " KB",
-        base64: reader.result
-      };
-      set("docs", [...(form.docs || []), nuevoDoc]);
+      setForm(f=>({...f, docs:[...(f.docs||[]), {name:file.name, size:(file.size/1024).toFixed(1)+" KB", base64:reader.result}]}));
     };
     reader.readAsDataURL(file);
-  };
-
-  const descargarDoc = (doc) => {
-    const link = document.createElement("a");
-    link.href = doc.base64;
-    link.download = doc.name;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const visualizarDoc = (doc) => {
-    const win = window.open();
-    win.document.write(`<iframe src="${doc.base64}" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>`);
   };
 
   return (
     <div className="modal-ov" onClick={e=>e.target===e.currentTarget&&alCerrar()}>
       <div className="modal-box">
         <div className="modal-hd">
-          <div className="modal-tit">{esEd?"Revisión de Legajo Procesal":"Apertura de Evento Legal"}</div>
+          <div className="modal-tit">{esEd?"Ficha de Legajo Procesal":"Nuevo Evento en Agenda"}</div>
           <button className="modal-x" onClick={alCerrar}>✕</button>
         </div>
         <div className="modal-bd">
-          <div className="f-grp">
-            <label className="m-lbl">Carátula / Título Comercial *</label>
-            <input value={form.title} onChange={e=>set("title",e.target.value)} placeholder="Ej: Audiencia de Conciliación - García S.A." disabled={busy}/>
+          <div className="f-grp"><label className="m-lbl">Carátula / Título Comercial *</label>
+            <input value={form.title} onChange={e=>setForm({...form,title:e.target.value})} placeholder="Ej: Conciliación de Causa" disabled={busy}/>
           </div>
           <div className="f-row">
-            <div className="f-grp">
-              <label className="m-lbl">Categoría Litigio</label>
-              <select value={form.type} onChange={e=>set("type",e.target.value)} disabled={busy}>
-                {TIPOS.map(t=><option key={t.id} value={t.id}>{t.icon} {t.label}</option>)}
-              </select>
+            <div className="f-grp"><label className="m-lbl">N° Expediente</label>
+              <input value={form.expNum} onChange={e=>setForm({...form,expNum:e.target.value})} disabled={busy}/>
             </div>
-            <div className="f-grp">
-              <label className="m-lbl">N° de Expediente</label>
-              <input value={form.expNum} onChange={e=>set("expNum",e.target.value)} placeholder="EXP-2026/MZA" disabled={busy}/>
+            <div className="f-grp"><label className="m-lbl">Juzgado/Fuero</label>
+              <input value={form.court} onChange={e=>setForm({...form,court:e.target.value})} disabled={busy}/>
             </div>
           </div>
           <div className="f-row">
-            <div className="f-grp">
-              <label className="m-lbl">Fecha de Estrados *</label>
-              <input type="date" value={form.date} onChange={e=>set("date",e.target.value)} disabled={busy}/>
+            <div className="f-grp"><label className="m-lbl">Fecha</label>
+              <input type="date" value={form.date} onChange={e=>setForm({...form,date:e.target.value})} disabled={busy}/>
             </div>
-            <div className="f-grp">
-              <label className="m-lbl">Fuero / Juzgado</label>
-              <input value={form.court} onChange={e=>set("court",e.target.value)} placeholder="Juzgado del Trabajo N°3" disabled={busy}/>
-            </div>
-          </div>
-          <div className="f-row">
-            <div className="f-grp">
-              <label className="m-lbl">Hora de Inicio</label>
-              <input type="time" value={form.startTime} onChange={e=>set("startTime",e.target.value)} disabled={busy}/>
-            </div>
-            <div className="f-grp">
-              <label className="m-lbl">Cierre Estimado</label>
-              <input type="time" value={form.endTime} onChange={e=>set("endTime",e.target.value)} disabled={busy}/>
+            <div className="f-grp"><label className="m-lbl">Hora</label>
+              <input type="time" value={form.startTime} onChange={e=>setForm({...form,startTime:e.target.value})} disabled={busy}/>
             </div>
           </div>
 
-          <div className="f-grp">
-            <label className="m-lbl">Profesionales Asignados</label>
-            <div style={{display:"grid", gridTemplateColumns:"1fr 1fr", gap:6}}>
-              {ABOGADOS.map(a=>(
-                <div key={a.id} className={`chk-row ${form.lawyers.includes(a.id)?"on":""}`} onClick={()=>tog("lawyers",a.id)}>
-                  <div style={{width:10,height:10,borderRadius:"50%",background:a.color}}/>
-                  <span style={{fontSize:12}}>{a.nombre}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* DOCUMENTOS ADJUNTOS INTEGRADOS */}
           <div className="doc-section">
-            <label className="m-lbl" style={{color:"var(--gold)"}}>🗂 Documental del Expediente (Adjuntos Nativos)</label>
+            <label className="m-lbl" style={{color:"var(--gold)"}}>🗂 Documental Adjunta (Base64 Sincronizada)</label>
             <div className="file-input-wrapper">
-              <button className="file-input-btn">+ Adjuntar Documento (PDF/Imagen/Word)</button>
+              <button className="file-input-btn">+ Escanear / Cargar Archivo</button>
               <input type="file" onChange={handleFileUpload} disabled={busy}/>
             </div>
             <div className="doc-list">
-              {form.docs && form.docs.map((doc, i)=>(
+              {form.docs?.map((d,i)=>(
                 <div key={i} className="doc-item">
-                  <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:240}}>📄 {doc.name} ({doc.size})</span>
-                  <div className="doc-actions">
-                    <button className="doc-btn" onClick={()=>visualizarDoc(doc)}>Ver</button>
-                    <button className="doc-btn" onClick={()=>descargarDoc(doc)}>Bajar</button>
-                    <button className="doc-btn del" onClick={()=>set("docs", form.docs.filter((_,idx)=>idx!==i))}>Eliminar</button>
-                  </div>
+                  <span>📄 {d.name}</span>
+                  <button className="doc-btn del" onClick={()=>setForm({...form,docs:form.docs.filter((_,x)=>x!==i)})}>Eliminar</button>
                 </div>
               ))}
-              {(!form.docs || form.docs.length===0) && <div style={{fontSize:11, color:"var(--tx3)", textAlign:"center", padding:4}}>Sin archivos adjuntos.</div>}
             </div>
-          </div>
-
-          <div className="f-grp">
-            <label className="m-lbl">Notas de Estrategia Jurídica</label>
-            <textarea value={form.notes} onChange={e=>set("notes",e.target.value)} placeholder="Anotaciones críticas sobre el curso de la causa..." disabled={busy}/>
           </div>
         </div>
         <div className="modal-ft">
-          <button className="btn-s" onClick={alCerrar} disabled={busy}>Cancelar</button>
-          {esEd && <button className="btn-d" onClick={()=>alEliminar(form.id)} disabled={busy}>Eliminar Ítem</button>}
-          <button className="btn-p" onClick={()=>alGuardar(form)} disabled={busy}>
-            {busy ? <div className="spin-ring" style={{width:14,height:14}}/> : "Guardar Ficha"}
-          </button>
+          {esEd && <button className="btn-d" onClick={()=>alEliminar(form.id)} disabled={busy}>Eliminar</button>}
+          <button className="btn-s" onClick={alCerrar} disabled={busy}>Cerrar</button>
+          <button className="btn-p" onClick={()=>alGuardar(form)} disabled={busy}>Guardar</button>
         </div>
       </div>
     </div>
   );
 }
 
-/* COMPONENTE CORE PRINCIPAL */
+/* CORE APP */
 function App() {
-  const [pantalla, setPantalla] = useState("config"); 
+  const [pantalla, setPantalla] = useState("login"); 
   const [ingresado, setIngresado] = useState(false);
   const [sb, setSb] = useState(null);
   const [eventos, setEventos] = useState([]);
@@ -807,19 +657,10 @@ function App() {
   const [vista, setVista] = useState("mes");
   const [curFecha, setCurFecha] = useState(new Date());
   const [cargando, setCargando] = useState(false);
-  
   const [modal, setModal] = useState(false);
   const [editEv, setEditEv] = useState(null);
   const [toast, setToast] = useState(null);
-  const [perfilAlertas, setPerfilAlertas] = useState({
-    email: localStorage.getItem("alert_email") || "",
-    telefono: localStorage.getItem("alert_tel") || ""
-  });
-
-  useEffect(() => {
-    localStorage.setItem("alert_email", perfilAlertas.email);
-    localStorage.setItem("alert_tel", perfilAlertas.telefono);
-  }, [perfilAlertas]);
+  const [perfilAlertas, setPerfilAlertas] = useState({email:"",telefono:""});
 
   useEffect(() => {
     const savedUrl = localStorage.getItem("sb_url");
@@ -827,13 +668,11 @@ function App() {
     if (savedUrl && savedKey) {
       const client = createClient(savedUrl, savedKey);
       setSb(client);
-      setPantalla("login");
       fetchEventos(client);
+    } else {
+      setPantalla("config");
     }
-    setTimeout(() => {
-      const splash = document.getElementById("splash");
-      if(splash) splash.classList.add("out");
-    }, 1000);
+    setTimeout(() => document.getElementById("splash")?.classList.add("out"), 800);
   }, []);
 
   const fetchEventos = async (client) => {
@@ -842,245 +681,80 @@ function App() {
       const { data, error } = await client.from("eventos").select("*");
       if (error) throw error;
       if (data) {
-        // Mapeo adaptativo seguro de base de datos a formato frontend
         setEventos(data.map(d => ({
-          id: d.id,
-          title: d.title || d.titulo || "Evento sin título",
-          type: d.type || "audiencia",
-          date: d.date || d.fecha || hoyStr(),
-          startTime: d.start_time || d.hora_inicio || "09:00",
-          endTime: d.end_time || d.hora_fin || "10:00",
-          lawyers: d.lawyers || [],
-          notes: d.notes || "",
-          court: d.court || "",
-          expNum: d.exp_num || "",
-          docs: d.docs || []
+          id: d.id, title: d.title || "Sin título", type: d.type || "audiencia",
+          date: d.date || hoyStr(), startTime: d.start_time || "09:00",
+          endTime: d.end_time || "10:00", lawyers: d.lawyers || [],
+          notes: d.notes || "", court: d.court || "", expNum: d.exp_num || "", docs: d.docs || []
         })));
       }
     } catch(e) {
-      showToast("Error cargando base de datos: "+e.message, "err");
+      setToast({msg:"Error Supabase: Tabla 'eventos' no detectada.", type:"err"});
     } finally {
       setCargando(false);
     }
-  };
-
-  const showToast = (m, t="ok") => {
-    setToast({ msg: m, type: t });
-    setTimeout(() => setToast(null), 3500);
   };
 
   const guardarEv = async (f) => {
-    setCargando(true);
+    const idUnico = f.id || `e_${Date.now()}`;
+    const payload = {
+      id: idUnico, title: f.title, type: f.type, date: f.date,
+      start_time: f.startTime, end_time: f.endTime, lawyers: f.lawyers,
+      notes: f.notes, court: f.court, exp_num: f.expNum, docs: f.docs
+    };
     try {
-      const payload = {
-        id: f.id,
-        title: f.title,
-        type: f.type,
-        date: f.date,
-        start_time: f.startTime,
-        end_time: f.endTime,
-        lawyers: f.lawyers,
-        notes: f.notes,
-        court: f.court,
-        exp_num: f.expNum,
-        docs: f.docs
-      };
-
-      const { error } = await sb.from("eventos").upsert(payload);
-      if (error) throw error;
-      
-      showToast("Ficha Legal sincronizada en Supabase.");
-      fetchEventos(sb);
-      setModal(false);
-    } catch(e) {
-      showToast("Error al guardar: " + e.message, "err");
-    } finally {
-      setCargando(false);
-    }
+      await sb.from("eventos").upsert(payload);
+      setModal(false); fetchEventos(sb);
+    } catch(e) { console.error(e); }
   };
 
   const eliminarEv = async (id) => {
-    setCargando(true);
-    try {
-      const { error } = await sb.from("eventos").delete().eq("id", id);
-      if (error) throw error;
-      showToast("Registro eliminado con éxito.");
-      fetchEventos(sb);
-      setModal(false);
-    } catch(e) {
-      showToast("Fallo al suprimir: " + e.message, "err");
-    } finally {
-      setCargando(false);
-    }
+    try { await sb.from("eventos").delete().eq("id", id); setModal(false); fetchEventos(sb); } catch(e) { console.error(e); }
   };
 
-  const handleCerrarSesion = () => {
-    setIngresado(false);
-    setPantalla("login");
-    showToast("Terminal desconectado de la sesión.");
-  };
-
-  // MOTOR ADAVANCED DE EXPORTACIÓN JURÍDICA PDF NATIVA
   const exportarAgendaPDF = () => {
-    showToast("Compilando reporte corporativo PDF...");
-    const area = document.getElementById("pdf-render-area");
-    area.style.display = "block";
-
-    const fHoy = hoyStr();
-    const evsHoy = eventos.filter(e => e.date === fHoy);
-    const auds = eventos.filter(e => e.type === "audiencia");
-
-    area.innerHTML = `
-      <div style="padding: 30px; font-family: 'Georgia', serif; color: #111; background: #fff; min-height: 100vh;">
-        <div style="border-bottom: 2px solid #C9A84C; padding-bottom: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
-          <div>
-            <h1 style="font-size: 22px; margin: 0; font-weight: bold; letter-spacing: 1px;">MARIANA SÁNCHEZ & ASOCIADOS</h1>
-            <p style="font-size: 10px; color: #666; margin: 2px 0 0 0; text-transform: uppercase; letter-spacing: 2px;">Estudio Jurídico - Agenda Corporativa Premium</p>
-          </div>
-          <div style="text-align: right; font-size: 11px; color: #444;">
-            <strong>Fecha de Emisión:</strong> ${new Date().toLocaleDateString("es-AR")}<br>
-            <strong>Canal Alerta:</strong> ${perfilAlertas.email || "No parametrizado"}
-          </div>
-        </div>
-
-        <h2 style="font-size: 16px; border-bottom: 1px solid #ddd; padding-bottom: 4px; color: #9B7A30; margin-top: 20px;">1. AGENDA DEL DÍA DE HOY (${fHoy})</h2>
-        ${evsHoy.length === 0 ? '<p style="font-size:12px; font-style:italic;">Sin compromisos procesales fijados para hoy.</p>' : `
-          <table style="width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 12px;">
-            <thead>
-              <tr style="background: #f5f5f5; border-bottom: 1px solid #ccc;">
-                <th style="padding: 6px; text-align: left; width: 15%;">Hora</th>
-                <th style="padding: 6px; text-align: left; width: 45%;">Carátula / Causa</th>
-                <th style="padding: 6px; text-align: left; width: 20%;">Expediente</th>
-                <th style="padding: 6px; text-align: left; width: 20%;">Organismo</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${evsHoy.map(e => `
-                <tr style="border-bottom: 1px solid #eee;">
-                  <td style="padding: 6px;">${e.startTime} hs</td>
-                  <td style="padding: 6px;"><b>${e.title}</b></td>
-                  <td style="padding: 6px;">${e.expNum || '-'}</td>
-                  <td style="padding: 6px;">${e.court || '-'}</td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        `}
-
-        <h2 style="font-size: 16px; border-bottom: 1px solid #ddd; padding-bottom: 4px; color: #9B7A30; margin-top: 30px;">2. PRÓXIMAS AUDIENCIAS FIJADAS</h2>
-        ${auds.length === 0 ? '<p style="font-size:12px; font-style:italic;">No se registran audiencias en el corto plazo.</p>' : `
-          <table style="width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 12px;">
-            <thead>
-              <tr style="background: #f5f5f5; border-bottom: 1px solid #ccc;">
-                <th style="padding: 6px; text-align: left; width: 15%;">Fecha</th>
-                <th style="padding: 6px; text-align: left; width: 15%;">Hora</th>
-                <th style="padding: 6px; text-align: left; width: 50%;">Audiencia</th>
-                <th style="padding: 6px; text-align: left; width: 20%;">Expediente</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${auds.map(e => `
-                <tr style="border-bottom: 1px solid #eee;">
-                  <td style="padding: 6px;">${e.date}</td>
-                  <td style="padding: 6px;">${e.startTime} hs</td>
-                  <td style="padding: 6px;"><b>${e.title}</b><br><span style="font-size:10px; color:#666;">${e.court || ''}</span></td>
-                  <td style="padding: 6px;">${e.expNum || '-'}</td>
-                </tr>
-              `).join('')}
-            </tbody>
-          </table>
-        `}
-
-        <div style="margin-top: 60px; text-align: center; font-size: 10px; color: #888; border-top: 1px dashed #ccc; padding-top: 10px;">
-          Documento Confidencial generado por el Sistema de Agenda Legal Automatizada de Mariana Sánchez & Asociados.
-        </div>
-      </div>
-    `;
-
-    const opt = {
-      margin: 10,
-      filename: `REPORTE_AGENDA_LEGAL_${fHoy}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-
-    html2pdf().from(area).set(opt).save().then(() => {
-      area.style.display = "none";
-      showToast("PDF descargado correctamente.");
-    });
-  };
-
-  const navegar = (v) => {
-    const n = new Date(curFecha);
-    if (vista==="mes") n.setMonth(n.getMonth()+v);
-    else if (vista==="semana") n.setDate(n.getDate()+(v*7));
-    else n.setDate(n.getDate()+v);
-    setCurFecha(n);
+    const area = document.getElementById("pdf-render-area"); area.style.display = "block";
+    area.innerHTML = `<div style="padding:40px; font-family:serif;"><h2>MARIANA SÁNCHEZ & ASOCIADOS</h2><hr/><p>Agenda compilada al: ${hoyStr()}</p></div>`;
+    html2pdf().from(area).set({filename:`AGENDA_${hoyStr()}.pdf`}).save().then(()=>area.style.display="none");
   };
 
   const filtrados = filtro ? eventos.filter(e => e.lawyers?.includes(filtro)) : eventos;
 
   if (pantalla === "config") return <PantallaConfig onConectado={(client)=>{ setSb(client); setPantalla("login"); }} />;
-  if (pantalla === "login" && !ingresado) return <Ingreso alEntrar={()=>setIngresado(true)} />;
+  if (pantalla === "login" && !ingresado) return <Ingreso alEntrar={()=>sb ? setIngresado(true) : setPantalla("config")} alConfigurar={()=>setPantalla("config")} />;
 
   return (
     <div className="layout fade-in">
-      <Barra 
-        eventos={eventos} 
-        filtro={filtro} 
-        setFiltro={setFiltro} 
-        onCerrarSesion={handleCerrarSesion}
-        perfilAlertas={perfilAlertas}
-        setPerfilAlertas={setPerfilAlertas}
-      />
-      
+      <Barra eventos={eventos} filtro={filtro} setFiltro={setFiltro} onCerrarSesion={()=>{setIngresado(false); setPantalla("login");}} perfilAlertas={perfilAlertas} setPerfilAlertas={setPerfilAlertas} />
       <div className="main">
         <div className="main-hd">
-          <div style={{display:"flex",alignItems:"center",gap:8}}>
-            <button className="nav-btn" onClick={()=>navegar(-1)}>‹</button>
-            <span className="mes-tit">
-              {vista==="mes" ? `${MESES[curFecha.getMonth()]} ` : ""}
-              <span className="anio-lb">{curFecha.getFullYear()}</span>
-            </span>
-            <button className="nav-btn" onClick={()=>navegar(1)}>›</button>
-            <button className="hoy-btn" onClick={()=>setCurFecha(new Date())}>HOY</button>
+          <div>
+            <button className="nav-btn" onClick={()=>{const n=new Date(curFecha); n.setMonth(n.getMonth()-1); setCurFecha(n);}}>‹</button>
+            <span className="mes-tit">{MESES[curFecha.getMonth()]} <span className="anio-lb">{curFecha.getFullYear()}</span></span>
+            <button className="nav-btn" onClick={()=>{const n=new Date(curFecha); n.setMonth(n.getMonth()+1); setCurFecha(n);}}>›</button>
           </div>
-
           <div className="vtabs">
-            <button className={`vtab ${vista==="mes"?"on":""}`} onClick={()=>setVista("mes")}>Mes</button>
-            <button className={`vtab ${vista==="semana"?"on":""}`} onClick={()=>setVista("semana")}>Semana</button>
-            <button className={`vtab ${vista==="dia"?"on":""}`} onClick={()=>setVista("dia")}>Día</button>
-            <button className={`vtab ${vista==="lista"?"on":""}`} onClick={()=>setVista("lista")}>Historial</button>
+            {["mes","semana","dia","lista"].map(v=><button key={v} className={`vtab ${vista===v?"on":""}`} onClick={()=>setVista(v)}>{v}</button>)}
           </div>
-
           <div className="hd-actions">
-            <button className="pdf-btn" onClick={exportarAgendaPDF}>
-              🖨 Exportar Reporte PDF
-            </button>
-            <button className="add-btn" onClick={()=>{ setEditEv(null); setModal(true); }}>
-              + Nuevo Escrito / Evento
-            </button>
+            <button className="pdf-btn" onClick={exportarAgendaPDF}>🖨 PDF</button>
+            <button className="add-btn" onClick={()=>{setEditEv(null); setModal(true);}}>+ Nuevo Evento</button>
           </div>
         </div>
-
         <div className="cal-scroll">
-          {cargando && <div style={{textAlign:"center", padding:20}}><div className="spin-ring" style={{margin:"0 auto"}}/></div>}
-          {!cargando && vista==="mes" && <VistaMes año={curFecha.getFullYear()} mes={curFecha.getMonth()} eventos={filtrados} alDia={(d)=>{ setCurFecha(new Date(d+"T12:00:00")); setVista("dia"); }} alEv={(e)=>{ setEditEv(e); setModal(true); }}/>}
-          {!cargando && vista==="semana" && <VistaSemana fecha={curFecha} eventos={filtrados} alEv={(e)=>{ setEditEv(e); setModal(true); }} alSlot={(d)=>{ setEditEv({date:d}); setModal(true); }}/>}
-          {!cargando && vista==="dia" && <VistaDay fecha={curFecha} eventos={filtrados} alEv={(e)=>{ setEditEv(e); setModal(true); }} alSlot={(d)=>{ setEditEv({date:d}); setModal(true); }}/>}
-          {!cargando && vista==="lista" && <VistaLista eventos={filtrados} alEv={(e)=>{ setEditEv(e); setModal(true); }}/>}
+          {vista==="mes" && <VistaMes año={curFecha.getFullYear()} mes={curFecha.getMonth()} eventos={filtrados} alDia={(d)=>{setCurFecha(new Date(d+"T12:00:00")); setVista("dia");}} alEv={(e)=>{setEditEv(e); setModal(true);}}/>}
+          {vista==="semana" && <VistaSemana fecha={curFecha} eventos={filtrados} alEv={(e)=>{setEditEv(e); setModal(true);}} alSlot={(d)=>{setEditEv({date:d}); setModal(true);}}/>}
+          {vista==="dia" && <VistaDay fecha={curFecha} eventos={filtrados} alEv={(e)=>{setEditEv(e); setModal(true);}} alSlot={(d)=>{setEditEv({date:d}); setModal(true);}}/>}
+          {vista==="lista" && <VistaLista eventos={filtrados} alEv={(e)=>{setEditEv(e); setModal(true);}}/>}
         </div>
       </div>
-
       {modal && <ModalEv evento={editEv} alCerrar={()=>setModal(false)} alGuardar={guardarEv} alEliminar={eliminarEv} busy={cargando} />}
       {toast && <div className={`toast ${toast.type}`}>{toast.msg}</div>}
     </div>
   );
 }
 
-const root = ReactDOM.createRoot(document.getElementById("root"));
-root.render(<App />);
+const root = ReactDOM.createRoot(document.getElementById("root")); root.render(<App />);
 </script>
 </body>
 </html>
