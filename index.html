@@ -2,25 +2,20 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Mariana Sánchez &amp; Asociados — Agenda</title>
-  <link rel="manifest" href="./manifest.json">
-  <meta name="theme-color" content="#C9A84C">
-  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Mariana Sánchez &amp; Asociados</title>
+  <meta name="theme-color" content="#07090F">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Agenda Legal">
-  <link rel="apple-touch-icon" href="./apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght=0,500;0,700;1,500&family=Jost:wght=300;400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
   
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -29,529 +24,479 @@
       --bd:#2A3860;--bd2:#1A2440;
       --gold:#C9A84C;--gold2:#E8C870;--gold3:#9B7A30;
       --tx:#DDD8CC;--tx2:#8A9AB8;--tx3:#35486A;
-      --green:#3DAA6A;--red:#C94C4C;
+      --green:#3DAA6A;--red:#C94C4C;--wsp:#25D366;
       --safe-t:env(safe-area-inset-top,0px);
       --safe-b:env(safe-area-inset-bottom,0px);
     }
-    html,body,#root{height:100%}
-    body{font-family:'Jost',sans-serif;background:var(--bg);color:var(--tx);overflow:hidden;
+    html,body,#root{height:100%; width:100%; overflow:hidden;}
+    body{font-family:'Jost',sans-serif;background:var(--bg);color:var(--tx);
       padding-top:var(--safe-t);padding-bottom:var(--safe-b);-webkit-font-smoothing:antialiased}
     *{-webkit-tap-highlight-color:transparent}
-    button,a{touch-action:manipulation}
+    button{cursor:pointer;font-family:'Jost',sans-serif;border:none;outline:none}
     input,select,textarea{background:var(--s3);border:1px solid var(--bd2);color:var(--tx);
-      font-family:'Jost',sans-serif;border-radius:7px;padding:9px 13px;width:100%;font-size:13.5px;outline:none}
+      font-family:'Jost',sans-serif;border-radius:6px;padding:8px 12px;width:100%;font-size:13px;outline:none}
     input:focus,select:focus,textarea:focus{border-color:var(--gold)}
-    button{cursor:pointer;font-family:'Jost',sans-serif;border:none}
+    textarea{resize:vertical;min-height:60px}
 
-    @keyframes loginFade {from{opacity:0;transform:scale(.97) translateY(14px)}to{opacity:1;transform:scale(1) translateY(0)}}
-    @keyframes spin      {to{transform:rotate(360deg)}}
-    @keyframes fadeIn    {from{opacity:0}to{opacity:1}}
+    /* ANIMACIONES */
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    @keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    .fade-in{animation:fadeIn .25s ease}
 
-    /* PANTALLA CENTRAL */
-    .pant-bg{height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);position:relative}
-    .card{background:var(--s1);border:1px solid var(--bd2);border-radius:18px;
-      padding:42px 40px;width:min(460px,calc(100vw - 36px));position:relative;z-index:1;
-      box-shadow:0 50px 100px rgba(0,0,0,.72);animation:loginFade .4s cubic-bezier(.22,.68,0,1.2)}
-    .sello{width:68px;height:68px;border:1.5px solid var(--gold);border-radius:50%;
-      margin:0 auto 20px;display:flex;align-items:center;justify-content:center;
-      font-family:'Playfair Display',serif;font-size:11px;color:var(--gold);text-align:center;line-height:1.3}
-    .firma{font-family:'Playfair Display',serif;font-size:21px;font-weight:700;text-align:center;color:var(--tx);line-height:1.3}
-    .firma-sub{font-size:10px;color:var(--gold);text-align:center;letter-spacing:.22em;text-transform:uppercase;margin-top:5px;margin-bottom:28px}
-    .divider{border:none;border-top:1px solid var(--bd2);margin:0 0 20px}
-    .cita{font-family:'Georgia',serif;font-style:italic;font-size:13px;color:var(--tx2);text-align:center;line-height:1.75;margin-bottom:26px}
-    
-    /* BOTONES */
-    .btn-gold{width:100%;padding:15px;background:linear-gradient(145deg,var(--gold3),var(--gold));
-      border-radius:9px;color:#08060A;font-size:12.5px;font-weight:700;
-      letter-spacing:.18em;text-transform:uppercase;transition:all .3s;
-      box-shadow:0 5px 26px rgba(201,168,76,.2);display:inline-flex;align-items:center;justify-content:center;gap:8px}
+    /* BOTONES PREMIUM */
+    .btn-gold{padding:12px;background:linear-gradient(145deg,var(--gold3),var(--gold));
+      border-radius:8px;color:#08060A;font-size:12px;font-weight:700;
+      letter-spacing:.1em;text-transform:uppercase;transition:all .2s;
+      display:inline-flex;align-items:center;justify-content:center;gap:6px;width:100%;box-shadow:0 4px 15px rgba(201,168,76,.2)}
     .btn-gold:hover:not(:disabled){transform:translateY(-1px);background:linear-gradient(145deg,var(--gold),var(--gold2))}
-    .card-footer{text-align:center;margin-top:20px;font-size:10px;color:var(--tx3)}
+    .btn-p{padding:8px 16px;background:var(--gold);color:#000;font-weight:600;font-size:12px;border-radius:6px}
+    .btn-s{padding:8px 16px;background:var(--s3);color:var(--tx2);border:1px solid var(--bd2);font-size:12px;border-radius:6px}
+    .btn-d{padding:8px 12px;background:rgba(201,76,76,0.15);color:#FF8888;border:1px solid rgba(201,76,76,0.3);font-size:12px;border-radius:6px}
+    .btn-wsp{padding:4px 8px;background:rgba(37,211,102,0.15);color:var(--wsp);border:1px solid rgba(37,211,102,0.3);font-size:11px;border-radius:4px;display:inline-flex;align-items:center;gap:4px;font-weight:600}
 
-    /* MODALES & INTERFAZ */
-    .btn-p{padding:10px 18px;background:linear-gradient(135deg,var(--gold3),var(--gold));color:#000;font-weight:600;font-size:12px;border-radius:6px}
-    .btn-d{padding:10px 14px;background:rgba(201,76,76,0.15);color:#FF8888;border:1px solid rgba(201,76,76,0.3);font-size:12px;border-radius:6px;margin-right:auto}
-    .btn-s{padding:10px 14px;background:var(--s3);color:var(--tx2);border:1px solid var(--bd2);font-size:12px;border-radius:6px}
+    /* LAYOUT PRINCIPAL (ESCRITORIO) */
+    .layout{display:grid;grid-template-columns:240px 1fr;height:100vh;overflow:hidden}
     
-    .cfg-hdg{font-size:16px;font-family:'Playfair Display',serif;color:var(--tx);text-align:center;margin-bottom:4px}
-    .cfg-sub{font-size:12px;color:var(--tx2);text-align:center;margin-bottom:18px}
-    .f-grp{display:flex;flex-direction:column;margin-bottom:12px}
-    .f-lbl{font-size:10px;color:var(--tx2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px}
-    .msg-err{background:rgba(201,76,76,.11);border:1px solid rgba(201,76,76,.33);border-radius:7px;padding:10px 14px;font-size:12px;color:#E07070;margin-bottom:12px}
-
-    /* LAYOUT CORE */
-    .layout{display:grid;grid-template-columns:260px 1fr;height:100vh;overflow:hidden}
-    .sidebar{background:var(--s1);border-right:1px solid var(--bd2);display:flex;flex-direction:column;overflow:hidden}
-    .sb-hd{padding:18px 14px 15px;border-bottom:1px solid var(--bd2)}
-    .sb-logo{display:flex;align-items:center;gap:9px}
-    .l-sello{width:36px;height:36px;border:1.5px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:8px;color:var(--gold);text-align:center}
-    .l-nm{font-family:'Playfair Display',serif;font-size:12px;font-weight:700;color:var(--tx);line-height:1.3}
-    .l-sb{font-size:9px;color:var(--gold);letter-spacing:.16em;text-transform:uppercase}
+    /* SIDEBAR */
+    .sidebar{background:var(--s1);border-right:1px solid var(--bd2);display:flex;flex-direction:column;overflow:hidden;z-index:10}
+    .sb-hd{padding:16px 12px;border-bottom:1px solid var(--bd2);display:flex;align-items:center;gap:10px}
+    .l-sello{width:32px;height:32px;border:1.5px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:8px;color:var(--gold)}
+    .l-nm{font-family:'Playfair Display',serif;font-size:12px;font-weight:700;color:var(--tx);line-height:1.2}
+    .l-sb{font-size:8.5px;color:var(--gold);letter-spacing:.15em;text-transform:uppercase}
+    
     .sb-body{flex:1;overflow-y:auto;padding:10px}
-    .sb-sec{font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.14em;padding:8px 6px 5px}
-    
-    .stat-row{display:flex;align-items:center;justify-content:space-between;padding:8px 11px;background:var(--s2);border-radius:7px;margin-bottom:4px}
-    .stat-lbl{font-size:11px;color:var(--tx2)}
-    .stat-val{font-family:'Playfair Display',serif;font-size:20px;color:var(--tx)}
-
-    .abg-row{display:flex;align-items:center;gap:9px;padding:6px 7px;border-radius:7px;cursor:pointer}
+    .sb-sec{font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.1em;padding:8px 6px 4px;display:flex;justify-content:space-between;align-items:center}
+    .abg-row{display:flex;align-items:center;gap:8px;padding:6px;border-radius:6px;cursor:pointer;margin-bottom:2px}
     .abg-row:hover, .abg-row.on{background:var(--s2)}
-    .av{width:29px;height:29px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#000}
-    .a-nm{font-size:12px;color:var(--tx);font-weight:500}
-    .a-rl{font-size:10px;color:var(--tx2)}
-
-    .sb-ft{padding:10px 12px;border-top:1px solid var(--bd2);display:flex;flex-direction:column;gap:6px}
-    .cfg-btn{width:100%;padding:8px;background:var(--s2);border:1px solid var(--bd2);border-radius:6px;color:var(--tx2);font-size:11px}
-    .logout-btn{background:rgba(201,76,76,0.1);color:#E07070}
-
-    /* MAIN PANEL */
+    .av{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#000;flex-shrink:0}
+    .a-nm{font-size:11.5px;color:var(--tx);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    
+    /* MAIN AREA */
     .main{display:flex;flex-direction:column;overflow:hidden;background:var(--bg)}
-    .main-hd{background:var(--s1);border-bottom:1px solid var(--bd2);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
-    .nav-btn{width:30px;height:30px;border:1px solid var(--bd2);background:transparent;color:var(--tx2);border-radius:6px}
-    .mes-tit{font-family:'Playfair Display',serif;font-size:18px;color:var(--tx)}
-    .anio-lb{font-size:13px;color:var(--tx2);margin-left:5px}
-    .vtabs{display:flex;gap:2px;background:var(--s2);padding:3px;border-radius:8px}
-    .vtab{padding:5px 12px;background:transparent;color:var(--tx2);font-size:11px;border-radius:6px}
+    .main-hd{background:var(--s1);border-bottom:1px solid var(--bd2);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+    .nav-btn{width:28px;height:28px;background:var(--s2);color:var(--tx2);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px}
+    .mes-tit{font-family:'Playfair Display',serif;font-size:16px;color:var(--tx)}
+    
+    .vtabs{display:flex;background:var(--s2);padding:3px;border-radius:6px}
+    .vtab{padding:5px 10px;background:transparent;color:var(--tx2);font-size:11px;border-radius:4px;font-weight:500}
     .vtab.on{background:var(--s4);color:var(--gold)}
     
-    .add-btn{padding:8px 14px;background:linear-gradient(135deg,var(--gold3),var(--gold));border-radius:7px;color:#08060A;font-size:12px;font-weight:700}
-    .pdf-btn{background:var(--s2);border:1px solid var(--bd);color:var(--tx);padding:8px 12px;font-size:12px;border-radius:7px}
+    .cal-scroll{flex:1;overflow-y:auto;padding:10px;position:relative}
 
-    .cal-scroll{flex:1;overflow-y:auto;padding:12px}
-
-    /* MATRIZ MENSUAL */
-    .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--bd2);border:1px solid var(--bd2);border-radius:10px;overflow:hidden}
-    .cal-hdr{background:var(--s1);text-align:center;padding:8px 4px;font-size:10px;color:var(--tx2);text-transform:uppercase}
-    .cal-cell{background:var(--s1);min-height:102px;padding:6px;cursor:pointer;display:flex;flex-direction:column}
-    .cal-cell.otra{background:var(--bg);opacity:0.3}
+    /* CALENDARIO MES */
+    .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--bd2);border:1px solid var(--bd2);border-radius:8px;overflow:hidden}
+    .cal-hdr{background:var(--s1);text-align:center;padding:6px;font-size:9.5px;color:var(--tx2);text-transform:uppercase}
+    .cal-cell{background:var(--s1);min-height:85px;padding:4px;display:flex;flex-direction:column;cursor:pointer}
+    .cal-cell.otra{background:var(--bg);opacity:0.5}
     .cal-cell.hoy{background:var(--s2);border-top:2px solid var(--gold)}
-    .dn{font-size:12.5px;font-weight:500;color:var(--tx2);width:24px;height:24px;display:flex;align-items:center;justify-content:center}
-    .cal-cell.hoy .dn{background:var(--gold);color:#000;border-radius:50%;font-weight:700}
-    
-    .chip{padding:2px 5px;border-radius:4px;font-size:10px;color:#fff;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .dn{font-size:11px;font-weight:600;color:var(--tx2);width:20px;height:20px;display:flex;align-items:center;justify-content:center;margin-bottom:2px}
+    .cal-cell.hoy .dn{background:var(--gold);color:#000;border-radius:50%}
+    .chip{padding:2px 4px;border-radius:3px;font-size:9px;color:#fff;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-    /* VISTAS EXTRAS */
-    .wk-wrap{overflow-y:auto;max-height:calc(100vh - 120px)}
-    .wk-hdr{display:grid;grid-template-columns:50px repeat(7,1fr);position:sticky;top:0;background:var(--s1);z-index:5;border-bottom:1px solid var(--bd2)}
-    .wk-dhdr{padding:8px 4px;text-align:center;font-size:11px;color:var(--tx2)}
-    .wk-body{display:grid;grid-template-columns:50px repeat(7,1fr)}
-    .wk-tlbl{height:54px;display:flex;align-items:flex-start;justify-content:flex-end;padding-right:6px;font-size:9px;color:var(--tx3)}
-    .wk-dcol{border-left:1px solid var(--bd2)}
-    .wk-hcel{height:54px;border-bottom:1px solid var(--bd2);cursor:pointer}
-
-    .dia-hdr{padding:12px 14px;border-bottom:1px solid var(--bd2);font-family:'Playfair Display',serif;font-size:15px}
-    .vacio{font-size:12px;color:var(--tx3);text-align:center;padding:24px;font-style:italic}
-
-    .list-card{background:var(--s1);border:1px solid var(--bd2);border-radius:9px;padding:11px 13px;cursor:pointer;display:flex;gap:11px;margin-bottom:8px}
+    /* LISTAS / TARJETAS */
+    .list-card{background:var(--s1);border:1px solid var(--bd2);border-radius:8px;padding:10px;display:flex;gap:10px;margin-bottom:8px;align-items:center}
     .list-bar{width:4px;border-radius:2px;align-self:stretch}
-    .list-tit{font-size:13px;font-weight:500;color:var(--tx)}
+    .list-tit{font-size:13px;font-weight:600;color:var(--tx);margin-bottom:2px}
     .list-meta{font-size:11px;color:var(--tx2)}
 
-    /* MODAL INTERNO */
-    .modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(4px);padding:12px}
-    .modal-box{background:var(--s1);border:1px solid var(--bd);border-radius:14px;width:min(540px,100%);max-height:90vh;overflow-y:auto}
-    .modal-hd{padding:16px 20px;border-bottom:1px solid var(--bd2);display:flex;align-items:center;justify-content:space-between}
-    .modal-tit{font-family:'Playfair Display',serif;font-size:17px}
-    .modal-bd{padding:18px 20px;display:flex;flex-direction:column;gap:14px}
-    .modal-ft{padding:12px 20px;border-top:1px solid var(--bd2);display:flex;gap:8px;justify-content:flex-end}
-    .f-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    /* MODALES OPTIMIZADOS */
+    .modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:200;padding:10px;backdrop-filter:blur(3px)}
+    .modal-box{background:var(--s1);border:1px solid var(--bd);border-radius:12px;width:100%;max-width:500px;max-height:95vh;display:flex;flex-direction:column;animation:slideUp .2s ease}
+    .modal-hd{padding:14px 16px;border-bottom:1px solid var(--bd2);display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+    .modal-tit{font-family:'Playfair Display',serif;font-size:16px;color:var(--tx)}
+    .modal-bd{padding:16px;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
+    .modal-ft{padding:12px 16px;border-top:1px solid var(--bd2);display:flex;gap:8px;justify-content:flex-end;flex-shrink:0}
+    
+    .f-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .m-lbl{font-size:10px;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:4px}
+    .chk-row{display:flex;align-items:center;gap:8px;padding:6px 8px;border:1px solid var(--bd2);border-radius:6px;cursor:pointer}
+    .chk-row.on{background:var(--s2);border-color:var(--gold3)}
 
-    /* INNER CORE SPINNER */
-    .local-spin{width:32px;height:32px;border:3px solid var(--bd);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin:40px auto}
+    /* MOBILE NAVIGATION BAR */
+    .bottom-nav{display:none;background:var(--s1);border-top:1px solid var(--bd2);padding:8px 10px;padding-bottom:calc(8px + var(--safe-b));justify-content:space-around;align-items:center;z-index:50}
+    .bn-item{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--tx2);font-size:9px;text-transform:uppercase}
+    .bn-item.on{color:var(--gold)}
+    .bn-icon{font-size:18px}
+    .bn-fab{background:var(--gold);color:#000;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;margin-top:-20px;box-shadow:0 4px 10px rgba(201,168,76,.4)}
+
+    /* AJUSTES RESPONSIVE (CELULAR) */
+    @media(max-width: 768px){
+      .layout{grid-template-columns:1fr;grid-template-rows:1fr auto}
+      .sidebar{display:none} /* Se oculta en celu, manejado por Bottom Nav */
+      .bottom-nav{display:flex}
+      .main-hd{flex-wrap:wrap; gap:8px;}
+      .main-hd .vtabs{order:3; width:100%; justify-content:space-between}
+      .main-hd .vtabs .vtab{flex:1; text-align:center}
+      .cal-cell{min-height:70px}
+      .chip{font-size:8.5px; padding:2px}
+      .f-row{grid-template-columns:1fr} /* Formularios de 1 columna en celu */
+    }
+
   </style>
 </head>
 <body>
 
-<div id="root">
-  <div style="height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#07090F; gap:12px;">
-    <div style="font-family:'Playfair Display',serif; font-size:20px; color:#C9A84C;">Mariana Sánchez &amp; Asociados</div>
-    <div style="width:24px; height:24px; border:2px solid #1A2440; border-top-color:#C9A84C; border-radius:50%; animation:spin 1s linear infinite;"></div>
-  </div>
-</div>
-<div id="pdf-render-area" style="display:none;"></div>
+<div id="root"></div>
 
 <script type="text/babel">
 const { useState, useEffect } = React;
 const { createClient } = window.supabase;
 
-const ABOGADOS = [
-  { id:"p",  nombre:"Dra. Mariana Sánchez", rol:"Socia Principal",   color:"#C9A84C", ini:"MS" },
-  { id:"a1", nombre:"Dr. Carlos Mendoza",   rol:"Abogado Asociado",  color:"#5491C8", ini:"CM" },
-  { id:"a2", nombre:"Dra. Ana Rivas",       rol:"Abogada Asociada",  color:"#4DAAA0", ini:"AR" },
-  { id:"a3", nombre:"Dr. Pablo Torres",     rol:"Abogado Asociado",  color:"#8E6DC4", ini:"PT" },
-  { id:"a4", nombre:"Dra. Laura Vega",      rol:"Abogada Asociada",  color:"#C46D6D", ini:"LV" },
+const TIPOS = [
+  { id:"audiencia",   label:"Audiencia",   icon:"⚖️" },
+  { id:"vencimiento", label:"Vencimiento", icon:"⏰" },
+  { id:"reunion",     label:"Reunión",     icon:"🤝" },
+  { id:"otro",        label:"Otro",        icon:"📋" }
 ];
 
 const DIAS = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
-const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+const MESES = ["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
 const hoyStr = () => new Date().toISOString().split("T")[0];
 
-/* CONFIGURACIÓN SEGURA */
-function PantallaConfig({ onConectado }) {
-  const [url, setUrl] = useState(localStorage.getItem("sb_url")||"");
-  const [key, setKey] = useState(localStorage.getItem("sb_key")||"");
-  const [busy, setBusy] = useState(false);
-  const [err, setErr] = useState("");
+// Abogados por defecto si es la primera vez
+const defAbogados = [
+  { id:"p",  nombre:"Dra. Mariana Sánchez", ini:"MS", color:"#C9A84C" },
+  { id:"a1", nombre:"Dr. Carlos Mendoza",   ini:"CM", color:"#5491C8" },
+];
 
-  const conectar = async () => {
-    setErr("");
-    if (!url.trim() || !key.trim()) { setErr("Complete ambos campos corporativos."); return; }
-    setBusy(true);
-    try {
-      const sbClient = createClient(url.trim(), key.trim());
-      const { error } = await sbClient.from("eventos").select("id").limit(1);
-      if (error && error.code !== "PGRST116") throw error;
-      
-      localStorage.setItem("sb_url", url.trim());
-      localStorage.setItem("sb_key", key.trim());
-      onConectado(sbClient);
-    } catch(e) {
-      setErr("Fallo crítico de enlace. Verifique los parámetros ingresados.");
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  return (
-    <div className="pant-bg">
-      <div className="card">
-        <div className="sello">M.S.<br/>&amp;A.</div>
-        <div className="firma">MARIANA SÁNCHEZ<br/>&amp; ASOCIADOS</div>
-        <div className="firma-sub">Estudio Jurídico</div>
-        <hr className="divider"/>
-        <div className="cfg-hdg">Infraestructura Supabase</div>
-        <div className="cfg-sub">Vincule el clúster seguro para sincronizar expedientes.</div>
-        {err && <div className="msg-err">{err}</div>}
-        <div className="f-grp">
-          <label className="f-lbl">URL de Supabase</label>
-          <input value={url} onChange={e=>setUrl(e.target.value)} placeholder="https://your-id.supabase.co" disabled={busy}/>
-        </div>
-        <div className="f-grp" style={{marginBottom:22}}>
-          <label className="f-lbl">Anon Public Key</label>
-          <input type="password" value={key} onChange={e=>setKey(e.target.value)} placeholder="eyJhbGciOiJIUzI1NiIsIn..." disabled={busy}/>
-        </div>
-        <button className="btn-gold" onClick={conectar} disabled={busy}>
-          {busy ? "VERIFICANDO..." : "ESTABLECER CONEXIÓN"}
-        </button>
-      </div>
-    </div>
-  );
-}
-
-/* LOGIN */
-function Ingreso({ alEntrar, alConfigurar }) {
-  return (
-    <div className="pant-bg">
-      <div className="card">
-        <div className="sello">M.S.<br/>&amp;A.</div>
-        <div className="firma">MARIANA SÁNCHEZ<br/>&amp; ASOCIADOS</div>
-        <div className="firma-sub">Estudio Jurídico</div>
-        <hr className="divider"/>
-        <p className="cita">"La justicia y la diligencia procesal sostienen la solidez del bufete corporativo."</p>
-        <button className="btn-gold" onClick={alEntrar} style={{marginBottom: 14}}>INGRESAR A LA AGENDA</button>
-        <button className="cfg-btn" onClick={alConfigurar}>⚙️ Configurar Servidor Externo</button>
-        <div className="card-footer">Estudio Jurídico Multiusuario Premium</div>
-      </div>
-    </div>
-  );
-}
-
-/* SIDEBAR */
-function Barra({ eventos, filtro, setFiltro, onCerrarSesion }) {
-  const cH = eventos.filter(e=>e.date===hoyStr()).length;
-  const cA = eventos.filter(e=>e.type==="audiencia").length;
-
-  return (
-    <div className="sidebar">
-      <div className="sb-hd">
-        <div className="sb-logo">
-          <div className="l-sello">M.S.<br/>&amp;A.</div>
-          <div>
-            <div className="l-nm">Mariana Sánchez<br/>&amp; Asociados</div>
-            <div className="l-sb">Estudio Jurídico</div>
-          </div>
-        </div>
-      </div>
-      <div className="sb-body">
-        <div className="sb-sec">Métricas Clave</div>
-        <div className="stat-row"><span className="stat-lbl">Eventos de Hoy</span><span className="stat-val">{cH}</span></div>
-        <div className="stat-row"><span className="stat-lbl">Audiencias</span><span className="stat-val">{cA}</span></div>
-        
-        <div className="sb-sec" style={{marginTop:20}}>Filtro de Profesionales</div>
-        <div className={`abg-row ${filtro===null?"on":""}`} onClick={()=>setFiltro(null)}>
-          <div className="av" style={{background:"var(--s4)",color:"var(--tx)"}}>∀</div>
-          <div style={{marginLeft:8}}><div className="a-nm">Todo el Bufete</div><div className="a-rl">{eventos.length} registros</div></div>
-        </div>
-        {ABOGADOS.map(a=>(
-          <div key={a.id} className={`abg-row ${filtro===a.id?"on":""}`} onClick={()=>setFiltro(a.id)}>
-            <div className="av" style={{background:a.color}}>{a.ini}</div>
-            <div style={{marginLeft:8}}><div className="a-nm">{a.nombre}</div><div className="a-rl">{eventos.filter(e=>e.lawyers?.includes(a.id)).length} ítems</div></div>
-          </div>
-        ))}
-      </div>
-      <div className="sb-ft">
-        <button className="cfg-btn logout-btn" onClick={onCerrarSesion}>🚪 Desconectar</button>
-      </div>
-    </div>
-  );
-}
-
-/* COMPONENTES DE VISTA */
-function VistaMes({año,mes,eventos,alDia,alEv}) {
-  const pri = new Date(año,mes,1).getDay();
-  const dias = new Date(año,mes+1,0).getDate();
-  const prev = new Date(año,mes,0).getDate();
-  const celdas = [];
-
-  for(let i=pri-1;i>=0;i--) celdas.push({d:prev-i,otra:true,m:mes-1});
-  for(let i=1;i<=dias;i++) celdas.push({d:i,otra:false,m:mes});
-  const tot = Math.ceil(celdas.length/7)*7;
-  let len = celdas.length;
-  for(let i=1;i<=tot-len;i++) celdas.push({d:i,otra:true,m:mes+1});
-
-  return (
-    <div className="cal-grid">
-      {DIAS.map(d=><div key={d} className="cal-hdr">{d}</div>)}
-      {celdas.map((c,idx)=>{
-        const ds = `${año}-${String(c.m+1).padStart(2,"0")}-${String(c.d).padStart(2,"0")}`;
-        const des = eventos.filter(e=>e.date===ds);
-        return (
-          <div key={idx} className={`cal-cell ${c.otra?"otra":""} ${ds===hoyStr()?"hoy":""}`} onClick={()=>!c.otra && alDia(ds)}>
-            <div className="dn">{c.d}</div>
-            <div style={{flex:1,overflow:"hidden"}}>
-              {des.slice(0,3).map(e=>(
-                <div key={e.id} className="chip" style={{background:ABOGADOS.find(a=>a.id===(e.lawyers?.[0]||"p"))?.color}} onClick={(x)=>{x.stopPropagation(); alEv(e);}}>
-                  {e.title}
-                </div>
-              ))}
-            </div>
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-function VistaSemana({fecha,eventos,alEv,alSlot}) {
-  const inicio = new Date(fecha); inicio.setDate(inicio.getDate() - inicio.getDay());
-  const diasArr = Array.from({length:7},(_,i)=>{ const d = new Date(inicio); d.setDate(d.getDate()+i); return d; });
-  const hs = Array.from({length:11},(_,i)=>i+8); // 8:00 a 18:00
-
-  return (
-    <div className="wk-wrap">
-      <div className="wk-hdr">
-        <div className="wk-dhdr">Hora</div>
-        {diasArr.map((d,i)=><div key={i} className="wk-dhdr"><b>{DIAS[d.getDay()]}</b><br/>{d.getDate()}</div>)}
-      </div>
-      <div className="wk-body">
-        <div>{hs.map(h=><div key={h} className="wk-tlbl">{h}:00</div>)}</div>
-        {diasArr.map((d,i)=>{
-          const ds = d.toISOString().split("T")[0];
-          return (
-            <div key={i} className="wk-dcol">
-              {hs.map(h=>{
-                const hEvs = eventos.filter(e=>e.date===ds && parseInt(e.startTime?.split(":")[0])===h);
-                return (
-                  <div key={h} className="wk-hcel" onClick={()=>alSlot(ds)}>
-                    {hEvs.map(ev=>(
-                      <div key={ev.id} className="chip" style={{background:ABOGADOS.find(a=>a.id===(ev.lawyers?.[0]||"p"))?.color}} onClick={(e)=>{e.stopPropagation();alEv(ev);}}>
-                        {ev.title}
-                      </div>
-                    ))}
-                  </div>
-                );
-              })}
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-function VistaDay({fecha,eventos,alEv,alSlot}) {
-  const ds = fecha.toISOString().split("T")[0];
-  const dEvs = eventos.filter(e=>e.date===ds);
-  return (
-    <div style={{background:"var(--s1)", borderRadius:10, padding:14}}>
-      <div className="dia-hdr">{fecha.toLocaleDateString("es-AR",{weekday:"long",day:"numeric",month:"long"})}</div>
-      <div style={{marginTop:12, display:"flex", flexDirection:"column", gap:8}}>
-        {dEvs.length===0 ? <div className="vacio">Sin compromisos procesales en la fecha.</div> : 
-          dEvs.map(ev=>(
-            <div key={ev.id} className="list-card" onClick={()=>alEv(ev)}>
-              <div className="list-bar" style={{background:ABOGADOS.find(a=>a.id===(ev.lawyers?.[0]||"p"))?.color}}/>
-              <div style={{flex:1}}>
-                <div className="list-tit">{ev.startTime} hs — {ev.title}</div>
-                <div className="list-meta">Exp: {ev.expNum||"S/D"} | Fuero: {ev.court||"S/D"}</div>
-              </div>
-            </div>
-          ))
-        }
-        <button className="cfg-btn" style={{borderStyle:"dashed", marginTop:8}} onClick={()=>alSlot(ds)}>+ Vincular Nuevo Item</button>
-      </div>
-    </div>
-  );
-}
-
-function VistaLista({eventos,alEv}) {
-  return (
-    <div>
-      {eventos.map(ev=>(
-        <div key={ev.id} className="list-card" onClick={()=>alEv(ev)}>
-          <div className="list-bar" style={{background:ABOGADOS.find(a=>a.id===(ev.lawyers?.[0]||"p"))?.color}}/>
-          <div style={{flex:1}}>
-            <div className="list-tit">[{ev.date}] {ev.title}</div>
-            <div className="list-meta">Expediente: {ev.expNum||"S/D"}</div>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-/* MODAL ELEGANTE */
-function ModalEv({evento,alGuardar,alEliminar,alCerrar,busy}) {
-  const esEd = !!evento?.id;
-  const [form,setForm] = useState({
-    title:"",type:"audiencia",date:hoyStr(),startTime:"09:00",endTime:"10:00",
-    lawyers:["p"],notes:"",court:"",expNum:"",docs:[],...evento
-  });
-
-  return (
-    <div className="modal-ov" onClick={e=>e.target===e.currentTarget&&alCerrar()}>
-      <div className="modal-box">
-        <div className="modal-hd">
-          <div className="modal-tit">{esEd ? "Editar Registro Procesal" : "Nuevo Evento en Agenda"}</div>
-          <button style={{background:"none", color:"var(--tx2)", fontSize:18}} onClick={alCerrar}>✕</button>
-        </div>
-        <div className="modal-bd">
-          <div className="f-grp">
-            <label className="m-lbl">Carátula / Título Comercial *</label>
-            <input value={form.title} onChange={e=>setForm({...form,title:e.target.value})} placeholder="Ej: Audiencia de Conciliación" disabled={busy}/>
-          </div>
-          <div className="f-row">
-            <div className="f-grp"><label className="m-lbl">N° Expediente</label><input value={form.expNum} onChange={e=>setForm({...form,expNum:e.target.value})} disabled={busy}/></div>
-            <div className="f-grp"><label className="m-lbl">Juzgado / Fuero</label><input value={form.court} onChange={e=>setForm({...form,court:e.target.value})} disabled={busy}/></div>
-          </div>
-          <div className="f-row">
-            <div className="f-grp"><label className="m-lbl">Fecha</label><input type="date" value={form.date} onChange={e=>setForm({...form,date:e.target.value})} disabled={busy}/></div>
-            <div className="f-grp"><label className="m-lbl">Hora Inicio</label><input type="time" value={form.startTime} onChange={e=>setForm({...form,startTime:e.target.value})} disabled={busy}/></div>
-          </div>
-        </div>
-        <div className="modal-ft">
-          {esEd && <button className="btn-d" onClick={()=>alEliminar(form.id)} disabled={busy}>Eliminar</button>}
-          <button className="btn-s" onClick={alCerrar} disabled={busy}>Cancelar</button>
-          <button className="btn-p" onClick={()=>alGuardar(form)} disabled={busy}>Guardar Cambios</button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* NÚCLEO CENTRAL */
 function App() {
   const [pantalla, setPantalla] = useState("login"); 
-  const [ingresado, setIngresado] = useState(false);
   const [sb, setSb] = useState(null);
+  
+  // ESTADOS DE DATOS
   const [eventos, setEventos] = useState([]);
-  const [filtro, setFiltro] = useState(null);
+  const [abogados, setAbogados] = useState(() => JSON.parse(localStorage.getItem("agenda_abg")) || defAbogados);
+  const [alertas, setAlertas] = useState(() => JSON.parse(localStorage.getItem("agenda_alerts")) || { email:"", wsp:"" });
+  
+  // ESTADOS UI
   const [vista, setVista] = useState("mes");
   const [curFecha, setCurFecha] = useState(new Date());
-  const [cargando, setCargando] = useState(false);
-  const [modal, setModal] = useState(false);
-  const [editEv, setEditEv] = useState(null);
+  const [filtroAbg, setFiltroAbg] = useState(null);
+  const [modalEv, setModalEv] = useState(null); // null = cerrado, {} = nuevo, {...} = editar
+  const [modalEquipo, setModalEquipo] = useState(false);
+  const [modalAlertas, setModalAlertas] = useState(false);
 
+  // EFECTOS DE GUARDADO LOCAL
+  useEffect(() => localStorage.setItem("agenda_abg", JSON.stringify(abogados)), [abogados]);
+  useEffect(() => localStorage.setItem("agenda_alerts", JSON.stringify(alertas)), [alertas]);
+
+  // INICIO SUPABASE
   useEffect(() => {
-    try {
-      const savedUrl = localStorage.getItem("sb_url");
-      const savedKey = localStorage.getItem("sb_key");
-      if (savedUrl && savedKey) {
-        const client = createClient(savedUrl, savedKey);
+    const url = localStorage.getItem("sb_url");
+    const key = localStorage.getItem("sb_key");
+    if (url && key) {
+      try {
+        const client = createClient(url, key);
         setSb(client);
         fetchEventos(client);
-      } else {
-        setPantalla("config");
-      }
-    } catch(err) {
+      } catch(e) { setPantalla("config"); }
+    } else {
       setPantalla("config");
     }
   }, []);
 
   const fetchEventos = async (client) => {
-    setCargando(true);
     try {
       const { data, error } = await client.from("eventos").select("*");
-      if (error) throw error;
-      if (data) {
+      if (!error && data) {
         setEventos(data.map(d => ({
-          id: d.id, title: d.title || "Sin título", type: d.type || "audiencia",
+          id: d.id, title: d.title || "Causa", type: d.type || "audiencia",
           date: d.date || hoyStr(), startTime: d.start_time || "09:00",
           endTime: d.end_time || "10:00", lawyers: d.lawyers || [],
-          notes: d.notes || "", court: d.court || "", expNum: d.exp_num || "", docs: d.docs || []
+          notes: d.notes || "", court: d.court || "", expNum: d.exp_num || ""
         })));
       }
-    } catch(e) {
-      console.error(e);
-    } finally {
-      setCargando(false);
-    }
-  };
-
-  const guardarEv = async (f) => {
-    const idUnico = f.id || `e_${Date.now()}`;
-    const payload = {
-      id: idUnico, title: f.title, type: f.type, date: f.date,
-      start_time: f.startTime, end_time: f.endTime, lawyers: f.lawyers,
-      notes: f.notes, court: f.court, exp_num: f.expNum, docs: f.docs
-    };
-    try {
-      await sb.from("eventos").upsert(payload);
-      setModal(false); 
-      fetchEventos(sb);
     } catch(e) { console.error(e); }
   };
 
-  const eliminarEv = async (id) => {
-    try { await sb.from("eventos").delete().eq("id", id); setModal(false); fetchEventos(sb); } catch(e) { console.error(e); }
+  const guardarEv = async (f) => {
+    const payload = {
+      id: f.id || `e_${Date.now()}`, title: f.title, type: f.type, date: f.date,
+      start_time: f.startTime, end_time: f.endTime, lawyers: f.lawyers,
+      notes: f.notes, court: f.court, exp_num: f.expNum
+    };
+    try { await sb.from("eventos").upsert(payload); setModalEv(null); fetchEventos(sb); } catch(e) {}
   };
 
-  const abrirNuevo = (ds) => { setEditEv({date: ds || hoyStr()}); setModal(true); };
-  const abrirEditar = (ev) => { setEditEv(ev); setModal(true); };
+  const eliminarEv = async (id) => {
+    try { await sb.from("eventos").delete().eq("id", id); setModalEv(null); fetchEventos(sb); } catch(e) {}
+  };
 
-  const filtrados = filtro ? eventos.filter(e => e.lawyers?.includes(filtro)) : eventos;
+  // ENVIAR WHATSAPP
+  const generarWsp = (ev) => {
+    if(!alertas.wsp) return alert("Configurá tu número de WhatsApp primero en la sección de Alertas (🔔)");
+    const num = alertas.wsp.replace(/[^0-9]/g, '');
+    const texto = `*RECORDATORIO JUDICIAL* ⚖️\n\n*Causa:* ${ev.title}\n*Fecha:* ${ev.date}\n*Hora:* ${ev.startTime}\n*Expediente:* ${ev.expNum||'-'}\n*Juzgado:* ${ev.court||'-'}\n\n_Enviado desde Agenda Mariana Sánchez_`;
+    window.open(`https://wa.me/${num}?text=${encodeURIComponent(texto)}`, '_blank');
+  };
 
-  if (pantalla === "config") return <PantallaConfig onConectado={(client)=>{ setSb(client); setPantalla("login"); }} />;
-  if (pantalla === "login" && !ingresado) return <Ingreso alEntrar={() => sb ? setIngresado(true) : setPantalla("config")} alConfigurar={() => setPantalla("config")} />;
+  // VISTAS
+  const renderCalendario = () => {
+    const filtrados = filtroAbg ? eventos.filter(e=>e.lawyers?.includes(filtroAbg)) : eventos;
+    
+    if(vista === "mes") {
+      const año = curFecha.getFullYear(); const mes = curFecha.getMonth();
+      const pri = new Date(año,mes,1).getDay(); const dias = new Date(año,mes+1,0).getDate();
+      const prev = new Date(año,mes,0).getDate();
+      const cels = [];
+      for(let i=pri-1;i>=0;i--) cels.push({d:prev-i,otra:true,m:mes-1});
+      for(let i=1;i<=dias;i++) cels.push({d:i,otra:false,m:mes});
+      while(cels.length % 7 !== 0) cels.push({d:cels.length-dias-pri+1,otra:true,m:mes+1});
 
-  return (
-    <div className="layout">
-      <Barra eventos={eventos} filtro={filtro} setFiltro={setFiltro} onCerrarSesion={()=>{setIngresado(false); setPantalla("login");}} />
-      <div className="main">
-        <div className="main-hd">
-          <div>
-            <button className="nav-btn" onClick={()=>{const n=new Date(curFecha); n.setMonth(n.getMonth()-1); setCurFecha(n);}}>‹</button>
-            <span className="mes-tit" style={{margin:"0 10px"}}>{MESES[curFecha.getMonth()]} <span className="anio-lb">{curFecha.getFullYear()}</span></span>
-            <button className="nav-btn" onClick={()=>{const n=new Date(curFecha); n.setMonth(n.getMonth()+1); setCurFecha(n);}}>›</button>
-          </div>
-          <div className="vtabs">
-            {["mes","semana","dia","lista"].map(v=><button key={v} className={`vtab ${vista===v?"on":""}`} onClick={()=>setVista(v)}>{v}</button>)}
-          </div>
-          <div>
-            <button className="add-btn" onClick={() => abrirNuevo(null)}>+ Nuevo Evento</button>
-          </div>
+      return (
+        <div className="cal-grid fade-in">
+          {DIAS.map(d=><div key={d} className="cal-hdr">{d}</div>)}
+          {cels.map((c,idx)=>{
+            const ds = `${año}-${String(c.m+1).padStart(2,"0")}-${String(c.d).padStart(2,"0")}`;
+            const des = filtrados.filter(e=>e.date===ds);
+            return (
+              <div key={idx} className={`cal-cell ${c.otra?"otra":""} ${ds===hoyStr()?"hoy":""}`} onClick={()=>!c.otra && setCurFecha(new Date(ds+"T12:00:00")) || setVista("dia")}>
+                <div className="dn">{c.d}</div>
+                <div style={{flex:1,overflow:"hidden"}}>
+                  {des.slice(0,3).map(e=>(
+                    <div key={e.id} className="chip" style={{background:abogados.find(a=>a.id===(e.lawyers?.[0]))?.color || "var(--gold)"}} onClick={(x)=>{x.stopPropagation(); setModalEv(e);}}>
+                      {e.title}
+                    </div>
+                  ))}
+                  {des.length>3 && <div style={{fontSize:9,color:"var(--gold)"}}>+{des.length-3}</div>}
+                </div>
+              </div>
+            );
+          })}
         </div>
-        <div className="cal-scroll">
-          {cargando ? <div className="local-spin"></div> : (
-            <>
-              {vista==="mes" && <VistaMes año={curFecha.getFullYear()} mes={curFecha.getMonth()} eventos={filtrados} alDia={(d)=>{setCurFecha(new Date(d+"T12:00:00")); setVista("dia");}} alEv={abrirEditar}/>}
-              {vista==="semana" && <VistaSemana fecha={curFecha} eventos={filtrados} alEv={abrirEditar} alSlot={abrirNuevo}/>}
-              {vista==="dia" && <VistaDay fecha={curFecha} eventos={filtrados} alEv={abrirEditar} alSlot={abrirNuevo}/>}
-              {vista==="lista" && <VistaLista eventos={filtrados} alEv={abrirEditar}/>}
-            </>
-          )}
+      );
+    }
+
+    if(vista === "dia") {
+      const ds = curFecha.toISOString().split("T")[0];
+      const dEvs = filtrados.filter(e=>e.date===ds).sort((a,b)=>a.startTime.localeCompare(b.startTime));
+      return (
+        <div className="fade-in">
+          <div style={{fontSize:14, fontWeight:600, marginBottom:12, paddingBottom:8, borderBottom:"1px solid var(--bd2)"}}>
+            {curFecha.toLocaleDateString("es-AR",{weekday:"long",day:"numeric",month:"long"})}
+          </div>
+          {dEvs.length===0 ? <div style={{textAlign:"center", color:"var(--tx3)", padding:20}}>Sin causas agendadas.</div> : 
+            dEvs.map(ev=>(
+              <div key={ev.id} className="list-card" onClick={()=>setModalEv(ev)}>
+                <div className="list-bar" style={{background:abogados.find(a=>a.id===(ev.lawyers?.[0]))?.color || "var(--gold)"}}/>
+                <div style={{flex:1}}>
+                  <div className="list-tit">{ev.startTime} hs - {ev.title}</div>
+                  <div className="list-meta">Exp: {ev.expNum||"S/D"} | {ev.court||"S/D"}</div>
+                </div>
+                <button className="btn-wsp" onClick={(e)=>{e.stopPropagation(); generarWsp(ev);}}>WSP</button>
+              </div>
+            ))
+          }
+        </div>
+      );
+    }
+
+    if(vista === "lista") {
+      return (
+        <div className="fade-in">
+          {filtrados.sort((a,b)=>a.date.localeCompare(b.date)).map(ev=>(
+            <div key={ev.id} className="list-card" onClick={()=>setModalEv(ev)}>
+              <div className="list-bar" style={{background:abogados.find(a=>a.id===(ev.lawyers?.[0]))?.color || "var(--gold)"}}/>
+              <div style={{flex:1}}>
+                <div className="list-tit">[{ev.date}] {ev.title}</div>
+                <div className="list-meta">Exp: {ev.expNum||"S/D"}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+  };
+
+  // PANTALLAS DE ACCESO
+  if (pantalla === "config") {
+    return (
+      <div className="pant-bg fade-in" style={{padding:20}}>
+        <div style={{background:"var(--s1)", padding:24, borderRadius:12, width:"100%", maxWidth:400, border:"1px solid var(--bd2)"}}>
+          <h2 style={{color:"var(--gold)", marginBottom:10, textAlign:"center"}}>Conectar Supabase</h2>
+          <input id="inUrl" placeholder="URL Supabase" defaultValue={localStorage.getItem("sb_url")} style={{marginBottom:10}}/>
+          <input id="inKey" type="password" placeholder="Anon Key" defaultValue={localStorage.getItem("sb_key")} style={{marginBottom:20}}/>
+          <button className="btn-gold" onClick={()=>{
+            localStorage.setItem("sb_url", document.getElementById("inUrl").value);
+            localStorage.setItem("sb_key", document.getElementById("inKey").value);
+            window.location.reload();
+          }}>Guardar y Entrar</button>
         </div>
       </div>
-      {modal && <ModalEv evento={editEv} alCerrar={()=>setModal(false)} alGuardar={guardarEv} alEliminar={eliminarEv} busy={cargando} />}
+    );
+  }
+
+  if (pantalla === "login") {
+    return (
+      <div className="pant-bg fade-in" style={{padding:20}}>
+        <div style={{background:"var(--s1)", padding:30, borderRadius:16, width:"100%", maxWidth:400, border:"1px solid var(--bd2)", textAlign:"center"}}>
+          <div style={{width:60,height:60,border:"2px solid var(--gold)",borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto 16px",color:"var(--gold)",fontFamily:"serif"}}>M.S.</div>
+          <h1 style={{fontSize:20, marginBottom:20}}>Mariana Sánchez & Asociados</h1>
+          <button className="btn-gold" onClick={()=>setPantalla("app")}>Ingresar al Sistema</button>
+          <button style={{background:"none", color:"var(--tx2)", fontSize:11, marginTop:16, textDecoration:"underline"}} onClick={()=>setPantalla("config")}>Configurar Servidor</button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="layout fade-in">
+      
+      {/* SIDEBAR PC */}
+      <div className="sidebar">
+        <div className="sb-hd">
+          <div className="l-sello">M.S.</div>
+          <div><div className="l-nm">Mariana Sánchez</div><div className="l-sb">Agenda Legal</div></div>
+        </div>
+        <div className="sb-body">
+          <div className="sb-sec"><span>Miembros del Estudio</span> <button style={{background:"none", color:"var(--gold)", fontSize:16}} onClick={()=>setModalEquipo(true)}>⚙️</button></div>
+          <div className={`abg-row ${filtroAbg===null?"on":""}`} onClick={()=>setFiltroAbg(null)}>
+            <div className="av" style={{background:"var(--s4)",color:"var(--tx)"}}>∀</div><div className="a-nm">Todos</div>
+          </div>
+          {abogados.map(a=>(
+            <div key={a.id} className={`abg-row ${filtroAbg===a.id?"on":""}`} onClick={()=>setFiltroAbg(a.id)}>
+              <div className="av" style={{background:a.color}}>{a.ini}</div><div className="a-nm">{a.nombre}</div>
+            </div>
+          ))}
+        </div>
+        <div style={{padding:12, borderTop:"1px solid var(--bd2)"}}>
+          <button className="btn-s" style={{width:"100%", marginBottom:8}} onClick={()=>setModalAlertas(true)}>🔔 Alertas / WSP</button>
+          <button className="btn-s" style={{width:"100%", color:"var(--red)"}} onClick={()=>setPantalla("login")}>Cerrar Sesión</button>
+        </div>
+      </div>
+
+      {/* MAIN APP */}
+      <div className="main">
+        <div className="main-hd">
+          <div style={{display:"flex",alignItems:"center",gap:4}}>
+            <button className="nav-btn" onClick={()=>setCurFecha(new Date(curFecha.getFullYear(), curFecha.getMonth()-1, 1))}>‹</button>
+            <span className="mes-tit" style={{margin:"0 4px"}}>{MESES[curFecha.getMonth()]} {curFecha.getFullYear()}</span>
+            <button className="nav-btn" onClick={()=>setCurFecha(new Date(curFecha.getFullYear(), curFecha.getMonth()+1, 1))}>›</button>
+          </div>
+          <div className="vtabs">
+            {["mes","dia","lista"].map(v=><button key={v} className={`vtab ${vista===v?"on":""}`} onClick={()=>setVista(v)}>{v.toUpperCase()}</button>)}
+          </div>
+          <button className="nav-btn" style={{background:"transparent", color:"var(--gold)", width:auto}} onClick={()=>setCurFecha(new Date())}>HOY</button>
+        </div>
+        <div className="cal-scroll">
+          {renderCalendario()}
+        </div>
+      </div>
+
+      {/* BOTTOM NAV (MOBILE) */}
+      <div className="bottom-nav">
+        <div className={`bn-item ${vista==="mes"?"on":""}`} onClick={()=>setVista("mes")}><span className="bn-icon">📅</span>Mes</div>
+        <div className={`bn-item ${vista==="lista"?"on":""}`} onClick={()=>setVista("lista")}><span className="bn-icon">📋</span>Lista</div>
+        <div className="bn-item" onClick={()=>{setModalEv({date:hoyStr()})}}><div className="bn-fab">+</div></div>
+        <div className="bn-item" onClick={()=>setModalEquipo(true)}><span className="bn-icon">👥</span>Equipo</div>
+        <div className="bn-item" onClick={()=>setModalAlertas(true)}><span className="bn-icon">🔔</span>Alertas</div>
+      </div>
+
+      {/* MODAL EVENTO */}
+      {modalEv && (
+        <div className="modal-ov" onClick={e=>e.target===e.currentTarget&&setModalEv(null)}>
+          <div className="modal-box">
+            <div className="modal-hd">
+              <div className="modal-tit">{modalEv.id ? "Editar Causa" : "Nueva Causa"}</div>
+              <button style={{background:"none", color:"var(--tx2)", fontSize:18}} onClick={()=>setModalEv(null)}>✕</button>
+            </div>
+            <div className="modal-bd">
+              <div className="f-grp"><label className="m-lbl">Carátula *</label><input defaultValue={modalEv.title} id="ev_t"/></div>
+              <div className="f-row">
+                <div className="f-grp"><label className="m-lbl">N° Exp</label><input defaultValue={modalEv.expNum} id="ev_exp"/></div>
+                <div className="f-grp"><label className="m-lbl">Juzgado</label><input defaultValue={modalEv.court} id="ev_c"/></div>
+              </div>
+              <div className="f-row">
+                <div className="f-grp"><label className="m-lbl">Fecha</label><input type="date" defaultValue={modalEv.date} id="ev_d"/></div>
+                <div className="f-grp"><label className="m-lbl">Hora</label><input type="time" defaultValue={modalEv.startTime||"09:00"} id="ev_h"/></div>
+              </div>
+              <div className="f-grp">
+                <label className="m-lbl">Asignar Profesional</label>
+                <select id="ev_abg" defaultValue={modalEv.lawyers?.[0]||"p"}>
+                  {abogados.map(a=><option key={a.id} value={a.id}>{a.nombre}</option>)}
+                </select>
+              </div>
+              <div className="f-grp"><label className="m-lbl">Notas internas</label><textarea defaultValue={modalEv.notes} id="ev_n"/></div>
+            </div>
+            <div className="modal-ft">
+              {modalEv.id && <button className="btn-d" onClick={()=>eliminarEv(modalEv.id)}>Eliminar</button>}
+              <button className="btn-s" onClick={()=>setModalEv(null)}>Cancelar</button>
+              <button className="btn-p" onClick={()=>guardarEv({
+                ...modalEv, title:document.getElementById("ev_t").value, expNum:document.getElementById("ev_exp").value,
+                court:document.getElementById("ev_c").value, date:document.getElementById("ev_d").value,
+                startTime:document.getElementById("ev_h").value, lawyers:[document.getElementById("ev_abg").value],
+                notes:document.getElementById("ev_n").value
+              })}>Guardar</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL EQUIPO (ABOGADOS) */}
+      {modalEquipo && (
+        <div className="modal-ov" onClick={e=>e.target===e.currentTarget&&setModalEquipo(false)}>
+          <div className="modal-box">
+            <div className="modal-hd"><div className="modal-tit">Gestión de Abogados</div><button style={{background:"none",color:"var(--tx2)"}} onClick={()=>setModalEquipo(false)}>✕</button></div>
+            <div className="modal-bd">
+              {abogados.map((a, i)=>(
+                <div key={a.id} style={{display:"flex", gap:8, alignItems:"center", background:"var(--s2)", padding:8, borderRadius:6}}>
+                  <div className="av" style={{background:a.color}}>{a.ini}</div>
+                  <div style={{flex:1, fontSize:13}}>{a.nombre}</div>
+                  <button className="btn-d" style={{padding:"4px 8px", marginRight:0}} onClick={()=>{
+                    if(confirm("¿Eliminar a "+a.nombre+"?")) setAbogados(abogados.filter(x=>x.id!==a.id));
+                  }}>Borrar</button>
+                </div>
+              ))}
+              <div style={{borderTop:"1px solid var(--bd2)", paddingTop:12, marginTop:4}}>
+                <div style={{fontSize:12, color:"var(--gold)", marginBottom:8}}>+ Agregar Nuevo Miembro</div>
+                <div className="f-grp"><input id="n_nom" placeholder="Nombre completo (ej: Dr. Juan Pérez)"/></div>
+                <div className="f-row">
+                  <div className="f-grp"><input id="n_ini" placeholder="Iniciales (ej: JP)" maxLength={3}/></div>
+                  <div className="f-grp">
+                    <select id="n_col">
+                      <option value="#5491C8">Azul</option><option value="#4DAAA0">Verde</option>
+                      <option value="#8E6DC4">Violeta</option><option value="#C46D6D">Rojo</option>
+                      <option value="#C9A84C">Dorado</option>
+                    </select>
+                  </div>
+                </div>
+                <button className="btn-s" style={{width:"100%"}} onClick={()=>{
+                  const nom = document.getElementById("n_nom").value; const ini = document.getElementById("n_ini").value;
+                  if(!nom || !ini) return alert("Completá nombre e iniciales.");
+                  setAbogados([...abogados, {id:"a_"+Date.now(), nombre:nom, ini:ini.toUpperCase(), color:document.getElementById("n_col").value}]);
+                  document.getElementById("n_nom").value = ""; document.getElementById("n_ini").value = "";
+                }}>Agregar Abogado</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL ALERTAS WSP */}
+      {modalAlertas && (
+        <div className="modal-ov" onClick={e=>e.target===e.currentTarget&&setModalAlertas(false)}>
+          <div className="modal-box">
+            <div className="modal-hd"><div className="modal-tit">Configuración de Alertas</div><button style={{background:"none",color:"var(--tx2)"}} onClick={()=>setModalAlertas(false)}>✕</button></div>
+            <div className="modal-bd">
+              <p style={{fontSize:12, color:"var(--tx2)", lineHeight:1.5}}>Configurá el número al que querés enviar los mensajes de recordatorio por WhatsApp. Usá el formato completo.</p>
+              <div className="f-grp">
+                <label className="m-lbl">Número WhatsApp (ej: 5492604123456) *</label>
+                <input value={alertas.wsp} onChange={e=>setAlertas({...alertas, wsp:e.target.value})} placeholder="549..."/>
+              </div>
+              <div className="f-grp">
+                <label className="m-lbl">E-mail corporativo</label>
+                <input value={alertas.email} onChange={e=>setAlertas({...alertas, email:e.target.value})} placeholder="estudio@..."/>
+              </div>
+              <button className="btn-wsp" style={{justifyContent:"center", padding:"10px", fontSize:12, width:"100%"}} onClick={()=>{
+                if(!alertas.wsp) return alert("Ingresá un número primero");
+                window.open(`https://wa.me/${alertas.wsp.replace(/[^0-9]/g,'')}?text=Prueba%20de%20conexion%20Agenda%20Legal`, '_blank');
+              }}>Probar Conexión WhatsApp</button>
+            </div>
+            <div className="modal-ft"><button className="btn-p" onClick={()=>setModalAlertas(false)}>Listo</button></div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
