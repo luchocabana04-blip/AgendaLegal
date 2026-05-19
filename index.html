@@ -38,269 +38,137 @@
       padding-top:var(--safe-t);padding-bottom:var(--safe-b);-webkit-font-smoothing:antialiased}
     *{-webkit-tap-highlight-color:transparent}
     button,a{touch-action:manipulation}
-    ::-webkit-scrollbar{width:5px;height:5px}
-    ::-webkit-scrollbar-track{background:transparent}
-    ::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:3px}
     input,select,textarea{background:var(--s3);border:1px solid var(--bd2);color:var(--tx);
-      font-family:'Jost',sans-serif;border-radius:7px;padding:9px 13px;width:100%;font-size:13.5px;
-      transition:border-color .2s;outline:none;-webkit-appearance:none;appearance:none}
-    input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.08)}
-    input::placeholder,textarea::placeholder{color:var(--tx3)}
-    select option{background:var(--s2)}
-    textarea{resize:vertical;min-height:76px}
+      font-family:'Jost',sans-serif;border-radius:7px;padding:9px 13px;width:100%;font-size:13.5px;outline:none}
+    input:focus,select:focus,textarea:focus{border-color:var(--gold)}
     button{cursor:pointer;font-family:'Jost',sans-serif;border:none}
-    input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}
 
-    @keyframes fadeIn    {from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
-    @keyframes slideUp   {from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-    @keyframes pulsar    {0%,100%{opacity:1;transform:scale(1)}50%{opacity:.55;transform:scale(.9)}}
     @keyframes loginFade {from{opacity:0;transform:scale(.97) translateY(14px)}to{opacity:1;transform:scale(1) translateY(0)}}
     @keyframes spin      {to{transform:rotate(360deg)}}
-
-    .fade-in{animation:fadeIn .3s ease}
-
-    /* SPLASH */
-    #splash{position:fixed;inset:0;background:var(--bg);z-index:9999;
-      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
-      transition:opacity .5s ease,visibility .5s ease}
-    #splash.out{opacity:0;visibility:hidden;pointer-events:none}
-    .sp-sello{width:76px;height:76px;border:2px solid var(--gold);border-radius:50%;
-      display:flex;align-items:center;justify-content:center;
-      font-family:'Playfair Display',serif;font-size:12px;color:var(--gold);
-      position:relative;box-shadow:0 0 40px rgba(201,168,76,.15);
-      animation:loginFade .8s cubic-bezier(.22,.68,0,1.2);text-align:center;line-height:1.3;padding:6px}
-    .sp-sello::after{content:'';position:absolute;inset:7px;border:1px solid rgba(201,168,76,.25);border-radius:50%}
-    .sp-nm{font-family:'Playfair Display',serif;font-size:19px;font-weight:700;color:var(--tx);animation:fadeIn .6s .2s both;text-align:center}
-    .sp-sb{font-size:10px;color:var(--gold);letter-spacing:.2em;text-transform:uppercase;animation:fadeIn .6s .35s both}
-    .sp-spin{width:22px;height:22px;border:2px solid var(--bd);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin-top:4px}
+    @keyframes fadeIn    {from{opacity:0}to{opacity:1}}
 
     /* PANTALLA CENTRAL */
-    .pant-bg{height:100vh;display:flex;align-items:center;justify-content:center;
-      background:var(--bg);position:relative;overflow:hidden}
-    .pant-bg::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
-      width:800px;height:800px;
-      background:radial-gradient(ellipse,rgba(201,168,76,.06) 0%,transparent 60%);pointer-events:none}
-    .pant-bg::after{content:'';position:absolute;inset:0;pointer-events:none;
-      background-image:linear-gradient(rgba(201,168,76,.024) 1px,transparent 1px),
-        linear-gradient(90deg,rgba(201,168,76,.024) 1px,transparent 1px);
-      background-size:68px 68px}
+    .pant-bg{height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);position:relative}
     .card{background:var(--s1);border:1px solid var(--bd2);border-radius:18px;
       padding:42px 40px;width:min(460px,calc(100vw - 36px));position:relative;z-index:1;
-      box-shadow:0 50px 100px rgba(0,0,0,.72),0 0 0 1px rgba(201,168,76,.07);
-      animation:loginFade .55s cubic-bezier(.22,.68,0,1.2)}
-    .card::before{content:'';position:absolute;top:-1px;left:22%;right:22%;height:2px;
-      background:linear-gradient(90deg,transparent,var(--gold),transparent);border-radius:2px}
+      box-shadow:0 50px 100px rgba(0,0,0,.72);animation:loginFade .4s cubic-bezier(.22,.68,0,1.2)}
     .sello{width:68px;height:68px;border:1.5px solid var(--gold);border-radius:50%;
       margin:0 auto 20px;display:flex;align-items:center;justify-content:center;
-      font-family:'Playfair Display',serif;font-size:11px;color:var(--gold);
-      position:relative;text-align:center;line-height:1.3;padding:6px;
-      box-shadow:0 0 28px rgba(201,168,76,.12),inset 0 0 18px rgba(201,168,76,.04)}
-    .sello::after{content:'';position:absolute;inset:6px;border:1px solid rgba(201,168,76,.2);border-radius:50%}
-    .firma{font-family:'Playfair Display',serif;font-size:21px;font-weight:700;text-align:center;letter-spacing:.02em;color:var(--tx);line-height:1.3}
+      font-family:'Playfair Display',serif;font-size:11px;color:var(--gold);text-align:center;line-height:1.3}
+    .firma{font-family:'Playfair Display',serif;font-size:21px;font-weight:700;text-align:center;color:var(--tx);line-height:1.3}
     .firma-sub{font-size:10px;color:var(--gold);text-align:center;letter-spacing:.22em;text-transform:uppercase;margin-top:5px;margin-bottom:28px}
     .divider{border:none;border-top:1px solid var(--bd2);margin:0 0 20px}
     .cita{font-family:'Georgia',serif;font-style:italic;font-size:13px;color:var(--tx2);text-align:center;line-height:1.75;margin-bottom:26px}
     
     /* BOTONES */
     .btn-gold{width:100%;padding:15px;background:linear-gradient(145deg,var(--gold3),var(--gold));
-      border:none;border-radius:9px;color:#08060A;font-size:12.5px;font-weight:700;
-      letter-spacing:.18em;text-transform:uppercase;transition:all .35s;
-      box-shadow:0 5px 26px rgba(201,168,76,.3);display:inline-flex;align-items:center;justify-content:center;gap:8px}
-    .btn-gold:hover:not(:disabled){box-shadow:0 8px 36px rgba(201,168,76,.44);transform:translateY(-2px);background:linear-gradient(145deg,var(--gold),var(--gold2))}
-    .btn-gold:disabled{opacity:.5;cursor:not-allowed}
-    .card-footer{text-align:center;margin-top:20px;font-size:10px;color:var(--tx3);letter-spacing:.04em}
+      border-radius:9px;color:#08060A;font-size:12.5px;font-weight:700;
+      letter-spacing:.18em;text-transform:uppercase;transition:all .3s;
+      box-shadow:0 5px 26px rgba(201,168,76,.2);display:inline-flex;align-items:center;justify-content:center;gap:8px}
+    .btn-gold:hover:not(:disabled){transform:translateY(-1px);background:linear-gradient(145deg,var(--gold),var(--gold2))}
+    .card-footer{text-align:center;margin-top:20px;font-size:10px;color:var(--tx3)}
 
-    /* ESTILOS DE BOTONES EN MODALES */
-    .btn-p{padding:10px 18px;background:linear-gradient(135deg,var(--gold3),var(--gold));color:#000;font-weight:600;font-size:12px;border-radius:6px;transition:all .2s}
-    .btn-p:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(201,168,76,0.3)}
-    .btn-d{padding:10px 14px;background:rgba(201,76,76,0.15);color:#FF8888;border:1px solid rgba(201,76,76,0.3);font-size:12px;border-radius:6px;transition:all .2s;margin-right:auto}
-    .btn-d:hover{background:rgba(201,76,76,0.25);color:#FFAAAA}
-    .btn-s{padding:10px 14px;background:var(--s3);color:var(--tx2);border:1px solid var(--bd2);font-size:12px;border-radius:6px;transition:all .2s}
-    .btn-s:hover{color:var(--tx);border-color:var(--bd)}
-
+    /* MODALES & INTERFAZ */
+    .btn-p{padding:10px 18px;background:linear-gradient(135deg,var(--gold3),var(--gold));color:#000;font-weight:600;font-size:12px;border-radius:6px}
+    .btn-d{padding:10px 14px;background:rgba(201,76,76,0.15);color:#FF8888;border:1px solid rgba(201,76,76,0.3);font-size:12px;border-radius:6px;margin-right:auto}
+    .btn-s{padding:10px 14px;background:var(--s3);color:var(--tx2);border:1px solid var(--bd2);font-size:12px;border-radius:6px}
+    
     .cfg-hdg{font-size:16px;font-family:'Playfair Display',serif;color:var(--tx);text-align:center;margin-bottom:4px}
-    .cfg-sub{font-size:12px;color:var(--tx2);text-align:center;line-height:1.6;margin-bottom:18px}
-    .f-grp{display:flex;flex-direction:column;margin-bottom:12px;position:relative}
-    .f-lbl{font-size:10px;color:var(--tx2);text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:5px}
-    .msg-err{background:rgba(201,76,76,.11);border:1px solid rgba(201,76,76,.33);border-radius:7px;
-      padding:10px 14px;font-size:12px;color:#E07070;margin-bottom:12px;line-height:1.55}
+    .cfg-sub{font-size:12px;color:var(--tx2);text-align:center;margin-bottom:18px}
+    .f-grp{display:flex;flex-direction:column;margin-bottom:12px}
+    .f-lbl{font-size:10px;color:var(--tx2);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px}
+    .msg-err{background:rgba(201,76,76,.11);border:1px solid rgba(201,76,76,.33);border-radius:7px;padding:10px 14px;font-size:12px;color:#E07070;margin-bottom:12px}
 
-    /* LAYOUT DINÁMICO */
+    /* LAYOUT CORE */
     .layout{display:grid;grid-template-columns:260px 1fr;height:100vh;overflow:hidden}
-
-    /* SIDEBAR */
     .sidebar{background:var(--s1);border-right:1px solid var(--bd2);display:flex;flex-direction:column;overflow:hidden}
     .sb-hd{padding:18px 14px 15px;border-bottom:1px solid var(--bd2)}
     .sb-logo{display:flex;align-items:center;gap:9px}
-    .l-sello{width:36px;height:36px;border:1.5px solid var(--gold);border-radius:50%;
-      display:flex;align-items:center;justify-content:center;
-      font-family:'Playfair Display',serif;font-size:8px;color:var(--gold);
-      flex-shrink:0;text-align:center;line-height:1.25;padding:4px}
+    .l-sello{width:36px;height:36px;border:1.5px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:8px;color:var(--gold);text-align:center}
     .l-nm{font-family:'Playfair Display',serif;font-size:12px;font-weight:700;color:var(--tx);line-height:1.3}
-    .l-sb{font-size:9px;color:var(--gold);letter-spacing:.16em;text-transform:uppercase;margin-top:1px}
-    .sb-body{flex:1;overflow-y:auto;padding:10px 10px 0}
+    .l-sb{font-size:9px;color:var(--gold);letter-spacing:.16em;text-transform:uppercase}
+    .sb-body{flex:1;overflow-y:auto;padding:10px}
     .sb-sec{font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.14em;padding:8px 6px 5px}
+    
     .stat-row{display:flex;align-items:center;justify-content:space-between;padding:8px 11px;background:var(--s2);border-radius:7px;margin-bottom:4px}
     .stat-lbl{font-size:11px;color:var(--tx2)}
-    .stat-val{font-family:'Playfair Display',serif;font-size:20px;color:var(--tx);line-height:1}
-    
-    .abg-row{display:flex;align-items:center;gap:9px;padding:6px 7px;border-radius:7px;cursor:pointer;transition:background .14s}
-    .abg-row:hover{background:var(--s2)}
-    .abg-row.on{background:var(--s3)}
-    .av{width:29px;height:29px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#000;flex-shrink:0}
-    .a-nm{font-size:12px;color:var(--tx);font-weight:500;line-height:1.25}
-    .a-rl{font-size:10px;color:var(--tx2)}
-    
-    .sb-ft{padding:10px 12px;border-top:1px solid var(--bd2);display:flex;flex-direction:column;gap:6px}
-    .sb-date{font-size:9.5px;color:var(--tx3);text-align:center}
-    .sync-row{display:flex;align-items:center;justify-content:center;gap:6px}
-    .sync-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-    .sync-lbl{font-size:9.5px;letter-spacing:.05em}
-    .cfg-btn{width:100%;padding:8px;background:var(--s2);border:1px solid var(--bd2);border-radius:6px;
-      color:var(--tx2);font-size:11px;cursor:pointer;transition:all .2s;
-      display:flex;align-items:center;justify-content:center;gap:6px}
-    .cfg-btn:hover{border-color:var(--gold3);color:var(--gold)}
-    .logout-btn{background:rgba(201,76,76,0.1);border:1px solid rgba(201,76,76,0.25);color:#E07070}
-    .logout-btn:hover{background:rgba(201,76,76,0.2);color:#FF8888;border-color:rgba(201,76,76,0.4)}
+    .stat-val{font-family:'Playfair Display',serif;font-size:20px;color:var(--tx)}
 
-    /* MAIN CALENDAR */
+    .abg-row{display:flex;align-items:center;gap:9px;padding:6px 7px;border-radius:7px;cursor:pointer}
+    .abg-row:hover, .abg-row.on{background:var(--s2)}
+    .av{width:29px;height:29px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#000}
+    .a-nm{font-size:12px;color:var(--tx);font-weight:500}
+    .a-rl{font-size:10px;color:var(--tx2)}
+
+    .sb-ft{padding:10px 12px;border-top:1px solid var(--bd2);display:flex;flex-direction:column;gap:6px}
+    .cfg-btn{width:100%;padding:8px;background:var(--s2);border:1px solid var(--bd2);border-radius:6px;color:var(--tx2);font-size:11px}
+    .logout-btn{background:rgba(201,76,76,0.1);color:#E07070}
+
+    /* MAIN PANEL */
     .main{display:flex;flex-direction:column;overflow:hidden;background:var(--bg)}
-    .main-hd{background:var(--s1);border-bottom:1px solid var(--bd2);padding:12px 16px;
-      display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0}
-    .nav-btn{width:30px;height:30px;border:1px solid var(--bd2);background:transparent;color:var(--tx2);
-      border-radius:6px;font-size:17px;display:flex;align-items:center;justify-content:center;transition:all .2s}
-    .nav-btn:hover{border-color:var(--gold);color:var(--gold)}
+    .main-hd{background:var(--s1);border-bottom:1px solid var(--bd2);padding:12px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+    .nav-btn{width:30px;height:30px;border:1px solid var(--bd2);background:transparent;color:var(--tx2);border-radius:6px}
     .mes-tit{font-family:'Playfair Display',serif;font-size:18px;color:var(--tx)}
     .anio-lb{font-size:13px;color:var(--tx2);margin-left:5px}
-    .hoy-btn{background:none;border:1px solid var(--bd2);border-radius:5px;color:var(--tx2);
-      font-size:10px;padding:4px 9px;letter-spacing:.06em;transition:all .2s}
-    .hoy-btn:hover{border-color:var(--gold3);color:var(--gold)}
     .vtabs{display:flex;gap:2px;background:var(--s2);padding:3px;border-radius:8px}
-    .vtab{padding:5px 12px;border:none;background:transparent;color:var(--tx2);font-size:11px;
-      font-weight:500;border-radius:6px;letter-spacing:.04em;transition:all .15s}
+    .vtab{padding:5px 12px;background:transparent;color:var(--tx2);font-size:11px;border-radius:6px}
     .vtab.on{background:var(--s4);color:var(--gold)}
-    .vtab:hover:not(.on){color:var(--tx)}
     
-    .hd-actions{display:flex;align-items:center;gap:8px}
-    .add-btn{padding:8px 14px;background:linear-gradient(135deg,var(--gold3),var(--gold));border:none;
-      border-radius:7px;color:#08060A;font-size:12px;font-weight:700;letter-spacing:.05em;
-      transition:all .2s;white-space:nowrap;display:inline-flex;align-items:center;gap:4px}
-    .add-btn:hover{box-shadow:0 4px 20px rgba(201,168,76,.4);transform:translateY(-1px)}
-    .pdf-btn{background:var(--s2);border:1px solid var(--bd);color:var(--tx);padding:8px 12px;font-size:12px;border-radius:7px;font-weight:500}
-    .pdf-btn:hover{border-color:var(--gold);color:var(--gold)}
+    .add-btn{padding:8px 14px;background:linear-gradient(135deg,var(--gold3),var(--gold));border-radius:7px;color:#08060A;font-size:12px;font-weight:700}
+    .pdf-btn{background:var(--s2);border:1px solid var(--bd);color:var(--tx);padding:8px 12px;font-size:12px;border-radius:7px}
 
     .cal-scroll{flex:1;overflow-y:auto;padding:12px}
 
-    /* VISTAS GRID */
-    .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--bd2);
-      border:1px solid var(--bd2);border-radius:10px;overflow:hidden}
-    .cal-hdr{background:var(--s1);text-align:center;padding:8px 4px;font-size:10px;
-      font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--tx2)}
-    .cal-cell{background:var(--s1);min-height:102px;padding:6px;cursor:pointer;
-      transition:background .12s;position:relative;display:flex;flex-direction:column}
-    .cal-cell:hover{background:var(--s2)}
-    .cal-cell.otra{background:var(--bg);opacity:0.4}
-    .cal-cell.hoy{background:var(--s2)}
-    .cal-cell.hoy::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold)}
-    .dn{font-size:12.5px;font-weight:500;color:var(--tx2);width:24px;height:24px;
-      display:flex;align-items:center;justify-content:center;border-radius:50%;margin-bottom:4px}
-    .cal-cell.hoy .dn{background:var(--gold);color:#08060A;font-weight:700}
+    /* MATRIZ MENSUAL */
+    .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--bd2);border:1px solid var(--bd2);border-radius:10px;overflow:hidden}
+    .cal-hdr{background:var(--s1);text-align:center;padding:8px 4px;font-size:10px;color:var(--tx2);text-transform:uppercase}
+    .cal-cell{background:var(--s1);min-height:102px;padding:6px;cursor:pointer;display:flex;flex-direction:column}
+    .cal-cell.otra{background:var(--bg);opacity:0.3}
+    .cal-cell.hoy{background:var(--s2);border-top:2px solid var(--gold)}
+    .dn{font-size:12.5px;font-weight:500;color:var(--tx2);width:24px;height:24px;display:flex;align-items:center;justify-content:center}
+    .cal-cell.hoy .dn{background:var(--gold);color:#000;border-radius:50%;font-weight:700}
     
-    .chip{padding:2px 5px;border-radius:4px;font-size:10px;color:#fff;margin-bottom:2px;
-      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;transition:transform 0.1s, opacity .14s;font-weight:500}
-    .chip:hover{opacity:.9;transform:scale(1.02)}
+    .chip{padding:2px 5px;border-radius:4px;font-size:10px;color:#fff;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 
-    /* VISTA SEMANA */
+    /* VISTAS EXTRAS */
     .wk-wrap{overflow-y:auto;max-height:calc(100vh - 120px)}
-    .wk-hdr{display:grid;grid-template-columns:50px repeat(7,1fr);border-bottom:1px solid var(--bd2);
-      position:sticky;top:0;background:var(--s1);z-index:5}
+    .wk-hdr{display:grid;grid-template-columns:50px repeat(7,1fr);position:sticky;top:0;background:var(--s1);z-index:5;border-bottom:1px solid var(--bd2)}
     .wk-dhdr{padding:8px 4px;text-align:center;font-size:11px;color:var(--tx2)}
-    .wk-dhdr.hoy-col{color:var(--gold);font-weight:600}
     .wk-body{display:grid;grid-template-columns:50px repeat(7,1fr)}
-    .wk-tlbl{height:54px;display:flex;align-items:flex-start;padding:4px 7px 0 0;
-      justify-content:flex-end;font-size:9px;color:var(--tx3)}
-    .wk-dcol{border-left:1px solid var(--bd2);position:relative}
-    .wk-hcel{height:54px;border-bottom:1px solid var(--bd2);cursor:pointer;transition:background .1s}
-    .wk-hcel:hover{background:rgba(201,168,76,.03)}
+    .wk-tlbl{height:54px;display:flex;align-items:flex-start;justify-content:flex-end;padding-right:6px;font-size:9px;color:var(--tx3)}
+    .wk-dcol{border-left:1px solid var(--bd2)}
+    .wk-hcel{height:54px;border-bottom:1px solid var(--bd2);cursor:pointer}
 
-    /* VISTA DIA */
-    .dia-hdr{padding:12px 14px;border-bottom:1px solid var(--bd2);
-      font-family:'Playfair Display',serif;font-size:15px;color:var(--tx)}
+    .dia-hdr{padding:12px 14px;border-bottom:1px solid var(--bd2);font-family:'Playfair Display',serif;font-size:15px}
     .vacio{font-size:12px;color:var(--tx3);text-align:center;padding:24px;font-style:italic}
 
-    /* VISTA LISTA */
-    .list-view{display:flex;flex-direction:column;gap:10px}
-    .list-gt{font-family:'Playfair Display',serif;font-size:13px;color:var(--tx2);
-      padding:6px 0 4px;border-bottom:1px solid var(--bd2);margin-bottom:4px}
-    .list-card{background:var(--s1);border:1px solid var(--bd2);border-radius:9px;
-      padding:11px 13px;cursor:pointer;transition:all .2s;
-      display:flex;align-items:flex-start;gap:11px}
-    .list-card:hover{background:var(--s2);border-color:var(--bd);transform:translateX(2px)}
-    .list-bar{width:4px;border-radius:2px;min-height:36px;align-self:stretch;flex-shrink:0}
-    .list-tit{font-size:13px;font-weight:500;color:var(--tx);margin-bottom:3px}
-    .list-meta{font-size:11px;color:var(--tx2);display:flex;gap:9px;flex-wrap:wrap}
+    .list-card{background:var(--s1);border:1px solid var(--bd2);border-radius:9px;padding:11px 13px;cursor:pointer;display:flex;gap:11px;margin-bottom:8px}
+    .list-bar{width:4px;border-radius:2px;align-self:stretch}
+    .list-tit{font-size:13px;font-weight:500;color:var(--tx)}
+    .list-meta{font-size:11px;color:var(--tx2)}
 
-    /* MODALES MÁS ELEGANTES Y AMPLIADOS */
-    .modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.82);display:flex;
-      align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(6px);padding:12px}
-    .modal-box{background:var(--s1);border:1px solid var(--bd);border-radius:14px;
-      width:min(580px,100%);max-height:90vh;overflow-y:auto;
-      box-shadow:0 40px 80px rgba(0,0,0,.8);animation:fadeIn .22s cubic-bezier(0.16, 1, 0.3, 1)}
-    .modal-hd{padding:16px 20px 13px;border-bottom:1px solid var(--bd2);
-      display:flex;align-items:center;justify-content:space-between}
-    .modal-tit{font-family:'Playfair Display',serif;font-size:17px;color:var(--tx)}
-    .modal-x{background:none;border:none;color:var(--tx2);font-size:18px;padding:4px;line-height:1}
-    .modal-x:hover{color:var(--tx)}
+    /* MODAL INTERNO */
+    .modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(4px);padding:12px}
+    .modal-box{background:var(--s1);border:1px solid var(--bd);border-radius:14px;width:min(540px,100%);max-height:90vh;overflow-y:auto}
+    .modal-hd{padding:16px 20px;border-bottom:1px solid var(--bd2);display:flex;align-items:center;justify-content:space-between}
+    .modal-tit{font-family:'Playfair Display',serif;font-size:17px}
     .modal-bd{padding:18px 20px;display:flex;flex-direction:column;gap:14px}
-    .modal-ft{padding:12px 20px 16px;border-top:1px solid var(--bd2);
-      display:flex;gap:8px;justify-content:flex-end;align-items:center}
+    .modal-ft{padding:12px 20px;border-top:1px solid var(--bd2);display:flex;gap:8px;justify-content:flex-end}
     .f-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-    .m-lbl{font-size:10.5px;color:var(--tx2);text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:5px}
-    
-    .chk-row{display:flex;align-items:center;gap:8px;padding:7px 9px;border:1px solid var(--bd2);
-      border-radius:6px;cursor:pointer;transition:all .14s;margin-bottom:3px}
-    .chk-row.on{background:var(--s2);border-color:var(--gold3)}
 
-    /* SECCIÓN DE ADJUNTOS */
-    .doc-section{background:var(--s2);border-radius:8px;padding:12px;border:1px dashed var(--bd2)}
-    .doc-list{display:flex;flex-direction:column;gap:6px;margin-top:8px}
-    .doc-item{display:flex;align-items:center;justify-content:space-between;background:var(--s3);
-      padding:6px 10px;border-radius:6px;font-size:12px;border:1px solid var(--bd2)}
-    .doc-actions{display:flex;gap:8px}
-    .doc-btn{background:none;color:var(--gold);font-size:11px;font-weight:500}
-    .doc-btn.del{color:var(--red)}
-    .file-input-wrapper{position:relative;overflow:hidden;display:inline-block;margin-top:6px}
-    .file-input-wrapper input[type=file]{font-size:100px;position:absolute;left:0;top:0;opacity:0;cursor:pointer}
-    .file-input-btn{background:var(--s4);border:1px solid var(--bd);padding:6px 12px;border-radius:6px;font-size:11.5px;color:var(--tx2)}
-
-    /* TOASTS */
-    .toast{position:fixed;bottom:calc(20px + var(--safe-b));right:20px;
-      background:var(--s3);border:1px solid var(--gold3);border-radius:9px;
-      padding:12px 20px;font-size:13px;color:var(--tx);z-index:300;
-      box-shadow:0 12px 34px rgba(0,0,0,.5);animation:slideUp .25s ease;pointer-events:none;max-width:320px}
-    .toast.err{border-color:#993333;background:#180D0D;color:#FFAAAA}
-    .toast.ok{border-color:var(--green);background:#0A1810;color:#AAFFAA}
-
-    #pdf-render-area{display:none}
-
-    /* RESPONSIVE OPTIMIZATIONS TÁCTILES */
-    @media(max-width:992px){
-      .layout{grid-template-columns:1fr}
-      .sidebar{display:none}
-    }
+    /* INNER CORE SPINNER */
+    .local-spin{width:32px;height:32px;border:3px solid var(--bd);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin:40px auto}
   </style>
 </head>
 <body>
 
-<div id="splash">
-  <div class="sp-sello">M.S.<br>&amp;A.</div>
-  <div class="sp-nm">Mariana Sánchez &amp; Asociados</div>
-  <div class="sp-sb">Estudio Jurídico</div>
-  <div class="sp-spin"></div>
+<div id="root">
+  <div style="height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; background:#07090F; gap:12px;">
+    <div style="font-family:'Playfair Display',serif; font-size:20px; color:#C9A84C;">Mariana Sánchez &amp; Asociados</div>
+    <div style="width:24px; height:24px; border:2px solid #1A2440; border-top-color:#C9A84C; border-radius:50%; animation:spin 1s linear infinite;"></div>
+  </div>
 </div>
-
-<div id="root"></div>
-<div id="pdf-render-area"></div>
+<div id="pdf-render-area" style="display:none;"></div>
 
 <script type="text/babel">
 const { useState, useEffect } = React;
@@ -314,21 +182,11 @@ const ABOGADOS = [
   { id:"a4", nombre:"Dra. Laura Vega",      rol:"Abogada Asociada",  color:"#C46D6D", ini:"LV" },
 ];
 
-const TIPOS = [
-  { id:"audiencia",   label:"Audiencia",   icon:"⚖️" },
-  { id:"reunion",     label:"Reunión",     icon:"🤝" },
-  { id:"vencimiento", label:"Vencimiento", icon:"⏰" },
-  { id:"consulta",    label:"Consulta",    icon:"💼" },
-  { id:"peritaje",    label:"Peritaje",    icon:"🔍" },
-  { id:"otro",        label:"Otro",        icon:"📋" },
-];
-
-const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 const DIAS = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
-
+const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 const hoyStr = () => new Date().toISOString().split("T")[0];
 
-/* CONFIGURACIÓN SUPABASE */
+/* CONFIGURACIÓN SEGURA */
 function PantallaConfig({ onConectado }) {
   const [url, setUrl] = useState(localStorage.getItem("sb_url")||"");
   const [key, setKey] = useState(localStorage.getItem("sb_key")||"");
@@ -337,18 +195,18 @@ function PantallaConfig({ onConectado }) {
 
   const conectar = async () => {
     setErr("");
-    if (!url.trim()||!key.trim()) { setErr("Complete ambos parámetros corporativos."); return; }
+    if (!url.trim() || !key.trim()) { setErr("Complete ambos campos corporativos."); return; }
     setBusy(true);
     try {
-      const sb = createClient(url.trim(), key.trim());
-      const { error } = await sb.from("eventos").select("id").limit(1);
-      if (error && error.code !== "PGRST116") throw new Error(error.message);
+      const sbClient = createClient(url.trim(), key.trim());
+      const { error } = await sbClient.from("eventos").select("id").limit(1);
+      if (error && error.code !== "PGRST116") throw error;
       
       localStorage.setItem("sb_url", url.trim());
       localStorage.setItem("sb_key", key.trim());
-      onConectado(sb);
+      onConectado(sbClient);
     } catch(e) {
-      setErr("Fallo de conexión: Estructura inválida o claves incorrectas.");
+      setErr("Fallo crítico de enlace. Verifique los parámetros ingresados.");
     } finally {
       setBusy(false);
     }
@@ -373,7 +231,7 @@ function PantallaConfig({ onConectado }) {
           <input type="password" value={key} onChange={e=>setKey(e.target.value)} placeholder="eyJhbGciOiJIUzI1NiIsIn..." disabled={busy}/>
         </div>
         <button className="btn-gold" onClick={conectar} disabled={busy}>
-          {busy ? "CONECTANDO..." : "ESTABLECER CONEXIÓN"}
+          {busy ? "VERIFICANDO..." : "ESTABLECER CONEXIÓN"}
         </button>
       </div>
     </div>
@@ -390,17 +248,16 @@ function Ingreso({ alEntrar, alConfigurar }) {
         <div className="firma-sub">Estudio Jurídico</div>
         <hr className="divider"/>
         <p className="cita">"La justicia y la diligencia procesal sostienen la solidez del bufete corporativo."</p>
-        <button className="btn-gold" onClick={alEntrar} style={{marginBottom: 12}}>INGRESAR A LA AGENDA</button>
-        <button className="cfg-btn" onClick={alConfigurar}>⚙️ Reconfigurar Servidor</button>
-        <div className="card-footer">Estudio Jurídico Multiusuario Premium · © {new Date().getFullYear()}</div>
+        <button className="btn-gold" onClick={alEntrar} style={{marginBottom: 14}}>INGRESAR A LA AGENDA</button>
+        <button className="cfg-btn" onClick={alConfigurar}>⚙️ Configurar Servidor Externo</button>
+        <div className="card-footer">Estudio Jurídico Multiusuario Premium</div>
       </div>
     </div>
   );
 }
 
 /* SIDEBAR */
-function Barra({ eventos, filtro, setFiltro, onCerrarSesion, perfilAlertas, setPerfilAlertas }) {
-  const [showPerfil, setShowPerfil] = useState(false);
+function Barra({ eventos, filtro, setFiltro, onCerrarSesion }) {
   const cH = eventos.filter(e=>e.date===hoyStr()).length;
   const cA = eventos.filter(e=>e.type==="audiencia").length;
 
@@ -408,62 +265,38 @@ function Barra({ eventos, filtro, setFiltro, onCerrarSesion, perfilAlertas, setP
     <div className="sidebar">
       <div className="sb-hd">
         <div className="sb-logo">
-          <div className="l-sello">M.S.<br>&amp;A.</div>
+          <div className="l-sello">M.S.<br/>&amp;A.</div>
           <div>
-            <div className="l-nm">Mariana Sánchez<br>&amp; Asociados</div>
+            <div className="l-nm">Mariana Sánchez<br/>&amp; Asociados</div>
             <div className="l-sb">Estudio Jurídico</div>
           </div>
         </div>
       </div>
       <div className="sb-body">
-        <div className="sb-sec">Métricas de Hoy</div>
-        <div className="stat-row"><span className="stat-lbl">Eventos del Día</span><span className="stat-val">{cH}</span></div>
-        <div className="stat-row"><span className="stat-lbl">Total Audiencias</span><span className="stat-val">{cA}</span></div>
+        <div className="sb-sec">Métricas Clave</div>
+        <div className="stat-row"><span className="stat-lbl">Eventos de Hoy</span><span className="stat-val">{cH}</span></div>
+        <div className="stat-row"><span className="stat-lbl">Audiencias</span><span className="stat-val">{cA}</span></div>
         
-        <button className="cfg-btn" style={{marginTop:10}} onClick={() => setShowPerfil(!showPerfil)}>
-          🔔 Canales de Alerta
-        </button>
-
-        {showPerfil && (
-          <div className="fade-in" style={{background:"var(--s2)", padding:10, borderRadius:8, marginTop:5, display:"flex", flexDirection:"column", gap:8, border:"1px solid var(--bd2)"}}>
-            <div className="f-grp">
-              <label className="f-lbl" style={{fontSize:9}}>E-mail Alertas</label>
-              <input value={perfilAlertas.email} onChange={e=>setPerfilAlertas({...perfilAlertas, email:e.target.value})} placeholder="estudio@sanchez.com" style={{padding:6}}/>
-            </div>
-            <div className="f-grp">
-              <label className="f-lbl" style={{fontSize:9}}>Teléfono Móvil</label>
-              <input value={perfilAlertas.telefono} onChange={e=>setPerfilAlertas({...perfilAlertas, telefono:e.target.value})} placeholder="+5492604..." style={{padding:6}}/>
-            </div>
-          </div>
-        )}
-
-        <div className="sb-sec" style={{marginTop:16}}>Profesionales</div>
+        <div className="sb-sec" style={{marginTop:20}}>Filtro de Profesionales</div>
         <div className={`abg-row ${filtro===null?"on":""}`} onClick={()=>setFiltro(null)}>
-          <div className="av" style={{background:"var(--s4)",color:"var(--tx2)"}}>∀</div>
-          <div><div className="a-nm">Todo el Bufete</div><div className="a-rl">{eventos.length} causas</div></div>
+          <div className="av" style={{background:"var(--s4)",color:"var(--tx)"}}>∀</div>
+          <div style={{marginLeft:8}}><div className="a-nm">Todo el Bufete</div><div className="a-rl">{eventos.length} registros</div></div>
         </div>
-        {ABOGADOS.map(a=>{
-          const cnt = eventos.filter(e=>e.lawyers?.includes(a.id)).length;
-          return (
-            <div key={a.id} className={`abg-row ${filtro===a.id?"on":""}`} onClick={()=>setFiltro(a.id)}>
-              <div className="av" style={{background:a.color}}>{a.ini}</div>
-              <div><div className="a-nm">{a.nombre}</div><div className="a-rl">{cnt} asignados</div></div>
-            </div>
-          );
-        })}
+        {ABOGADOS.map(a=>(
+          <div key={a.id} className={`abg-row ${filtro===a.id?"on":""}`} onClick={()=>setFiltro(a.id)}>
+            <div className="av" style={{background:a.color}}>{a.ini}</div>
+            <div style={{marginLeft:8}}><div className="a-nm">{a.nombre}</div><div className="a-rl">{eventos.filter(e=>e.lawyers?.includes(a.id)).length} ítems</div></div>
+          </div>
+        ))}
       </div>
       <div className="sb-ft">
-        <div className="sync-row">
-          <div className="sync-dot" style={{background:"var(--green)"}}/>
-          <span className="sync-lbl" style={{color:"var(--green)"}}>Sincronizado Supabase</span>
-        </div>
-        <button className="cfg-btn logout-btn" onClick={onCerrarSesion}>🚪 Cerrar Sesión</button>
+        <button className="cfg-btn logout-btn" onClick={onCerrarSesion}>🚪 Desconectar</button>
       </div>
     </div>
   );
 }
 
-/* VISTAS */
+/* COMPONENTES DE VISTA */
 function VistaMes({año,mes,eventos,alDia,alEv}) {
   const pri = new Date(año,mes,1).getDay();
   const dias = new Date(año,mes+1,0).getDate();
@@ -477,7 +310,7 @@ function VistaMes({año,mes,eventos,alDia,alEv}) {
   for(let i=1;i<=tot-len;i++) celdas.push({d:i,otra:true,m:mes+1});
 
   return (
-    <div className="cal-grid fade-in">
+    <div className="cal-grid">
       {DIAS.map(d=><div key={d} className="cal-hdr">{d}</div>)}
       {celdas.map((c,idx)=>{
         const ds = `${año}-${String(c.m+1).padStart(2,"0")}-${String(c.d).padStart(2,"0")}`;
@@ -502,10 +335,10 @@ function VistaMes({año,mes,eventos,alDia,alEv}) {
 function VistaSemana({fecha,eventos,alEv,alSlot}) {
   const inicio = new Date(fecha); inicio.setDate(inicio.getDate() - inicio.getDay());
   const diasArr = Array.from({length:7},(_,i)=>{ const d = new Date(inicio); d.setDate(d.getDate()+i); return d; });
-  const hs = Array.from({length:12},(_,i)=>i+8); // 8:00 a 19:00
+  const hs = Array.from({length:11},(_,i)=>i+8); // 8:00 a 18:00
 
   return (
-    <div className="wk-wrap fade-in">
+    <div className="wk-wrap">
       <div className="wk-hdr">
         <div className="wk-dhdr">Hora</div>
         {diasArr.map((d,i)=><div key={i} className="wk-dhdr"><b>{DIAS[d.getDay()]}</b><br/>{d.getDate()}</div>)}
@@ -540,21 +373,21 @@ function VistaDay({fecha,eventos,alEv,alSlot}) {
   const ds = fecha.toISOString().split("T")[0];
   const dEvs = eventos.filter(e=>e.date===ds);
   return (
-    <div className="fade-in" style={{background:"var(--s1)", borderRadius:10, padding:12}}>
+    <div style={{background:"var(--s1)", borderRadius:10, padding:14}}>
       <div className="dia-hdr">{fecha.toLocaleDateString("es-AR",{weekday:"long",day:"numeric",month:"long"})}</div>
-      <div style={{marginTop:10, display:"flex", flexDirection:"column", gap:8}}>
-        {dEvs.length===0 ? <div className="vacio">No hay compromisos procesales hoy.</div> : 
+      <div style={{marginTop:12, display:"flex", flexDirection:"column", gap:8}}>
+        {dEvs.length===0 ? <div className="vacio">Sin compromisos procesales en la fecha.</div> : 
           dEvs.map(ev=>(
             <div key={ev.id} className="list-card" onClick={()=>alEv(ev)}>
               <div className="list-bar" style={{background:ABOGADOS.find(a=>a.id===(ev.lawyers?.[0]||"p"))?.color}}/>
               <div style={{flex:1}}>
-                <div className="list-tit">{ev.startTime} hs - {ev.title}</div>
-                <div className="list-meta">📁 Exp: {ev.expNum||"S/D"} | 🏛 {ev.court||"S/D"}</div>
+                <div className="list-tit">{ev.startTime} hs — {ev.title}</div>
+                <div className="list-meta">Exp: {ev.expNum||"S/D"} | Fuero: {ev.court||"S/D"}</div>
               </div>
             </div>
           ))
         }
-        <button className="cfg-btn" style={{borderStyle:"dashed"}} onClick={()=>alSlot(ds)}>+ Añadir ítem</button>
+        <button className="cfg-btn" style={{borderStyle:"dashed", marginTop:8}} onClick={()=>alSlot(ds)}>+ Vincular Nuevo Item</button>
       </div>
     </div>
   );
@@ -562,13 +395,13 @@ function VistaDay({fecha,eventos,alEv,alSlot}) {
 
 function VistaLista({eventos,alEv}) {
   return (
-    <div className="list-view fade-in">
-      <div className="list-gt">Historial Total del Servidor</div>
+    <div>
       {eventos.map(ev=>(
         <div key={ev.id} className="list-card" onClick={()=>alEv(ev)}>
           <div className="list-bar" style={{background:ABOGADOS.find(a=>a.id===(ev.lawyers?.[0]||"p"))?.color}}/>
           <div style={{flex:1}}>
             <div className="list-tit">[{ev.date}] {ev.title}</div>
+            <div className="list-meta">Expediente: {ev.expNum||"S/D"}</div>
           </div>
         </div>
       ))}
@@ -576,7 +409,7 @@ function VistaLista({eventos,alEv}) {
   );
 }
 
-/* MODAL REVISADO */
+/* MODAL ELEGANTE */
 function ModalEv({evento,alGuardar,alEliminar,alCerrar,busy}) {
   const esEd = !!evento?.id;
   const [form,setForm] = useState({
@@ -584,70 +417,38 @@ function ModalEv({evento,alGuardar,alEliminar,alCerrar,busy}) {
     lawyers:["p"],notes:"",court:"",expNum:"",docs:[],...evento
   });
 
-  const handleFileUpload = (e) => {
-    const file = e.target.files[0]; if (!file) return;
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setForm(f=>({...f, docs:[...(f.docs||[]), {name:file.name, size:(file.size/1024).toFixed(1)+" KB", base64:reader.result}]}));
-    };
-    reader.readAsDataURL(file);
-  };
-
   return (
     <div className="modal-ov" onClick={e=>e.target===e.currentTarget&&alCerrar()}>
       <div className="modal-box">
         <div className="modal-hd">
-          <div className="modal-tit">{esEd?"Ficha de Legajo Procesal":"Nuevo Evento en Agenda"}</div>
-          <button className="modal-x" onClick={alCerrar}>✕</button>
+          <div className="modal-tit">{esEd ? "Editar Registro Procesal" : "Nuevo Evento en Agenda"}</div>
+          <button style={{background:"none", color:"var(--tx2)", fontSize:18}} onClick={alCerrar}>✕</button>
         </div>
         <div className="modal-bd">
-          <div className="f-grp"><label className="m-lbl">Carátula / Título Comercial *</label>
-            <input value={form.title} onChange={e=>setForm({...form,title:e.target.value})} placeholder="Ej: Conciliación de Causa" disabled={busy}/>
+          <div className="f-grp">
+            <label className="m-lbl">Carátula / Título Comercial *</label>
+            <input value={form.title} onChange={e=>setForm({...form,title:e.target.value})} placeholder="Ej: Audiencia de Conciliación" disabled={busy}/>
           </div>
           <div className="f-row">
-            <div className="f-grp"><label className="m-lbl">N° Expediente</label>
-              <input value={form.expNum} onChange={e=>setForm({...form,expNum:e.target.value})} disabled={busy}/>
-            </div>
-            <div className="f-grp"><label className="m-lbl">Juzgado/Fuero</label>
-              <input value={form.court} onChange={e=>setForm({...form,court:e.target.value})} disabled={busy}/>
-            </div>
+            <div className="f-grp"><label className="m-lbl">N° Expediente</label><input value={form.expNum} onChange={e=>setForm({...form,expNum:e.target.value})} disabled={busy}/></div>
+            <div className="f-grp"><label className="m-lbl">Juzgado / Fuero</label><input value={form.court} onChange={e=>setForm({...form,court:e.target.value})} disabled={busy}/></div>
           </div>
           <div className="f-row">
-            <div className="f-grp"><label className="m-lbl">Fecha</label>
-              <input type="date" value={form.date} onChange={e=>setForm({...form,date:e.target.value})} disabled={busy}/>
-            </div>
-            <div className="f-grp"><label className="m-lbl">Hora</label>
-              <input type="time" value={form.startTime} onChange={e=>setForm({...form,startTime:e.target.value})} disabled={busy}/>
-            </div>
-          </div>
-
-          <div className="doc-section">
-            <label className="m-lbl" style={{color:"var(--gold)"}}>🗂 Documental Adjunta (Base64 Sincronizada)</label>
-            <div className="file-input-wrapper">
-              <button className="file-input-btn">+ Escanear / Cargar Archivo</button>
-              <input type="file" onChange={handleFileUpload} disabled={busy}/>
-            </div>
-            <div className="doc-list">
-              {form.docs?.map((d,i)=>(
-                <div key={i} className="doc-item">
-                  <span>📄 {d.name}</span>
-                  <button className="doc-btn del" onClick={()=>setForm({...form,docs:form.docs.filter((_,x)=>x!==i)})}>Eliminar</button>
-                </div>
-              ))}
-            </div>
+            <div className="f-grp"><label className="m-lbl">Fecha</label><input type="date" value={form.date} onChange={e=>setForm({...form,date:e.target.value})} disabled={busy}/></div>
+            <div className="f-grp"><label className="m-lbl">Hora Inicio</label><input type="time" value={form.startTime} onChange={e=>setForm({...form,startTime:e.target.value})} disabled={busy}/></div>
           </div>
         </div>
         <div className="modal-ft">
           {esEd && <button className="btn-d" onClick={()=>alEliminar(form.id)} disabled={busy}>Eliminar</button>}
-          <button className="btn-s" onClick={alCerrar} disabled={busy}>Cerrar</button>
-          <button className="btn-p" onClick={()=>alGuardar(form)} disabled={busy}>Guardar</button>
+          <button className="btn-s" onClick={alCerrar} disabled={busy}>Cancelar</button>
+          <button className="btn-p" onClick={()=>alGuardar(form)} disabled={busy}>Guardar Cambios</button>
         </div>
       </div>
     </div>
   );
 }
 
-/* CORE APP */
+/* NÚCLEO CENTRAL */
 function App() {
   const [pantalla, setPantalla] = useState("login"); 
   const [ingresado, setIngresado] = useState(false);
@@ -659,20 +460,21 @@ function App() {
   const [cargando, setCargando] = useState(false);
   const [modal, setModal] = useState(false);
   const [editEv, setEditEv] = useState(null);
-  const [toast, setToast] = useState(null);
-  const [perfilAlertas, setPerfilAlertas] = useState({email:"",telefono:""});
 
   useEffect(() => {
-    const savedUrl = localStorage.getItem("sb_url");
-    const savedKey = localStorage.getItem("sb_key");
-    if (savedUrl && savedKey) {
-      const client = createClient(savedUrl, savedKey);
-      setSb(client);
-      fetchEventos(client);
-    } else {
+    try {
+      const savedUrl = localStorage.getItem("sb_url");
+      const savedKey = localStorage.getItem("sb_key");
+      if (savedUrl && savedKey) {
+        const client = createClient(savedUrl, savedKey);
+        setSb(client);
+        fetchEventos(client);
+      } else {
+        setPantalla("config");
+      }
+    } catch(err) {
       setPantalla("config");
     }
-    setTimeout(() => document.getElementById("splash")?.classList.add("out"), 800);
   }, []);
 
   const fetchEventos = async (client) => {
@@ -689,7 +491,7 @@ function App() {
         })));
       }
     } catch(e) {
-      setToast({msg:"Error Supabase: Tabla 'eventos' no detectada.", type:"err"});
+      console.error(e);
     } finally {
       setCargando(false);
     }
@@ -704,7 +506,8 @@ function App() {
     };
     try {
       await sb.from("eventos").upsert(payload);
-      setModal(false); fetchEventos(sb);
+      setModal(false); 
+      fetchEventos(sb);
     } catch(e) { console.error(e); }
   };
 
@@ -712,49 +515,49 @@ function App() {
     try { await sb.from("eventos").delete().eq("id", id); setModal(false); fetchEventos(sb); } catch(e) { console.error(e); }
   };
 
-  const exportarAgendaPDF = () => {
-    const area = document.getElementById("pdf-render-area"); area.style.display = "block";
-    area.innerHTML = `<div style="padding:40px; font-family:serif;"><h2>MARIANA SÁNCHEZ & ASOCIADOS</h2><hr/><p>Agenda compilada al: ${hoyStr()}</p></div>`;
-    html2pdf().from(area).set({filename:`AGENDA_${hoyStr()}.pdf`}).save().then(()=>area.style.display="none");
-  };
+  const abrirNuevo = (ds) => { setEditEv({date: ds || hoyStr()}); setModal(true); };
+  const abrirEditar = (ev) => { setEditEv(ev); setModal(true); };
 
   const filtrados = filtro ? eventos.filter(e => e.lawyers?.includes(filtro)) : eventos;
 
   if (pantalla === "config") return <PantallaConfig onConectado={(client)=>{ setSb(client); setPantalla("login"); }} />;
-  if (pantalla === "login" && !ingresado) return <Ingreso alEntrar={()=>sb ? setIngresado(true) : setPantalla("config")} alConfigurar={()=>setPantalla("config")} />;
+  if (pantalla === "login" && !ingresado) return <Ingreso alEntrar={() => sb ? setIngresado(true) : setPantalla("config")} alConfigurar={() => setPantalla("config")} />;
 
   return (
-    <div className="layout fade-in">
-      <Barra eventos={eventos} filtro={filtro} setFiltro={setFiltro} onCerrarSesion={()=>{setIngresado(false); setPantalla("login");}} perfilAlertas={perfilAlertas} setPerfilAlertas={setPerfilAlertas} />
+    <div className="layout">
+      <Barra eventos={eventos} filtro={filtro} setFiltro={setFiltro} onCerrarSesion={()=>{setIngresado(false); setPantalla("login");}} />
       <div className="main">
         <div className="main-hd">
           <div>
             <button className="nav-btn" onClick={()=>{const n=new Date(curFecha); n.setMonth(n.getMonth()-1); setCurFecha(n);}}>‹</button>
-            <span className="mes-tit">{MESES[curFecha.getMonth()]} <span className="anio-lb">{curFecha.getFullYear()}</span></span>
+            <span className="mes-tit" style={{margin:"0 10px"}}>{MESES[curFecha.getMonth()]} <span className="anio-lb">{curFecha.getFullYear()}</span></span>
             <button className="nav-btn" onClick={()=>{const n=new Date(curFecha); n.setMonth(n.getMonth()+1); setCurFecha(n);}}>›</button>
           </div>
           <div className="vtabs">
             {["mes","semana","dia","lista"].map(v=><button key={v} className={`vtab ${vista===v?"on":""}`} onClick={()=>setVista(v)}>{v}</button>)}
           </div>
-          <div className="hd-actions">
-            <button className="pdf-btn" onClick={exportarAgendaPDF}>🖨 PDF</button>
-            <button className="add-btn" onClick={()=>{setEditEv(null); setModal(true);}}>+ Nuevo Evento</button>
+          <div>
+            <button className="add-btn" onClick={() => abrirNuevo(null)}>+ Nuevo Evento</button>
           </div>
         </div>
         <div className="cal-scroll">
-          {vista==="mes" && <VistaMes año={curFecha.getFullYear()} mes={curFecha.getMonth()} eventos={filtrados} alDia={(d)=>{setCurFecha(new Date(d+"T12:00:00")); setVista("dia");}} alEv={(e)=>{setEditEv(e); setModal(true);}}/>}
-          {vista==="semana" && <VistaSemana fecha={curFecha} eventos={filtrados} alEv={(e)=>{setEditEv(e); setModal(true);}} alSlot={(d)=>{setEditEv({date:d}); setModal(true);}}/>}
-          {vista==="dia" && <VistaDay fecha={curFecha} eventos={filtrados} alEv={(e)=>{setEditEv(e); setModal(true);}} alSlot={(d)=>{setEditEv({date:d}); setModal(true);}}/>}
-          {vista==="lista" && <VistaLista eventos={filtrados} alEv={(e)=>{setEditEv(e); setModal(true);}}/>}
+          {cargando ? <div className="local-spin"></div> : (
+            <>
+              {vista==="mes" && <VistaMes año={curFecha.getFullYear()} mes={curFecha.getMonth()} eventos={filtrados} alDia={(d)=>{setCurFecha(new Date(d+"T12:00:00")); setVista("dia");}} alEv={abrirEditar}/>}
+              {vista==="semana" && <VistaSemana fecha={curFecha} eventos={filtrados} alEv={abrirEditar} alSlot={abrirNuevo}/>}
+              {vista==="dia" && <VistaDay fecha={curFecha} eventos={filtrados} alEv={abrirEditar} alSlot={abrirNuevo}/>}
+              {vista==="lista" && <VistaLista eventos={filtrados} alEv={abrirEditar}/>}
+            </>
+          )}
         </div>
       </div>
       {modal && <ModalEv evento={editEv} alCerrar={()=>setModal(false)} alGuardar={guardarEv} alEliminar={eliminarEv} busy={cargando} />}
-      {toast && <div className={`toast ${toast.type}`}>{toast.msg}</div>}
     </div>
   );
 }
 
-const root = ReactDOM.createRoot(document.getElementById("root")); root.render(<App />);
+const root = ReactDOM.createRoot(document.getElementById("root")); 
+root.render(<App />);
 </script>
 </body>
 </html>
