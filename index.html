@@ -490,7 +490,7 @@ function App() {
               <button className="btn-wsp" style={{justifyContent:"center", padding:"10px", fontSize:12, width:"100%"}} onClick={()=>{
                 if(!alertas.wsp) return alert("Ingresá un número primero");
                 window.open(`https://wa.me/${alertas.wsp.replace(/[^0-9]/g,'')}?text=Prueba%20de%20conexion%20Agenda%20Legal`, '_blank');
-              }}><Probar Conexión WhatsApp></button>
+              }}>Probar Conexión WhatsApp</button>
             </div>
             <div className="modal-ft"><button className="btn-p" onClick={()=>setModalAlertas(false)}>Listo</button></div>
           </div>
