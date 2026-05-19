@@ -3,625 +3,1082 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Mariana Sánchez &amp; Asociados — Suite Legal</title>
+  <title>Mariana Sánchez &amp; Asociados — Agenda</title>
   <link rel="manifest" href="./manifest.json">
-  <meta name="theme-color" content="#121826">
+  <meta name="theme-color" content="#C9A84C">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Agenda Legal">
+  <link rel="apple-touch-icon" href="./apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Jost:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght=0,500;0,700;1,500&family=Jost:wght=300;400;500;600&display=swap" rel="stylesheet">
+  
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
   <style>
-    *,*::before,*::after{box-shadow:none;box-sizing:border-box;margin:0;padding:0}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
-      --bg:#090D16; --s1:#111625; --s2:#172033; --s3:#1E2942; --s4:#263554;
-      --bd:#2D3E66; --bd2:#182238; --gold:#C9A84C; --gold2:#E8C870;
-      --tx:#F3F4F6; --tx2:#9CA3AF; --tx3:#4B5563;
-      --celeste:#3B82F6; --green:#10B981; --red:#EF4444;
-      --safe-t:env(safe-area-inset-top,0px); --safe-b:env(safe-area-inset-bottom,0px);
-      --shadow-sm:0 2px 4px rgba(0,0,0,0.1);
-      --shadow-md:0 10px 25px -5px rgba(0,0,0,0.2);
-      --shadow-lg:0 20px 50px rgba(0,0,0,0.4);
+      --bg:#07090F;--s1:#0D1120;--s2:#141C33;--s3:#1A2240;--s4:#22304C;
+      --bd:#2A3860;--bd2:#1A2440;
+      --gold:#C9A84C;--gold2:#E8C870;--gold3:#9B7A30;
+      --tx:#DDD8CC;--tx2:#8A9AB8;--tx3:#35486A;
+      --green:#3DAA6A;--red:#C94C4C;
+      --safe-t:env(safe-area-inset-top,0px);
+      --safe-b:env(safe-area-inset-bottom,0px);
     }
-    body{font-family:'Jost',sans-serif;background:var(--bg);color:var(--tx);overflow:hidden;height:100vh;
+    html,body,#root{height:100%}
+    body{font-family:'Jost',sans-serif;background:var(--bg);color:var(--tx);overflow:hidden;
       padding-top:var(--safe-t);padding-bottom:var(--safe-b);-webkit-font-smoothing:antialiased}
-    
-    /* inputs y selectores modernos */
-    input,select,textarea{background:var(--s2);border:1px solid var(--bd);color:var(--tx);
-      font-family:'Jost',sans-serif;border-radius:10px;padding:12px 14px;width:100%;font-size:14px;
-      transition:all .2s;outline:none;}
-    input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 0 2px rgba(201,168,76,.15)}
-    input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.8)}
+    *{-webkit-tap-highlight-color:transparent}
+    button,a{touch-action:manipulation}
+    ::-webkit-scrollbar{width:5px;height:5px}
+    ::-webkit-scrollbar-track{background:transparent}
+    ::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:3px}
+    input,select,textarea{background:var(--s3);border:1px solid var(--bd2);color:var(--tx);
+      font-family:'Jost',sans-serif;border-radius:7px;padding:9px 13px;width:100%;font-size:13.5px;
+      transition:border-color .2s;outline:none;-webkit-appearance:none;appearance:none}
+    input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.08)}
+    input::placeholder,textarea::placeholder{color:var(--tx3)}
+    select option{background:var(--s2)}
+    textarea{resize:vertical;min-height:76px}
+    button{cursor:pointer;font-family:'Jost',sans-serif;border:none}
+    input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}
 
-    /* Layout modular */
-    .layout{display:grid;grid-template-columns:260px 1fr;height:100vh;overflow:hidden}
-    
-    /* Sidebar corporativo */
+    @keyframes fadeIn    {from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes slideUp   {from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes pulsar    {0%,100%{opacity:1;transform:scale(1)}50%{opacity:.55;transform:scale(.9)}}
+    @keyframes loginFade {from{opacity:0;transform:scale(.97) translateY(14px)}to{opacity:1;transform:scale(1) translateY(0)}}
+    @keyframes spin      {to{transform:rotate(360deg)}}
+    @keyframes shimmer   {0%{background-position:-400px 0}100%{background-position:400px 0}}
+
+    .fade-in{animation:fadeIn .3s ease}
+    .pulsar{animation:pulsar 1.8s infinite}
+
+    /* SPLASH */
+    #splash{position:fixed;inset:0;background:var(--bg);z-index:9999;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+      transition:opacity .5s ease,visibility .5s ease}
+    #splash.out{opacity:0;visibility:hidden;pointer-events:none}
+    .sp-sello{width:76px;height:76px;border:2px solid var(--gold);border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      font-family:'Playfair Display',serif;font-size:12px;color:var(--gold);
+      position:relative;box-shadow:0 0 40px rgba(201,168,76,.15);
+      animation:loginFade .8s cubic-bezier(.22,.68,0,1.2);text-align:center;line-height:1.3;padding:6px}
+    .sp-sello::after{content:'';position:absolute;inset:7px;border:1px solid rgba(201,168,76,.25);border-radius:50%}
+    .sp-nm{font-family:'Playfair Display',serif;font-size:19px;font-weight:700;color:var(--tx);animation:fadeIn .6s .2s both;text-align:center}
+    .sp-sb{font-size:10px;color:var(--gold);letter-spacing:.2em;text-transform:uppercase;animation:fadeIn .6s .35s both}
+    .sp-spin{width:22px;height:22px;border:2px solid var(--bd);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin-top:4px}
+
+    /* PANTALLA CENTRAL */
+    .pant-bg{height:100vh;display:flex;align-items:center;justify-content:center;
+      background:var(--bg);position:relative;overflow:hidden}
+    .pant-bg::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+      width:800px;height:800px;
+      background:radial-gradient(ellipse,rgba(201,168,76,.06) 0%,transparent 60%);pointer-events:none}
+    .pant-bg::after{content:'';position:absolute;inset:0;pointer-events:none;
+      background-image:linear-gradient(rgba(201,168,76,.024) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(201,168,76,.024) 1px,transparent 1px);
+      background-size:68px 68px}
+    .card{background:var(--s1);border:1px solid var(--bd2);border-radius:18px;
+      padding:42px 40px;width:min(460px,calc(100vw - 36px));position:relative;z-index:1;
+      box-shadow:0 50px 100px rgba(0,0,0,.72),0 0 0 1px rgba(201,168,76,.07);
+      animation:loginFade .55s cubic-bezier(.22,.68,0,1.2)}
+    .card::before{content:'';position:absolute;top:-1px;left:22%;right:22%;height:2px;
+      background:linear-gradient(90deg,transparent,var(--gold),transparent);border-radius:2px}
+    .sello{width:68px;height:68px;border:1.5px solid var(--gold);border-radius:50%;
+      margin:0 auto 20px;display:flex;align-items:center;justify-content:center;
+      font-family:'Playfair Display',serif;font-size:11px;color:var(--gold);
+      position:relative;text-align:center;line-height:1.3;padding:6px;
+      box-shadow:0 0 28px rgba(201,168,76,.12),inset 0 0 18px rgba(201,168,76,.04)}
+    .sello::after{content:'';position:absolute;inset:6px;border:1px solid rgba(201,168,76,.2);border-radius:50%}
+    .firma{font-family:'Playfair Display',serif;font-size:21px;font-weight:700;text-align:center;letter-spacing:.02em;color:var(--tx);line-height:1.3}
+    .firma-sub{font-size:10px;color:var(--gold);text-align:center;letter-spacing:.22em;text-transform:uppercase;margin-top:5px;margin-bottom:28px}
+    .divider{border:none;border-top:1px solid var(--bd2);margin:0 0 20px}
+    .cita{font-family:'Georgia',serif;font-style:italic;font-size:13px;color:var(--tx2);text-align:center;line-height:1.75;margin-bottom:26px}
+    .btn-gold{width:100%;padding:15px;background:linear-gradient(145deg,var(--gold3),var(--gold));
+      border:none;border-radius:9px;color:#08060A;font-size:12.5px;font-weight:700;
+      letter-spacing:.18em;text-transform:uppercase;transition:all .35s;
+      box-shadow:0 5px 26px rgba(201,168,76,.3);display:inline-flex;align-items:center;justify-content:center;gap:8px}
+    .btn-gold:hover:not(:disabled){box-shadow:0 8px 36px rgba(201,168,76,.44);transform:translateY(-2px);background:linear-gradient(145deg,var(--gold),var(--gold2))}
+    .btn-gold:active{transform:translateY(0)}
+    .btn-gold:disabled{opacity:.5;cursor:not-allowed}
+    .card-footer{text-align:center;margin-top:20px;font-size:10px;color:var(--tx3);letter-spacing:.04em}
+
+    .cfg-hdg{font-size:16px;font-family:'Playfair Display',serif;color:var(--tx);text-align:center;margin-bottom:4px}
+    .cfg-sub{font-size:12px;color:var(--tx2);text-align:center;line-height:1.6;margin-bottom:18px}
+    .cfg-steps{background:var(--s2);border-radius:8px;padding:13px 15px;margin-bottom:16px;
+      font-size:11.5px;color:var(--tx2);line-height:1.85}
+    .cfg-steps b{color:var(--gold)}
+    .f-grp{display:flex;flex-direction:column;margin-bottom:12px;position:relative}
+    .f-lbl{font-size:10px;color:var(--tx2);text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:5px}
+    .msg-err{background:rgba(201,76,76,.11);border:1px solid rgba(201,76,76,.33);border-radius:7px;
+      padding:10px 14px;font-size:12px;color:#E07070;margin-bottom:12px;line-height:1.55}
+
+    .loading-full{height:100vh;display:flex;flex-direction:column;align-items:center;
+      justify-content:center;gap:18px;background:var(--bg)}
+    .spin-ring{width:32px;height:32px;border:2.5px solid var(--bd);border-top-color:var(--gold);
+      border-radius:50%;animation:spin .8s linear infinite}
+
+    /* LAYOUT DINÁMICO */
+    .layout{display:grid;grid-template-columns:260px 1fr 300px;height:100vh;overflow:hidden}
+
+    /* SIDEBAR */
     .sidebar{background:var(--s1);border-right:1px solid var(--bd2);display:flex;flex-direction:column;overflow:hidden}
-    .sb-hd{padding:24px 18px;border-bottom:1px solid var(--bd2);display:flex;align-items:center;gap:12px}
-    .l-sello{width:42px;height:42px;border:1.5px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:10px;color:var(--gold);text-align:center;line-height:1.2;flex-shrink:0}
-    .l-nm{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;color:var(--tx)}
-    .l-sb{font-size:9px;color:var(--gold);letter-spacing:.15em;text-transform:uppercase}
-    .sb-menu{flex:1;padding:20px 12px;overflow-y:auto;display:flex;flex-direction:column;gap:4px}
-    .menu-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:10px;cursor:pointer;color:var(--tx2);font-size:14px;font-weight:500;transition:all .2s}
-    .menu-item:hover{background:var(--s2);color:var(--tx)}
-    .menu-item.on{background:var(--s3);color:var(--gold);box-shadow:inset -4px 0 0 var(--gold)}
-    .menu-ico{font-size:16px;width:20px;text-align:center}
+    .sb-hd{padding:18px 14px 15px;border-bottom:1px solid var(--bd2)}
+    .sb-logo{display:flex;align-items:center;gap:9px}
+    .l-sello{width:36px;height:36px;border:1.5px solid var(--gold);border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      font-family:'Playfair Display',serif;font-size:8px;color:var(--gold);
+      flex-shrink:0;text-align:center;line-height:1.25;padding:4px}
+    .l-nm{font-family:'Playfair Display',serif;font-size:12px;font-weight:700;color:var(--tx);line-height:1.3}
+    .l-sb{font-size:9px;color:var(--gold);letter-spacing:.16em;text-transform:uppercase;margin-top:1px}
+    .sb-body{flex:1;overflow-y:auto;padding:10px 10px 0}
+    .sb-sec{font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.14em;padding:8px 6px 5px}
+    .stat-row{display:flex;align-items:center;justify-content:space-between;padding:8px 11px;background:var(--s2);border-radius:7px;margin-bottom:4px}
+    .stat-lbl{font-size:11px;color:var(--tx2)}
+    .stat-val{font-family:'Playfair Display',serif;font-size:20px;color:var(--tx);line-height:1}
     
-    /* Área Principal */
-    .main-wrapper{display:flex;flex-direction:column;overflow:hidden;background:var(--bg)}
-    .topbar{background:var(--s1);border-bottom:1px solid var(--bd2);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;gap:20px}
-    .mod-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--tx)}
-    .search-box{position:relative;width:320px}
-    .search-box input{padding-left:36px;height:38px;font-size:13px}
-    .search-box::before{content:"🔍";position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:13px;opacity:0.6}
-    .content-pane{flex:1;overflow-y:auto;padding:24px}
-
-    /* Botones Premium */
-    .btn-gold{padding:10px 20px;background:linear-gradient(135deg,var(--s4),var(--gold));border:none;border-radius:8px;color:#0B0E14;font-size:13px;font-weight:600;cursor:pointer;letter-spacing:0.02em;transition:all .2s;display:inline-flex;align-items:center;gap:8px}
-    .btn-gold:hover{transform:translateY(-1px);box-shadow:0 4px 15px rgba(201,168,76,0.25)}
-    .btn-secondary{padding:10px 16px;background:var(--s2);border:1px solid var(--bd);border-radius:8px;color:var(--tx2);font-size:13px;cursor:pointer;transition:all .2s}
-    .btn-secondary:hover{border-color:var(--gold);color:var(--tx)}
-    .btn-danger{padding:10px 16px;background:transparent;border:1px solid var(--red);border-radius:8px;color:var(--red);font-size:13px;cursor:pointer;transition:all .2s}
-    .btn-danger:hover{background:rgba(239,68,68,0.1)}
-
-    /* Grid de Dashboard Moderno */
-    .db-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
-    .db-card{background:var(--s1);border:1px solid var(--bd2);border-radius:14px;padding:20px;display:flex;align-items:center;gap:16px;box-shadow:var(--shadow-sm)}
-    .db-icon{width:46px;height:46px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px}
-    .db-info{display:flex;flex-direction:column}
-    .db-num{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;line-height:1.2}
-    .db-lbl{font-size:12px;color:var(--tx2)}
+    .abg-row{display:flex;align-items:center;gap:9px;padding:6px 7px;border-radius:7px;cursor:pointer;transition:background .14s}
+    .abg-row:hover{background:var(--s2)}
+    .abg-row.on{background:var(--s3)}
+    .av{width:29px;height:29px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#000;flex-shrink:0}
+    .a-nm{font-size:12px;color:var(--tx);font-weight:500;line-height:1.25}
+    .a-rl{font-size:10px;color:var(--tx2)}
     
-    .sec-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
-    .panel-block{background:var(--s1);border:1px solid var(--bd2);border-radius:16px;padding:20px}
-    .panel-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--gold);border-bottom:1px solid var(--bd2);padding-bottom:12px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+    .sb-ft{padding:10px 12px;border-top:1px solid var(--bd2);display:flex;flex-direction:column;gap:6px}
+    .sb-date{font-size:9.5px;color:var(--tx3);text-align:center}
+    .sync-row{display:flex;align-items:center;justify-content:center;gap:6px}
+    .sync-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+    .sync-lbl{font-size:9.5px;letter-spacing:.05em}
+    .cfg-btn{width:100%;padding:8px;background:var(--s2);border:1px solid var(--bd2);border-radius:6px;
+      color:var(--tx2);font-size:11px;cursor:pointer;transition:all .2s;
+      display:flex;align-items:center;justify-content:center;gap:6px}
+    .cfg-btn:hover{border-color:var(--gold3);color:var(--gold)}
+    .logout-btn{background:rgba(201,76,76,0.1);border:1px solid rgba(201,76,76,0.25);color:#E07070}
+    .logout-btn:hover{background:rgba(201,76,76,0.2);color:#FF8888;border-color:rgba(201,76,76,0.4)}
 
-    /* Listas y Tablas Corporativas */
-    .data-table-wrapper{background:var(--s1);border:1px solid var(--bd2);border-radius:14px;overflow:hidden}
-    .data-table{width:100%;border-collapse:collapse;text-align:left;font-size:14px}
-    .data-table th{background:rgba(0,0,0,0.15);padding:14px 18px;color:var(--tx2);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:0.05em;border-bottom:1px solid var(--bd2)}
-    .data-table td{padding:14px 18px;border-bottom:1px solid var(--bd2);color:var(--tx);vertical-align:middle}
-    .data-table tr:hover td{background:rgba(255,255,255,0.01)}
-    .badge{padding:4px 8px;border-radius:6px;font-size:11px;font-weight:600}
-    .badge.active{background:rgba(16,185,129,0.1);color:var(--green)}
-    .badge.pending{background:rgba(245,158,11,0.1);color:#F59E0B}
+    /* MAIN CALENDAR */
+    .main{display:flex;flex-direction:column;overflow:hidden;background:var(--bg)}
+    .main-hd{background:var(--s1);border-bottom:1px solid var(--bd2);padding:12px 16px;
+      display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0}
+    .nav-btn{width:30px;height:30px;border:1px solid var(--bd2);background:transparent;color:var(--tx2);
+      border-radius:6px;font-size:17px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+    .nav-btn:hover{border-color:var(--gold);color:var(--gold)}
+    .mes-tit{font-family:'Playfair Display',serif;font-size:18px;color:var(--tx)}
+    .anio-lb{font-size:13px;color:var(--tx2);margin-left:5px}
+    .hoy-btn{background:none;border:1px solid var(--bd2);border-radius:5px;color:var(--tx2);
+      font-size:10px;padding:4px 9px;letter-spacing:.06em;transition:all .2s}
+    .hoy-btn:hover{border-color:var(--gold3);color:var(--gold)}
+    .vtabs{display:flex;gap:2px;background:var(--s2);padding:3px;border-radius:8px}
+    .vtab{padding:5px 12px;border:none;background:transparent;color:var(--tx2);font-size:11px;
+      font-weight:500;border-radius:6px;letter-spacing:.04em;transition:all .15s}
+    .vtab.on{background:var(--s4);color:var(--gold)}
+    .vtab:hover:not(.on){color:var(--tx)}
+    
+    .hd-actions{display:flex;align-items:center;gap:8px}
+    .add-btn{padding:8px 14px;background:linear-gradient(135deg,var(--gold3),var(--gold));border:none;
+      border-radius:7px;color:#08060A;font-size:12px;font-weight:700;letter-spacing:.05em;
+      transition:all .2s;white-space:nowrap;display:inline-flex;align-items:center;gap:4px}
+    .add-btn:hover{box-shadow:0 4px 20px rgba(201,168,76,.4);transform:translateY(-1px)}
+    .pdf-btn{background:var(--s2);border:1px solid var(--bd);color:var(--tx);padding:8px 12px;font-size:12px;border-radius:7px;font-weight:500}
+    .pdf-btn:hover{border-color:var(--gold);color:var(--gold)}
 
-    /* Vistas de Calendario Modificado */
-    .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--bd2);border-radius:12px;overflow:hidden}
-    .cal-hdr{background:var(--s2);text-align:center;padding:12px;font-size:11px;font-weight:600;color:var(--tx2);text-transform:uppercase}
-    .cal-cell{background:var(--s1);min-height:90px;padding:6px;cursor:pointer;transition:all .15s}
+    .cal-scroll{flex:1;overflow-y:auto;padding:12px}
+
+    /* VISTAS GRID */
+    .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--bd2);
+      border:1px solid var(--bd2);border-radius:10px;overflow:hidden}
+    .cal-hdr{background:var(--s1);text-align:center;padding:8px 4px;font-size:10px;
+      font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--tx2)}
+    .cal-cell{background:var(--s1);min-height:102px;padding:6px;cursor:pointer;
+      transition:background .12s;position:relative;display:flex;flex-direction:column}
     .cal-cell:hover{background:var(--s2)}
-    .cal-cell.hoy{box-shadow:inset 0 0 0 1px var(--gold)}
-    .cal-num{font-size:12px;font-weight:600;margin-bottom:4px;color:var(--tx2)}
-    .cal-cell.hoy .cal-num{color:var(--gold)}
-    .cal-ev-chip{padding:2px 6px;border-radius:4px;font-size:10px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .cal-cell.otra{background:var(--bg);opacity:0.4}
+    .cal-cell.hoy{background:var(--s2)}
+    .cal-cell.hoy::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold)}
+    .dn{font-size:12.5px;font-weight:500;color:var(--tx2);width:24px;height:24px;
+      display:flex;align-items:center;justify-content:center;border-radius:50%;margin-bottom:4px}
+    .cal-cell.hoy .dn{background:var(--gold);color:#08060A;font-weight:700}
+    
+    .chip{padding:2px 5px;border-radius:4px;font-size:10px;color:#fff;margin-bottom:2px;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;transition:transform 0.1s, opacity .14s;font-weight:500}
+    .chip:hover{opacity:.9;transform:scale(1.02)}
 
-    /* Modales Profesionales */
-    .modal-ov{position:fixed;inset:0;background:rgba(4,6,10,0.8);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;z-index:200;padding:16px}
-    .modal-box{background:var(--s1);border:1px solid var(--bd);border-radius:18px;width:min(600px,100%);max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg)}
-    .modal-hd{padding:18px 24px;border-bottom:1px solid var(--bd2);display:flex;align-items:center;justify-content:space-between}
-    .modal-bd{padding:24px;display:flex;flex-direction:column;gap:16px}
-    .modal-ft{padding:16px 24px;border-top:1px solid var(--bd2);display:flex;gap:10px;justify-content:flex-end;background:rgba(0,0,0,0.05)}
-    .f-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    /* VISTA SEMANA */
+    .wk-wrap{overflow-y:auto;max-height:calc(100vh - 120px)}
+    .wk-hdr{display:grid;grid-template-columns:50px repeat(7,1fr);border-bottom:1px solid var(--bd2);
+      position:sticky;top:0;background:var(--s1);z-index:5}
+    .wk-dhdr{padding:8px 4px;text-align:center;font-size:11px;color:var(--tx2)}
+    .wk-dhdr.hoy-col{color:var(--gold);font-weight:600}
+    .wk-body{display:grid;grid-template-columns:50px repeat(7,1fr)}
+    .wk-tlbl{height:54px;display:flex;align-items:flex-start;padding:4px 7px 0 0;
+      justify-content:flex-end;font-size:9px;color:var(--tx3)}
+    .wk-dcol{border-left:1px solid var(--bd2);position:relative}
+    .wk-hcel{height:54px;border-bottom:1px solid var(--bd2);cursor:pointer;transition:background .1s}
+    .wk-hcel:hover{background:rgba(201,168,76,.03)}
 
-    /* Toast System */
-    .toast{position:fixed;bottom:24px;right:24px;background:var(--s3);border-left:4px solid var(--gold);padding:14px 20px;border-radius:8px;font-size:13.5px;box-shadow:var(--shadow-lg);z-index:350}
+    /* VISTA DIA */
+    .dia-hdr{padding:12px 14px;border-bottom:1px solid var(--bd2);
+      font-family:'Playfair Display',serif;font-size:15px;color:var(--tx)}
 
-    /* Responsive */
-    @media(max-width:900px){
-      .layout{grid-template-columns:1fr}
-      .sidebar{display:none} /* Simplificación móvil */
-      .db-grid{grid-template-columns:1fr 1fr}
-      .sec-grid{grid-template-columns:1fr}
-      .topbar{flex-direction:column;align-items:flex-start}
-      .search-box{width:100%}
+    /* VISTA LISTA */
+    .list-view{display:flex;flex-direction:column;gap:10px}
+    .list-gt{font-family:'Playfair Display',serif;font-size:13px;color:var(--tx2);
+      padding:6px 0 4px;border-bottom:1px solid var(--bd2);margin-bottom:4px}
+    .list-card{background:var(--s1);border:1px solid var(--bd2);border-radius:9px;
+      padding:11px 13px;cursor:pointer;transition:all .2s;
+      display:flex;align-items:flex-start;gap:11px}
+    .list-card:hover{background:var(--s2);border-color:var(--bd);transform:translateX(2px)}
+    .list-bar{width:4px;border-radius:2px;min-height:36px;align-self:stretch;flex-shrink:0}
+    .list-tit{font-size:13px;font-weight:500;color:var(--tx);margin-bottom:3px}
+    .list-meta{font-size:11px;color:var(--tx2);display:flex;gap:9px;flex-wrap:wrap}
+
+    /* PANEL DERECHO */
+    .rpanel{background:var(--s1);border-left:1px solid var(--bd2);display:flex;flex-direction:column;overflow:hidden}
+    .rp-tabs{display:flex;border-bottom:1px solid var(--bd2)}
+    .rptab{flex:1;padding:12px 6px;border:none;background:transparent;color:var(--tx2);
+      font-size:10.5px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;
+      border-bottom:2px solid transparent;transition:all .2s}
+    .rptab.on{color:var(--gold);border-bottom-color:var(--gold)}
+    .rp-body{flex:1;overflow-y:auto;padding:13px}
+    
+    .up-item{padding:10px 11px;border:1px solid var(--bd2);border-radius:8px;margin-bottom:6px;
+      cursor:pointer;transition:all .2s;position:relative}
+    .up-item:hover{background:var(--s2)}
+    .up-dot{position:absolute;top:10px;right:10px;width:7px;height:7px;border-radius:50%}
+    .up-tit{font-size:12.5px;font-weight:500;color:var(--tx);margin-bottom:2px;
+      padding-right:18px;line-height:1.35}
+    .up-fecha{font-size:10.5px;color:var(--tx2)}
+
+    /* MODALES MÁS ELEGANTES Y AMPLIADOS */
+    .modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.82);display:flex;
+      align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(6px);padding:12px}
+    .modal-box{background:var(--s1);border:1px solid var(--bd);border-radius:14px;
+      width:min(580px,100%);max-height:90vh;overflow-y:auto;
+      box-shadow:0 40px 80px rgba(0,0,0,.8);animation:fadeIn .22s cubic-bezier(0.16, 1, 0.3, 1)}
+    .modal-hd{padding:16px 20px 13px;border-bottom:1px solid var(--bd2);
+      display:flex;align-items:center;justify-content:space-between}
+    .modal-tit{font-family:'Playfair Display',serif;font-size:17px;color:var(--tx)}
+    .modal-x{background:none;border:none;color:var(--tx2);font-size:18px;padding:4px;line-height:1}
+    .modal-x:hover{color:var(--tx)}
+    .modal-bd{padding:18px 20px;display:flex;flex-direction:column;gap:14px}
+    .modal-ft{padding:12px 20px 16px;border-top:1px solid var(--bd2);
+      display:flex;gap:8px;justify-content:flex-end}
+    .f-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .m-lbl{font-size:10.5px;color:var(--tx2);text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:5px}
+    
+    .chk-row{display:flex;align-items:center;gap:8px;padding:7px 9px;border:1px solid var(--bd2);
+      border-radius:6px;cursor:pointer;transition:all .14s;margin-bottom:3px}
+    .chk-row.on{background:var(--s2);border-color:var(--gold3)}
+
+    /* SECCIÓN DE ADJUNTOS */
+    .doc-section{background:var(--s2);border-radius:8px;padding:12px;border:1px dashed var(--bd2)}
+    .doc-list{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+    .doc-item{display:flex;align-items:center;justify-content:space-between;background:var(--s3);
+      padding:6px 10px;border-radius:6px;font-size:12px;border:1px solid var(--bd2)}
+    .doc-actions{display:flex;gap:8px}
+    .doc-btn{background:none;color:var(--gold);font-size:11px;font-weight:500}
+    .doc-btn.del{color:var(--red)}
+    .file-input-wrapper{position:relative;overflow:hidden;display:inline-block;margin-top:6px}
+    .file-input-wrapper input[type=file]{font-size:100px;position:absolute;left:0;top:0;opacity:0;cursor:pointer}
+    .file-input-btn{background:var(--s4);border:1px solid var(--bd);padding:6px 12px;border-radius:6px;font-size:11.5px;color:var(--tx2)}
+
+    /* TOASTS */
+    .toast{position:fixed;bottom:calc(20px + var(--safe-b));right:20px;
+      background:var(--s3);border:1px solid var(--gold3);border-radius:9px;
+      padding:12px 20px;font-size:13px;color:var(--tx);z-index:300;
+      box-shadow:0 12px 34px rgba(0,0,0,.5);animation:slideUp .25s ease;pointer-events:none;max-width:320px}
+    .toast.err{border-color:#993333;background:#180D0D;color:#FFAAAA}
+    .toast.ok{border-color:var(--green);background:#0A1810;color:#AAFFAA}
+
+    /* SECCIÓN EXPORTACIÓN IMPRESIÓN PDF OCULTA EN PANTALLA */
+    #pdf-render-area{display:none}
+
+    /* RESPONSIVE OPTIMIZATIONS TÁCTILES */
+    @media(max-width:992px){
+      .layout{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+      .sidebar{display:none} /* Ocultado dinámico para optimizar área táctil móvil */
+      .rpanel{display:none}
     }
   </style>
 </head>
 <body>
 
+<div id="splash">
+  <div class="sp-sello">M.S.<br>&amp;A.</div>
+  <div class="sp-nm">Mariana Sánchez &amp; Asociados</div>
+  <div class="sp-sb">Estudio Jurídico</div>
+  <div class="sp-spin"></div>
+</div>
+
 <div id="root"></div>
 
+<div id="pdf-render-area"></div>
+
 <script type="text/babel">
-const { useState, useEffect } = React;
+const { useState, useEffect, useRef, useCallback } = React;
+const { createClient } = window.supabase;
 
-// Configuración por defecto de Supabase (conecta automáticamente si las variables de entorno están guardadas)
-const SB_URL = localStorage.getItem("sb_url") || "";
-const SB_KEY = localStorage.getItem("sb_key") || "";
-let supabase = null;
-if (SB_URL && SB_KEY) {
-  supabase = window.supabase.createClient(SB_URL, SB_KEY);
-}
+const FIRMA = { nombre:"MARIANA SÁNCHEZ & ASOCIADOS", sub:"Estudio Jurídico Premium" };
 
-function App() {
-  // Estados de Navegación y Datos del Estudio Jurídico
-  const [modulo, setModulo] = useState("dashboard");
-  const [busqueda, setBusqueda] = useState("");
-  const [clientes, setClientes] = useState([]);
-  const [expedientes, setExpedientes] = useState([]);
-  const [eventos, setEventos] = useState([]);
-  const [toast, setToast] = useState(null);
-  
-  // Modales de Gestión
-  const [modalCliente, setModalCliente] = useState(null); // cliente a editar o {} para nuevo
-  const [modalExpediente, setModalExpediente] = useState(null);
-  const [modalEvento, setModalEvento] = useState(null);
+const ABOGADOS = [
+  { id:"p",  nombre:"Dra. Mariana Sánchez", rol:"Socia Principal",   color:"#C9A84C", ini:"MS", principal:true  },
+  { id:"a1", nombre:"Dr. Carlos Mendoza",   rol:"Abogado Asociado",  color:"#5491C8", ini:"CM", principal:false },
+  { id:"a2", nombre:"Dra. Ana Rivas",       rol:"Abogada Asociada",  color:"#4DAAA0", ini:"AR", principal:false },
+  { id:"a3", nombre:"Dr. Pablo Torres",     rol:"Abogado Asociado",  color:"#8E6DC4", ini:"PT", principal:false },
+  { id:"a4", nombre:"Dra. Laura Vega",      rol:"Abogada Asociada",  color:"#C46D6D", ini:"LV", principal:false },
+];
 
-  // Filtro de Vista de Calendario Interno
-  const [vistaCal, setVistaCal] = useState("mes");
-  const [fechaFiltro, setFechaFiltro] = useState(new Date());
+const TIPOS = [
+  { id:"audiencia",   label:"Audiencia",   icon:"⚖️" },
+  { id:"reunion",     label:"Reunión",     icon:"🤝" },
+  { id:"vencimiento", label:"Vencimiento", icon:"⏰" },
+  { id:"consulta",    label:"Consulta",    icon:"💼" },
+  { id:"peritaje",    label:"Peritaje",    icon:"🔍" },
+  { id:"otro",        label:"Otro",        icon:"📋" },
+];
 
-  const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(null), 3000); };
+const AL_OPTS = [
+  { id:"72h", label:"3 días antes",   h:72  },
+  { id:"48h", label:"2 días antes",   h:48  },
+  { id:"24h", label:"1 día antes",    h:24  },
+  { id:"12h", label:"12 horas antes", h:12  },
+  { id:"1h",  label:"1 hora antes",   h:1   },
+];
 
-  // Carga inicial y fallback local seguro si Supabase no está configurado
-  useEffect(() => {
-    fetchData();
-  }, []);
+const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+const DIAS = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
 
-  const fetchData = async () => {
-    if (supabase) {
-      try {
-        const { data: cl } = await supabase.from("clientes").select("*");
-        const { data: ex } = await supabase.from("expedientes").select("*");
-        const { data: ev } = await supabase.from("eventos").select("*");
-        if (cl) setClientes(cl);
-        if (ex) setExpedientes(ex);
-        if (ev) setEventos(ev.map(e => ({
-          id: e.id, title: e.title, type: e.type, date: e.date,
-          startTime: e.start_time, endTime: e.end_time, court: e.court, expNum: e.exp_num, notes: e.notes
-        })));
-      } catch (e) {
-        cargarMockData();
+const genId = () => `e_${Date.now()}_${Math.random().toString(36).slice(2,6)}`;
+const hoyStr = () => new Date().toISOString().split("T")[0];
+
+/* COMPONENTE DE CONFIGURACIÓN SUPABASE */
+function PantallaConfig({ onConectado }) {
+  const [url, setUrl] = useState(localStorage.getItem("sb_url")||"");
+  const [key, setKey] = useState(localStorage.getItem("sb_key")||"");
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState("");
+
+  const conectar = async () => {
+    setErr("");
+    if (!url.trim()||!key.trim()) { setErr("Complete ambos parámetros corporativos."); return; }
+    setBusy(true);
+    try {
+      const sb = createClient(url.trim(), key.trim());
+      // Validar conexión básica e infraestructura de tabla eventos
+      const { error } = await sb.from("eventos").select("id").limit(1);
+      if (error && error.code !== "PGRST116") {
+        throw new Error(error.message || "Fallo estructural en Supabase.");
       }
-    } else {
-      cargarMockData();
+      localStorage.setItem("sb_url", url.trim());
+      localStorage.setItem("sb_key", key.trim());
+      onConectado(sb);
+    } catch(e) {
+      setErr(e.message);
+    } finally {
+      setBusy(false);
     }
   };
-
-  const cargarMockData = () => {
-    // Datos semilla para asegurar funcionamiento inmediato y demostración profesional
-    const mockClientes = [
-      { id: "c1", nombre: "Carlos Alberto Pereyra", dni: "24.567.123", telefono: "2604556677", email: "carlos.p@gmail.com", direccion: "Av. Mitre 455, San Rafael", estado: "Activo", observaciones: "Cliente corporativo recurrente." },
-      { id: "c2", nombre: "Estudio Inmobiliario Sur", dni: "30-745589-2", telefono: "2604112233", email: "legal@inmobiliariasur.com", direccion: "Chile 120, Mendoza", estado: "Activo", observaciones: "Causas de desalojo en trámite." }
-    ];
-    const mockExpedientes = [
-      { id: "ex1", num_expediente: "EXP-1045/2025", juzgado: "Juzgado Civil N°3", fuero: "Civil y Comercial", caratula: "Pereyra Carlos c/ Seguros S.A. s/ Daños", estado_procesal: "Etapa Probatoria", cliente_id: "c1", seguimiento: "Presentado escrito de pericia contable.", documentos: "Demanda_Final.pdf" },
-      { id: "ex2", num_expediente: "EXP-2089/2026", juzgado: "Cámara Laboral N°1", fuero: "Laboral", caratula: "Gomez Luis c/ Inmobiliaria Sur s/ Despido", estado_procesal: "Fijación de Audiencia", cliente_id: "c2", seguimiento: "Trámite de conciliación previa obligatorio fracasado.", documentos: "Contestacion_Demanda.docx" }
-    ];
-    const mockEventos = [
-      { id: "ev1", title: "Audiencia Testimonial - Caso Pereyra", type: "audiencia", date: new Date().toISOString().split("T")[0], startTime: "09:00", endTime: "10:30", court: "Juzgado Civil N°3", expNum: "EXP-1045/2025", notes: "Llevar el pliego de preguntas físicas." },
-      { id: "ev2", title: "Vencimiento Contestación de Traslado", type: "vencimiento", date: new Date(Date.now() + 172800000).toISOString().split("T")[0], startTime: "12:00", endTime: "13:00", court: "Cámara Laboral N°1", expNum: "EXP-2089/2026", notes: "Firma digital del procurador requerida." }
-    ];
-    setClientes(mockClientes);
-    setExpedientes(mockExpedientes);
-    setEventos(mockEventos);
-  };
-
-  // Operaciones de Escritura / CRUD con Sincronización Optimizada
-  const saveCliente = async (obj) => {
-    const nuevo = { ...obj, id: obj.id || "cl_" + Date.now() };
-    setClientes(prev => prev.find(c=>c.id===nuevo.id) ? prev.map(c=>c.id===nuevo.id?nuevo:c) : [...prev, nuevo]);
-    setModalCliente(null);
-    showToast("Cliente guardado en el ecosistema jurídico.");
-    if(supabase) await supabase.from("clientes").upsert(nuevo);
-  };
-
-  const deleteCliente = async (id) => {
-    setClientes(prev => prev.filter(c=>c.id!==id));
-    setModalCliente(null);
-    showToast("Cliente removido.");
-    if(supabase) await supabase.from("clientes").delete().eq("id", id);
-  };
-
-  const saveExpediente = async (obj) => {
-    const nuevo = { ...obj, id: obj.id || "ex_" + Date.now() };
-    setExpedientes(prev => prev.find(e=>e.id===nuevo.id) ? prev.map(e=>e.id===nuevo.id?nuevo:e) : [...prev, nuevo]);
-    setModalExpediente(null);
-    showToast("Expediente procesal actualizado.");
-    if(supabase) await supabase.from("expedientes").upsert(nuevo);
-  };
-
-  const deleteExpediente = async (id) => {
-    setExpedientes(prev => prev.filter(e=>e.id!==id));
-    setModalExpediente(null);
-    showToast("Expediente archivado/removido.");
-    if(supabase) await supabase.from("expedientes").delete().eq("id", id);
-  };
-
-  const saveEvento = async (obj) => {
-    const nuevo = { ...obj, id: obj.id || "ev_" + Date.now() };
-    setEventos(prev => prev.find(e=>e.id===nuevo.id) ? prev.map(e=>e.id===nuevo.id?nuevo:e) : [...prev, nuevo]);
-    setModalEvento(null);
-    showToast("Evento comprometido en la agenda general.");
-    if(supabase) {
-      await supabase.from("eventos").upsert({
-        id: nuevo.id, title: nuevo.title, type: nuevo.type, date: nuevo.date,
-        start_time: nuevo.startTime, end_time: nuevo.endTime, court: nuevo.court, exp_num: nuevo.expNum, notes: nuevo.notes
-      });
-    }
-  };
-
-  const deleteEvento = async (id) => {
-    setEventos(prev => prev.filter(e=>e.id!==id));
-    setModalEvento(null);
-    showToast("Evento cancelado.");
-    if(supabase) await supabase.from("eventos").delete().eq("id", id);
-  };
-
-  // Buscador Global Integrado
-  const query = busqueda.toLowerCase().trim();
-  const clientesFiltrados = clientes.filter(c => c.nombre.toLowerCase().includes(query) || c.dni.includes(query));
-  const expedientesFiltrados = expedientes.filter(e => e.caratula.toLowerCase().includes(query) || e.num_expediente.toLowerCase().includes(query) || e.juzgado.toLowerCase().includes(query));
-  const eventosFiltrados = eventos.filter(ev => ev.title.toLowerCase().includes(query) || (ev.expNum && ev.expNum.toLowerCase().includes(query)));
-
-  // Alertas Automatizadas Críticas
-  const hoyStr = new Date().toISOString().split("T")[0];
-  const alertasCriticas = eventos.filter(e => e.date === hoyStr || e.type === "vencimiento");
 
   return (
-    <div className="layout">
-      
-      {/* 1. NAVEGACIÓN LATERAL EXCLUSIVA */}
-      <div className="sidebar">
-        <div className="sb-hd">
-          <div className="l-sello">M.S.<br/>&amp;A.</div>
-          <div>
-            <div className="l-nm">Mariana Sánchez</div>
-            <div className="l-sb">Suite Corporativa</div>
-          </div>
+    <div className="pant-bg">
+      <div className="card">
+        <div className="sello">M.S.<br/>&amp;A.</div>
+        <div className="firma">MARIANA SÁNCHEZ<br/>&amp; ASOCIADOS</div>
+        <div className="firma-sub">Estudio Jurídico</div>
+        <hr className="divider"/>
+        <div className="cfg-hdg">Infraestructura Supabase</div>
+        <div className="cfg-sub">Vincule el clúster de base de datos seguro para sincronizar expedientes y audiencias legales.</div>
+        {err && <div className="msg-err">{err}</div>}
+        <div className="f-grp">
+          <label className="f-lbl">URL de Supabase</label>
+          <input value={url} onChange={e=>setUrl(e.target.value)} placeholder="https://your-id.supabase.co" disabled={busy}/>
         </div>
-        <div className="sb-menu">
-          <div className={`menu-item ${modulo==="dashboard"?"on":""}`} onClick={()=>setModulo("dashboard")}>
-            <span className="menu-ico">📊</span>Dashboard Central
-          </div>
-          <div className={`menu-item ${modulo==="clientes"?"on":""}`} onClick={()=>setModulo("clientes")}>
-            <span className="menu-ico">👤</span>Fichero de Clientes
-          </div>
-          <div className={`menu-item ${modulo==="expedientes"?"on":""}`} onClick={()=>setModulo("expedientes")}>
-            <span className="menu-ico">📂</span>Expedientes Jurídicos
-          </div>
-          <div className={`menu-item ${modulo==="agenda"?"on":""}`} onClick={()=>setModulo("agenda")}>
-            <span className="menu-ico">📅</span>Agenda Avanzada
-          </div>
-          <div className={`menu-item ${modulo==="alertas"?"on":""}`} onClick={()=>setModulo("alertas")}>
-            <span className="menu-ico">⚠️</span>Centro de Alertas ({alertasCriticas.length})
-          </div>
+        <div className="f-grp" style={{marginBottom:22}}>
+          <label className="f-lbl">Anon Public Key</label>
+          <input type="password" value={key} onChange={e=>setKey(e.target.value)} placeholder="eyJhbGciOiJIUzI1NiIsIn..." disabled={busy}/>
         </div>
+        <button className="btn-gold" onClick={conectar} disabled={busy}>
+          {busy ? <div className="spin-ring" style={{width:16,height:16}}/> : "ESTABLECER CONEXIÓN"}
+        </button>
       </div>
-
-      {/* CONTENEDOR DE CONTENIDO PRINCIPAL */}
-      <div className="main-wrapper">
-        <div className="topbar">
-          <div className="mod-title">
-            {modulo === "dashboard" && "Panel de Control de Operaciones"}
-            {modulo === "clientes" && "Administración de Clientes"}
-            {modulo === "expedientes" && "Registro General de Expedientes"}
-            {modulo === "agenda" && "Cronograma & Agenda Judicial Directa"}
-            {modulo === "alertas" && "Monitoreo Preventivo de Plazos"}
-          </div>
-          <div className="search-box">
-            <input 
-              type="text" 
-              placeholder="Buscador global (clientes, expedientes, juzgados...)" 
-              value={busqueda}
-              onChange={(e)=>setBusqueda(e.target.value)}
-            />
-          </div>
-        </div>
-
-        <div className="content-pane">
-          {query !== "" ? (
-            /* VISTA DE BÚSQUEDA GLOBAL AUTOMÁTICA EN TIEMPO REAL */
-            <div>
-              <h3 style={{fontFamily:"'Playfair Display',serif", marginBottom:16}}>Resultados del Escaneo Global para: "{busqueda}"</h3>
-              <div className="panel-block" style={{marginBottom:20}}>
-                <div className="panel-title">👥 Clientes Encontrados ({clientesFiltrados.length})</div>
-                {clientesFiltrados.map(c => <div key={c.id} style={{padding:"8px 0", borderBottom:"1px solid var(--bd2)"}}><b>{c.nombre}</b> - DNI/CUIT: {c.dni} - 📞 {c.telefono}</div>)}
-              </div>
-              <div className="panel-block" style={{marginBottom:20}}>
-                <div className="panel-title">📂 Expedientes Encontrados ({expedientesFiltrados.length})</div>
-                {expedientesFiltrados.map(e => <div key={e.id} style={{padding:"8px 0", borderBottom:"1px solid var(--bd2)"}}><b>{e.num_expediente}</b>: {e.caratula} [<i>{e.juzgado}</i>]</div>)}
-              </div>
-              <div className="panel-block">
-                <div className="panel-title">📅 Fechas y Compromisos ({eventosFiltrados.length})</div>
-                {eventosFiltrados.map(ev => <div key={ev.id} style={{padding:"8px 0", borderBottom:"1px solid var(--bd2)"}}><b>{ev.date} ({ev.startTime}hs)</b>: {ev.title}</div>)}
-              </div>
-            </div>
-          ) : (
-            /* CONMUTACIÓN MODULAR DE VISTAS */
-            <>
-              {/* MÓDULO: DASHBOARD */}
-              {modulo === "dashboard" && (
-                <div>
-                  <div className="db-grid">
-                    <div className="db-card">
-                      <div className="db-icon" style={{background:"rgba(201,168,76,0.1)", color:"var(--gold)"}}>👥</div>
-                      <div className="db-info"><span className="db-num">{clientes.length}</span><span className="db-lbl">Clientes Protegidos</span></div>
-                    </div>
-                    <div className="db-card">
-                      <div className="db-icon" style={{background:"rgba(59,130,246,0.1)", color:"var(--celeste)"}}>📂</div>
-                      <div className="db-info"><span className="db-num">{expedientes.length}</span><span className="db-lbl">Expedientes Activos</span></div>
-                    </div>
-                    <div className="db-card">
-                      <div className="db-icon" style={{background:"rgba(16,185,129,0.1)", color:"var(--green)"}}>⚖️</div>
-                      <div className="db-info"><span className="db-num">{eventos.filter(e=>e.type==="audiencia").length}</span><span className="db-lbl">Audiencias Fijadas</span></div>
-                    </div>
-                    <div className="db-card">
-                      <div className="db-icon" style={{background:"rgba(239,68,68,0.1)", color:"var(--red)"}}>⚠️</div>
-                      <div className="db-info"><span className="db-num">{alertasCriticas.length}</span><span className="db-lbl">Alertas Inmediatas</span></div>
-                    </div>
-                  </div>
-
-                  <div className="sec-grid">
-                    <div className="panel-block">
-                      <div className="panel-title">📅 Compromisos y Vistas del Día ({eventos.filter(e=>e.date===hoyStr).length})</div>
-                      {eventos.filter(e=>e.date===hoyStr).length === 0 ? <p style={{color:"var(--tx3)", fontSize:13}}>Sin audiencias ni plazos procesales para el día de la fecha.</p> : 
-                        eventos.filter(e=>e.date===hoyStr).map(ev => (
-                          <div key={ev.id} style={{padding:12, background:"var(--s2)", borderRadius:8, marginBottom:8, borderLeft:"3px solid var(--gold)"}}>
-                            <b>{ev.startTime} hs</b> - {ev.title} <br/> <small style={{color: "var(--tx2)"}}>{ev.court} {ev.expNum}</small>
-                          </div>
-                        ))
-                      }
-                    </div>
-
-                    <div className="panel-block">
-                      <div className="panel-title">📂 Litigios Recientes Añadidos</div>
-                      {expedientes.slice(0,4).map(ex => (
-                        <div key={ex.id} style={{padding:"8px 0", borderBottom:"1px solid var(--bd2)", fontSize:13.5}}>
-                          <b>{ex.num_expediente}</b> - {ex.caratula} <br/>
-                          <span style={{color:"var(--gold)"}}>{ex.estado_procesal}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* MÓDULO: CLIENTES */}
-              {modulo === "clientes" && (
-                <div className="data-table-wrapper">
-                  <div style={{padding:16, display:"flex", justifyContent:"flex-end"}}>
-                    <button className="btn-gold" onClick={()=>setModalCliente({})}>+ AGREGAR CLIENTE</button>
-                  </div>
-                  <table className="data-table">
-                    <thead>
-                      <tr><th>Nombre / Razón Social</th><th>DNI / CUIT</th><th>Teléfono</th><th>Email</th><th>Estado</th><th>Acción</th></tr>
-                    </thead>
-                    <tbody>
-                      {clientes.map(c => (
-                        <tr key={c.id}>
-                          <td><b>{c.nombre}</b></td><td>{c.dni}</td><td>{c.telefono}</td><td>{c.email}</td>
-                          <td><span className="badge active">{c.estado}</span></td>
-                          <td><button className="btn-secondary" style={{padding:"4px 8px"}} onClick={()=>setModalCliente(c)}>Editar ficha</button></td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-
-              {/* MÓDULO: EXPEDIENTES */}
-              {modulo === "expedientes" && (
-                <div className="data-table-wrapper">
-                  <div style={{padding:16, display:"flex", justifyContent:"flex-end"}}>
-                    <button className="btn-gold" onClick={()=>setModalExpediente({})}>+ NUEVO EXPEDIENTE</button>
-                  </div>
-                  <table className="data-table">
-                    <thead>
-                      <tr><th>Número</th><th>Carátula Judicial</th><th>Juzgado / Fuero</th><th>Estado Procesal</th><th>Documentos</th><th>Acciones</th></tr>
-                    </thead>
-                    <tbody>
-                      {expedientes.map(e => (
-                        <tr key={e.id}>
-                          <td><code style={{color:"var(--gold)"}}>{e.num_expediente}</code></td>
-                          <td><b>{e.caratula}</b></td><td>{e.juzgado} <br/><small style={{color:"var(--tx2)"}}>{e.fuero}</small></td>
-                          <td><span className="badge pending">{e.estado_procesal}</span></td>
-                          <td><span style={{fontSize:12, color:"var(--celeste)"}}>📄 {e.documentos || "Ninguno"}</span></td>
-                          <td><button className="btn-secondary" style={{padding:"4px 8px"}} onClick={()=>setModalExpediente(e)}>Actualizar</button></td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-
-              {/* MÓDULO: AGENDA AVANZADA */}
-              {modulo === "agenda" && (
-                <div className="panel-block">
-                  <div style={{display:"flex", justifyContent:"between", alignItems:"center", marginBottom:20, gap:10}}>
-                    <div className="vtabs" style={{display:"flex", background:"var(--s2)", padding:4, borderRadius:8}}>
-                      <button className="btn-secondary" style={{border:"none", background:vistaCal==="mes"?"var(--s4)":""}} onClick={()=>setVistaCal("mes")}>Mes Completo</button>
-                      <button className="btn-secondary" style={{border:"none", background:vistaCal==="lista"?"var(--s4)":""}} onClick={()=>setVistaCal("lista")}>Línea Temporal de Hitos</button>
-                    </div>
-                    <button className="btn-gold" style={{marginLeft:"auto"}} onClick={()=>setModalEvento({})}>+ ASIGNAR COMPROMISO</button>
-                  </div>
-
-                  {vistaCal === "mes" ? (
-                    <div className="cal-grid">
-                      {DIAS.map(d => <div key={d} className="cal-hdr">{d}</div>)}
-                      {Array.from({length:35}, (_, i) => {
-                        const diaNum = (i + 1) - 3; // Estructura fija de simulación directa
-                        const dateStr = `2026-05-${String(diaNum).padStart(2,"0")}`;
-                        const evs = eventos.filter(e => e.date === dateStr);
-                        return (
-                          <div key={i} className={`cal-cell ${diaNum === 19?"hoy":""}`} onClick={()=>diaNum > 0 && abrirNuevoEventoConFecha(dateStr)}>
-                            <div className="cal-num">{diaNum > 0 ? diaNum : ""}</div>
-                            {diaNum > 0 && evs.map(ev => (
-                              <div key={ev.id} className="cal-ev-chip" style={{background: ev.type==="audiencia"?"var(--gold3)":"var(--s4)", color:"#fff"}} onClick={(e)=>{e.stopPropagation(); setModalEvento(ev);}}>
-                                {ev.startTime} {ev.title}
-                              </div>
-                            ))}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <div>
-                      {eventos.map(ev => (
-                        <div key={ev.id} className="db-card" style={{marginBottom:10, cursor:"pointer"}} onClick={()=>setModalEvento(ev)}>
-                          <div style={{fontWeight:700, color:"var(--gold)"}}>{ev.date} a las {ev.startTime} hs</div>
-                          <div style={{flex:1, marginLeft:15}}><b>{ev.title}</b> — <small>{ev.court}</small></div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* MÓDULO: ALERTAS */}
-              {modulo === "alertas" && (
-                <div className="panel-block">
-                  <div className="panel-title">⚠️ Control Crítico Anti-Perención de Plazos</div>
-                  {alertasCriticas.length === 0 ? <p>Estudio al día. No se detectan alertas automáticas de urgencia.</p> : 
-                    alertasCriticas.map(ev => (
-                      <div key={ev.id} style={{padding:16, borderRadius:10, background:"rgba(239,68,68,0.06)", border:"1px solid rgba(239,68,68,0.2)", marginBottom:12, display:"flex", justifyContent:"space-between", alignItems:"center"}}>
-                        <div>
-                          <span style={{fontSize:11, textTransform:"uppercase", letterSpacing:".05em", color:"var(--red)", fontWeight:700}}>Vencimiento / Audiencia Crítica</span>
-                          <h4 style={{margin:"4px 0"}}>{ev.title}</h4>
-                          <p style={{fontSize:13, color:"var(--tx2)"}}>Fecha: {ev.date} a las {ev.startTime} hs — Radicación: {ev.court || "No asignada"}</p>
-                        </div>
-                        <button className="btn-secondary" onClick={()=>setModalEvento(ev)}>Revisar Hito</button>
-                      </div>
-                    ))
-                  }
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      </div>
-
-      {/* MODAL: CLIENTE */}
-      {modalCliente && (
-        <div className="modal-ov">
-          <div className="modal-box">
-            <div className="modal-hd"><h3 className="modal-tit">{modalCliente.id ? "Modificar Cliente" : "Alta de Cliente Corporativo / Particular"}</h3></div>
-            <div className="modal-bd">
-              <div className="f-grp"><label>Nombre Completo / Razón Social *</label><input defaultValue={modalCliente.nombre} id="c_nom"/></div>
-              <div className="f-row">
-                <div className="f-grp"><label>DNI / CUIT / LE *</label><input defaultValue={modalCliente.dni} id="c_dni"/></div>
-                <div className="f-grp"><label>Teléfono de Contacto</label><input defaultValue={modalCliente.telefono} id="c_tel"/></div>
-              </div>
-              <div className="f-grp"><label>Correo Electrónico</label><input defaultValue={modalCliente.email} id="c_em"/></div>
-              <div className="f-grp"><label>Dirección Legal Constituida</label><input defaultValue={modalCliente.direccion} id="c_dir"/></div>
-              <div className="f-grp"><label>Observaciones / Antecedentes</label><textarea defaultValue={modalCliente.observaciones} id="c_obs"/></div>
-            </div>
-            <div className="modal-ft">
-              {modalCliente.id && <button className="btn-danger" onClick={()=>deleteCliente(modalCliente.id)}>Eliminar</button>}
-              <button className="btn-secondary" onClick={()=>setModalCliente(null)}>Cancelar</button>
-              <button className="btn-gold" onClick={()=>saveCliente({
-                id: modalCliente.id,
-                nombre: document.getElementById("c_nom").value,
-                dni: document.getElementById("c_dni").value,
-                telefono: document.getElementById("c_tel").value,
-                email: document.getElementById("c_em").value,
-                direccion: document.getElementById("c_dir").value,
-                observaciones: document.getElementById("c_obs").value,
-                estado: "Activo"
-              })}>Comprometer Ficha</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL: EXPEDIENTE */}
-      {modalExpediente && (
-        <div className="modal-ov">
-          <div className="modal-box">
-            <div className="modal-hd"><h3 className="modal-tit">{modalExpediente.id ? "Actualizar Expediente" : "Radicar Nuevo Expediente Judicial"}</h3></div>
-            <div className="modal-bd">
-              <div className="f-row">
-                <div className="f-grp"><label>Número de Expediente *</label><input defaultValue={modalExpediente.num_expediente} id="e_num"/></div>
-                <div className="f-grp"><label>Fuero</label><input defaultValue={modalExpediente.fuero} placeholder="Civil, Laboral, Penal..." id="e_fue"/></div>
-              </div>
-              <div className="f-grp"><label>Carátula de la Causa *</label><input defaultValue={modalExpediente.caratula} placeholder="Actor c/ Demandado s/ Materia" id="e_car"/></div>
-              <div className="f-grp"><label>Tribunal / Juzgado Radicado</label><input defaultValue={modalExpediente.juzgado} id="e_juz"/></div>
-              <div className="f-grp"><label>Estado Procesal Actual</label><input defaultValue={modalExpediente.estado_procesal} placeholder="Demanda, Contestación, Pruebas, Sentencia" id="e_est"/></div>
-              <div className="f-grp"><label>Asociar Cliente del Estudio</label>
-                <select id="e_cli" defaultValue={modalExpediente.cliente_id}>
-                  <option value="">Seleccionar de la lista...</option>
-                  {clientes.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
-                </select>
-              </div>
-              <div className="f-grp"><label>Historial de Actuaciones / Seguimiento</label><textarea defaultValue={modalExpediente.seguimiento} id="e_seg"/></div>
-            </div>
-            <div className="modal-ft">
-              {modalExpediente.id && <button className="btn-danger" onClick={()=>deleteExpediente(modalExpediente.id)}>Archivar</button>}
-              <button className="btn-secondary" onClick={()=>setModalExpediente(null)}>Cancelar</button>
-              <button className="btn-gold" onClick={()=>saveExpediente({
-                id: modalExpediente.id,
-                num_expediente: document.getElementById("e_num").value,
-                fuero: document.getElementById("e_fue").value,
-                caratula: document.getElementById("e_car").value,
-                juzgado: document.getElementById("e_juz").value,
-                estado_procesal: document.getElementById("e_est").value,
-                cliente_id: document.getElementById("e_cli").value,
-                seguimiento: document.getElementById("e_seg").value
-              })}>Registrar Litigio</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL: EVENTO / AUDIENCIA */}
-      {modalEvento && (
-        <div className="modal-ov">
-          <div className="modal-box">
-            <div className="modal-hd"><h3 className="modal-tit">Compromiso Judicial / Audiencia</h3></div>
-            <div className="modal-bd">
-              <div className="f-grp"><label>Título o Hito *</label><input defaultValue={modalEvento.title} id="ev_tit"/></div>
-              <div className="f-row">
-                <div className="f-grp"><label>Tipo</label>
-                  <select id="ev_typ" defaultValue={modalEvento.type}>
-                    <option value="audiencia">Audiencia Presencial/Virtual</option>
-                    <option value="vencimiento">Vencimiento Término Procesal</option>
-                    <option value="reunion">Consulta / Reunión Estudio</option>
-                  </select>
-                </div>
-                <div className="f-grp"><label>Fecha *</label><input type="date" defaultValue={modalEvento.date} id="ev_dat"/></div>
-              </div>
-              <div className="f-row">
-                <div className="f-grp"><label>Hora Inicio</label><input type="time" defaultValue={modalEvento.startTime} id="ev_st"/></div>
-                <div className="f-grp"><label>Hora Fin</label><input type="time" defaultValue={modalEvento.endTime} id="ev_et"/></div>
-              </div>
-              <div className="f-grp"><label>Notas / Instrucciones Adicionales</label><textarea defaultValue={modalEvento.notes} id="ev_not"/></div>
-            </div>
-            <div className="modal-ft">
-              {modalEvento.id && <button className="btn-danger" onClick={()=>deleteEvento(modalEvento.id)}>Remover</button>}
-              <button className="btn-secondary" onClick={()=>setModalEvento(null)}>Cancelar</button>
-              <button className="btn-gold" onClick={()=>saveEvento({
-                id: modalEvento.id,
-                title: document.getElementById("ev_tit").value,
-                type: document.getElementById("ev_typ").value,
-                date: document.getElementById("ev_dat").value,
-                startTime: document.getElementById("ev_st").value,
-                endTime: document.getElementById("ev_et").value,
-                notes: document.getElementById("ev_not").value
-              })}>Confirmar Fecha</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* TOAST NOTIFICADOR */}
-      {toast && <div className="toast">{toast}</div>}
-
     </div>
   );
-
-  function abrirNuevoEventoConFecha(dateStr) {
-    setModalEvento({ date: dateStr, startTime: "09:00", endTime: "10:00", type: "audiencia" });
-  }
 }
 
-const DIAS = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+/* PANTALLA INGRESO / LOGIN */
+function Ingreso({ alEntrar }) {
+  return (
+    <div className="pant-bg">
+      <div className="card">
+        <div className="sello">M.S.<br/>&amp;A.</div>
+        <div className="firma">MARIANA SÁNCHEZ<br/>&amp; ASOCIADOS</div>
+        <div className="firma-sub">Estudio Jurídico</div>
+        <hr className="divider"/>
+        <p className="cita">"La justicia y la diligencia procesal sostienen la solidez de la República corporativa."</p>
+        <button className="btn-gold" onClick={alEntrar}>INGRESAR A LA AGENDA</button>
+        <div className="card-footer">Estudio Jurídico Multiusuario Premium · © {new Date().getFullYear()}</div>
+      </div>
+    </div>
+  );
+}
+
+/* COMPONENTE SIDEBAR LATERAL PROFESIONAL */
+function Barra({ eventos, filtro, setFiltro, onCerrarSesion, perfilAlertas, setPerfilAlertas }) {
+  const hoy = hoyStr();
+  const [showPerfil, setShowPerfil] = useState(false);
+
+  const cH = eventos.filter(e=>e.date===hoy).length;
+  const cA = eventos.filter(e=>e.type==="audiencia").length;
+
+  return (
+    <div className="sidebar">
+      <div className="sb-hd">
+        <div className="sb-logo">
+          <div className="l-sello">M.S.<br>&amp;A.</div>
+          <div>
+            <div className="l-nm">Mariana Sánchez<br>&amp; Asociados</div>
+            <div className="l-sb">Estudio Jurídico</div>
+          </div>
+        </div>
+      </div>
+      <div className="sb-body">
+        <div className="sb-sec">Métricas de Hoy</div>
+        <div className="stat-row"><span className="stat-lbl">Eventos del Día</span><span className="stat-val">{cH}</span></div>
+        <div className="stat-row"><span className="stat-lbl">Total Audiencias</span><span className="stat-val">{cA}</span></div>
+        
+        <button className="cfg-btn" style={{marginTop:10}} onClick={() => setShowPerfil(!showPerfil)}>
+          🔔 Configurar Canales de Alerta
+        </button>
+
+        {showPerfil && (
+          <div className="fade-in" style={{background:"var(--s2)", padding:10, borderRadius:8, marginTop:5, display:"flex", flexDirection:"column", gap:8, border:"1px solid var(--bd2)"}}>
+            <div className="f-grp">
+              <label className="f-lbl" style={{fontSize:9}}>E-mail Alertas</label>
+              <input value={perfilAlertas.email} onChange={e=>setPerfilAlertas({...perfilAlertas, email:e.target.value})} placeholder="estudio@sanchez.com" style={{padding:6}}/>
+            </div>
+            <div className="f-grp">
+              <label className="f-lbl" style={{fontSize:9}}>Teléfono Móvil</label>
+              <input value={perfilAlertas.telefono} onChange={e=>setPerfilAlertas({...perfilAlertas, telefono:e.target.value})} placeholder="+5492604..." style={{padding:6}}/>
+            </div>
+            <div style={{fontSize:9, color: "var(--gold)", textAlign:"center"}}>Sincronizado automáticamente para alertas inmediatas.</div>
+          </div>
+        )}
+
+        <div className="sb-sec" style={{marginTop:16}}>Filtrar por Profesional</div>
+        <div className={`abg-row ${filtro===null?"on":""}`} onClick={()=>setFiltro(null)}>
+          <div className="av" style={{background:"var(--s4)",color:"var(--tx2)"}}>∀</div>
+          <div><div className="a-nm">Todo el Bufete</div><div className="a-rl">{eventos.length} causas activas</div></div>
+        </div>
+        {ABOGADOS.map(a=>{
+          const cnt = eventos.filter(e=>e.lawyers?.includes(a.id)).length;
+          return (
+            <div key={a.id} className={`abg-row ${filtro===a.id?"on":""}`} onClick={()=>setFiltro(a.id)}>
+              <div className="av" style={{background:a.color}}>{a.ini}</div>
+              <div>
+                <div className="a-nm">{a.nombre}</div>
+                <div className="a-rl">{a.rol} · {cnt} ítems</div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <div className="sb-ft">
+        <div className="sb-date">{new Date().toLocaleDateString("es-AR",{weekday:"long",day:"numeric",month:"long"})}</div>
+        <div className="sync-row">
+          <div className="sync-dot" style={{background:"var(--green)"}}/>
+          <span className="sync-lbl" style={{color:"var(--green)"}}>Conexión Encriptada Supabase</span>
+        </div>
+        <button className="cfg-btn logout-btn" onClick={onCerrarSesion}>
+          🚪 Cerrar Sesión del Terminal
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* VISTAS DE AGENDA COMPATIBLES CON GOOGLE CALENDAR */
+function VistaMes({año,mes,eventos,alDia,alEv}) {
+  const pri = new Date(año,mes,1).getDay();
+  const dias = new Date(año,mes+1,0).getDate();
+  const prev = new Date(año,mes,0).getDate();
+  const hoy = hoyStr();
+  const celdas = [];
+
+  for(let i=pri-1;i>=0;i--) celdas.push({d:prev-i,otra:true,m:mes-1});
+  for(let i=1;i<=dias;i++) celdas.push({d:i,otra:false,m:mes});
+  const tot = Math.ceil(celdas.length/7)*7;
+  let len = celdas.length;
+  for(let i=1;i<=tot-len;i++) celdas.push({d:i,otra:true,m:mes+1});
+
+  return (
+    <div className="cal-grid fade-in">
+      {DIAS.map(d=><div key={d} className="cal-hdr">{d}</div>)}
+      {celdas.map((c,idx)=>{
+        const ds = `${año}-${String(c.m+1).padStart(2,"0")}-${String(c.d).padStart(2,"0")}`;
+        const des = eventos.filter(e=>e.date===ds);
+        const esHoy = ds === hoy && !c.otra;
+        return (
+          <div key={idx} className={`cal-cell ${c.otra?"otra":""} ${esHoy?"hoy":""}`} onClick={()=>!c.otra && alDia(ds)}>
+            <div className="dn">{c.d}</div>
+            <div style={{flex:1,overflow:"hidden"}}>
+              {des.slice(0,3).map(e=>{
+                const typeOpt = TIPOS.find(t=>t.id===e.type);
+                const abg = ABOGADOS.find(a=>a.id===(e.lawyers?.[0]||"p"));
+                return (
+                  <div key={e.id} className="chip" style={{background:abg?.color||"var(--gold3)"}} onClick={(x)=>{x.stopPropagation(); alEv(e);}}>
+                    {typeOpt?.icon} {e.title}
+                  </div>
+                );
+              })}
+              {des.length>3 && <div style={{fontSize:9,color:"var(--gold)"}}>+{des.length-3} adicionales</div>}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function VistaSemana({fecha,eventos,alEv,alSlot}) {
+  const inicio = new Date(fecha);
+  inicio.setDate(inicio.getDate() - inicio.getDay());
+  const diasArr = Array.from({length:7},(_,i)=>{
+    const d = new Date(inicio); d.setDate(d.getDate()+i); return d;
+  });
+  const hs = Array.from({length:15},(_,i)=>i+7); // 7:00 a 21:00
+
+  return (
+    <div className="wk-wrap fade-in">
+      <div className="wk-hdr">
+        <div className="wk-dhdr">Hora</div>
+        {diasArr.map((d,i)=>{
+          const ds = d.toISOString().split("T")[0];
+          const esHoy = ds===hoyStr();
+          return (
+            <div key={i} className={`wk-dhdr ${esHoy?"hoy-col":""}`}>
+              <div>{DIAS[d.getDay()]}</div>
+              <div style={{fontSize:13,fontWeight:600}}>{d.getDate()}</div>
+            </div>
+          );
+        })}
+      </div>
+      <div className="wk-body">
+        <div>{hs.map(h=><div key={h} className="wk-tlbl">{String(h).padStart(2,"0")}:00</div>)}</div>
+        {diasArr.map((d,i)=>{
+          const ds = d.toISOString().split("T")[0];
+          const dEvs = eventos.filter(e=>e.date===ds);
+          return (
+            <div key={i} className="wk-dcol">
+              {hs.map(h=>{
+                const hEvs = dEvs.filter(e=>parseInt(e.startTime?.split(":")[0]||0)===h);
+                return (
+                  <div key={h} className="wk-hcel" onClick={()=>alSlot(ds)}>
+                    {hEvs.map(ev=>{
+                      const col = ABOGADOS.find(a=>a.id===(ev.lawyers?.[0]||"p"))?.color || "var(--gold)";
+                      return (
+                        <div key={ev.id} onClick={(e)=>{e.stopPropagation();alEv(ev);}} 
+                             style={{background:col+"CC", borderLeft:`3px solid ${col}`, borderRadius:4, padding:"2px 4px", fontSize:10, color:"#fff", marginBottom:2}}>
+                          <b>{ev.startTime}</b> {ev.title}
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function VistaDay({fecha,eventos,alEv,alSlot}) {
+  const ds = fecha.toISOString().split("T")[0];
+  const dEvs = eventos.filter(e=>e.date===ds).sort((a,b)=>a.startTime.localeCompare(b.startTime));
+  return (
+    <div className="fade-in" style={{background:"var(--s1)", borderRadius:10, padding:12, border:"1px solid var(--bd2)"}}>
+      <div className="dia-hdr">
+        {fecha.toLocaleDateString("es-AR",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}
+      </div>
+      <div style={{marginTop:10, display:"flex", flexDirection:"column", gap:8}}>
+        {dEvs.length===0 ? <div className="vacio">No hay audiencias o compromisos agendados para este día bursátil.</div> : 
+          dEvs.map(ev=>{
+            const abg = ABOGADOS.find(a=>a.id===(ev.lawyers?.[0]||"p"));
+            return (
+              <div key={ev.id} className="list-card" onClick={()=>alEv(ev)}>
+                <div className="list-bar" style={{background:abg?.color}}/>
+                <div style={{flex:1}}>
+                  <div className="list-tit">{ev.title}</div>
+                  <div className="list-meta">
+                    <span>⏱ {ev.startTime} a {ev.endTime||"--:--"} hs</span>
+                    {ev.expNum && <span>📁 Exp: {ev.expNum}</span>}
+                    {ev.court && <span>🏛 {ev.court}</span>}
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        }
+        <button className="cfg-btn" style={{marginTop:8, borderStyle:"dashed"}} onClick={()=>alSlot(ds)}>+ Añadir ítem en esta fecha</button>
+      </div>
+    </div>
+  );
+}
+
+function VistaLista({eventos,alEv}) {
+  const prox = [...eventos].sort((a,b)=>a.date.localeCompare(b.date));
+  return (
+    <div className="list-view fade-in">
+      <div className="list-gt">Historial y Próximos Vencimientos Cronológicos</div>
+      {prox.length===0 ? <div className="vacio">Sin registros históricos en Supabase.</div> :
+        prox.map(ev=>{
+          const abg = ABOGADOS.find(a=>a.id===(ev.lawyers?.[0]||"p"));
+          return (
+            <div key={ev.id} className="list-card" onClick={()=>alEv(ev)}>
+              <div className="list-bar" style={{background:abg?.color}}/>
+              <div style={{flex:1}}>
+                <div className="list-tit">[{ev.date}] - {ev.title}</div>
+                <div className="list-meta">
+                  <span>⚖️ {TIPOS.find(t=>t.id===ev.type)?.label}</span>
+                  <span>💼 {abg?.nombre}</span>
+                </div>
+              </div>
+            </div>
+          );
+        })
+      }
+    </div>
+  );
+}
+
+/* MODAL DE CAUSAS LEGALES, AUDIENCIAS Y ADJUNTACIÓN EN BASE64 COMPATIBLE */
+function ModalEv({evento,alGuardar,alEliminar,alCerrar,busy}) {
+  const esEd = !!evento?.id;
+  const [form,setForm] = useState({
+    title:"",type:"audiencia",date:hoyStr(),startTime:"09:00",endTime:"10:00",
+    lawyers:["p"],notes:"",alerts:["24h"],court:"",expNum:"",docs:[],...evento
+  });
+
+  const set = (k,v) => setForm(f=>({...f,[k]:v}));
+  const tog = (k,v) => set(k,form[k].includes(v)?form[k].filter(x=>x!==v):[...form[k],v]);
+
+  // Conversión y procesamiento premium de documentos adjuntos a Base64 para almacenamiento Supabase
+  const handleFileUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const nuevoDoc = {
+        name: file.name,
+        size: (file.size / 1024).toFixed(1) + " KB",
+        base64: reader.result
+      };
+      set("docs", [...(form.docs || []), nuevoDoc]);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const descargarDoc = (doc) => {
+    const link = document.createElement("a");
+    link.href = doc.base64;
+    link.download = doc.name;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const visualizarDoc = (doc) => {
+    const win = window.open();
+    win.document.write(`<iframe src="${doc.base64}" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>`);
+  };
+
+  return (
+    <div className="modal-ov" onClick={e=>e.target===e.currentTarget&&alCerrar()}>
+      <div className="modal-box">
+        <div className="modal-hd">
+          <div className="modal-tit">{esEd?"Revisión de Legajo Procesal":"Apertura de Evento Legal"}</div>
+          <button className="modal-x" onClick={alCerrar}>✕</button>
+        </div>
+        <div className="modal-bd">
+          <div className="f-grp">
+            <label className="m-lbl">Carátula / Título Comercial *</label>
+            <input value={form.title} onChange={e=>set("title",e.target.value)} placeholder="Ej: Audiencia de Conciliación - García S.A." disabled={busy}/>
+          </div>
+          <div className="f-row">
+            <div className="f-grp">
+              <label className="m-lbl">Categoría Litigio</label>
+              <select value={form.type} onChange={e=>set("type",e.target.value)} disabled={busy}>
+                {TIPOS.map(t=><option key={t.id} value={t.id}>{t.icon} {t.label}</option>)}
+              </select>
+            </div>
+            <div className="f-grp">
+              <label className="m-lbl">N° de Expediente</label>
+              <input value={form.expNum} onChange={e=>set("expNum",e.target.value)} placeholder="EXP-2026/MZA" disabled={busy}/>
+            </div>
+          </div>
+          <div className="f-row">
+            <div className="f-grp">
+              <label className="m-lbl">Fecha de Estrados *</label>
+              <input type="date" value={form.date} onChange={e=>set("date",e.target.value)} disabled={busy}/>
+            </div>
+            <div className="f-grp">
+              <label className="m-lbl">Fuero / Juzgado</label>
+              <input value={form.court} onChange={e=>set("court",e.target.value)} placeholder="Juzgado del Trabajo N°3" disabled={busy}/>
+            </div>
+          </div>
+          <div className="f-row">
+            <div className="f-grp">
+              <label className="m-lbl">Hora de Inicio</label>
+              <input type="time" value={form.startTime} onChange={e=>set("startTime",e.target.value)} disabled={busy}/>
+            </div>
+            <div className="f-grp">
+              <label className="m-lbl">Cierre Estimado</label>
+              <input type="time" value={form.endTime} onChange={e=>set("endTime",e.target.value)} disabled={busy}/>
+            </div>
+          </div>
+
+          <div className="f-grp">
+            <label className="m-lbl">Profesionales Asignados</label>
+            <div style={{display:"grid", gridTemplateColumns:"1fr 1fr", gap:6}}>
+              {ABOGADOS.map(a=>(
+                <div key={a.id} className={`chk-row ${form.lawyers.includes(a.id)?"on":""}`} onClick={()=>tog("lawyers",a.id)}>
+                  <div style={{width:10,height:10,borderRadius:"50%",background:a.color}}/>
+                  <span style={{fontSize:12}}>{a.nombre}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* DOCUMENTOS ADJUNTOS INTEGRADOS */}
+          <div className="doc-section">
+            <label className="m-lbl" style={{color:"var(--gold)"}}>🗂 Documental del Expediente (Adjuntos Nativos)</label>
+            <div className="file-input-wrapper">
+              <button className="file-input-btn">+ Adjuntar Documento (PDF/Imagen/Word)</button>
+              <input type="file" onChange={handleFileUpload} disabled={busy}/>
+            </div>
+            <div className="doc-list">
+              {form.docs && form.docs.map((doc, i)=>(
+                <div key={i} className="doc-item">
+                  <span style={{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",maxWidth:240}}>📄 {doc.name} ({doc.size})</span>
+                  <div className="doc-actions">
+                    <button className="doc-btn" onClick={()=>visualizarDoc(doc)}>Ver</button>
+                    <button className="doc-btn" onClick={()=>descargarDoc(doc)}>Bajar</button>
+                    <button className="doc-btn del" onClick={()=>set("docs", form.docs.filter((_,idx)=>idx!==i))}>Eliminar</button>
+                  </div>
+                </div>
+              ))}
+              {(!form.docs || form.docs.length===0) && <div style={{fontSize:11, color:"var(--tx3)", textAlign:"center", padding:4}}>Sin archivos adjuntos.</div>}
+            </div>
+          </div>
+
+          <div className="f-grp">
+            <label className="m-lbl">Notas de Estrategia Jurídica</label>
+            <textarea value={form.notes} onChange={e=>set("notes",e.target.value)} placeholder="Anotaciones críticas sobre el curso de la causa..." disabled={busy}/>
+          </div>
+        </div>
+        <div className="modal-ft">
+          <button className="btn-s" onClick={alCerrar} disabled={busy}>Cancelar</button>
+          {esEd && <button className="btn-d" onClick={()=>alEliminar(form.id)} disabled={busy}>Eliminar Ítem</button>}
+          <button className="btn-p" onClick={()=>alGuardar(form)} disabled={busy}>
+            {busy ? <div className="spin-ring" style={{width:14,height:14}}/> : "Guardar Ficha"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* COMPONENTE CORE PRINCIPAL */
+function App() {
+  const [pantalla, setPantalla] = useState("config"); 
+  const [ingresado, setIngresado] = useState(false);
+  const [sb, setSb] = useState(null);
+  const [eventos, setEventos] = useState([]);
+  const [filtro, setFiltro] = useState(null);
+  const [vista, setVista] = useState("mes");
+  const [curFecha, setCurFecha] = useState(new Date());
+  const [cargando, setCargando] = useState(false);
+  
+  const [modal, setModal] = useState(false);
+  const [editEv, setEditEv] = useState(null);
+  const [toast, setToast] = useState(null);
+  const [perfilAlertas, setPerfilAlertas] = useState({
+    email: localStorage.getItem("alert_email") || "",
+    telefono: localStorage.getItem("alert_tel") || ""
+  });
+
+  useEffect(() => {
+    localStorage.setItem("alert_email", perfilAlertas.email);
+    localStorage.setItem("alert_tel", perfilAlertas.telefono);
+  }, [perfilAlertas]);
+
+  useEffect(() => {
+    const savedUrl = localStorage.getItem("sb_url");
+    const savedKey = localStorage.getItem("sb_key");
+    if (savedUrl && savedKey) {
+      const client = createClient(savedUrl, savedKey);
+      setSb(client);
+      setPantalla("login");
+      fetchEventos(client);
+    }
+    setTimeout(() => {
+      const splash = document.getElementById("splash");
+      if(splash) splash.classList.add("out");
+    }, 1000);
+  }, []);
+
+  const fetchEventos = async (client) => {
+    setCargando(true);
+    try {
+      const { data, error } = await client.from("eventos").select("*");
+      if (error) throw error;
+      if (data) {
+        // Mapeo adaptativo seguro de base de datos a formato frontend
+        setEventos(data.map(d => ({
+          id: d.id,
+          title: d.title || d.titulo || "Evento sin título",
+          type: d.type || "audiencia",
+          date: d.date || d.fecha || hoyStr(),
+          startTime: d.start_time || d.hora_inicio || "09:00",
+          endTime: d.end_time || d.hora_fin || "10:00",
+          lawyers: d.lawyers || [],
+          notes: d.notes || "",
+          court: d.court || "",
+          expNum: d.exp_num || "",
+          docs: d.docs || []
+        })));
+      }
+    } catch(e) {
+      showToast("Error cargando base de datos: "+e.message, "err");
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  const showToast = (m, t="ok") => {
+    setToast({ msg: m, type: t });
+    setTimeout(() => setToast(null), 3500);
+  };
+
+  const guardarEv = async (f) => {
+    setCargando(true);
+    try {
+      const payload = {
+        id: f.id,
+        title: f.title,
+        type: f.type,
+        date: f.date,
+        start_time: f.startTime,
+        end_time: f.endTime,
+        lawyers: f.lawyers,
+        notes: f.notes,
+        court: f.court,
+        exp_num: f.expNum,
+        docs: f.docs
+      };
+
+      const { error } = await sb.from("eventos").upsert(payload);
+      if (error) throw error;
+      
+      showToast("Ficha Legal sincronizada en Supabase.");
+      fetchEventos(sb);
+      setModal(false);
+    } catch(e) {
+      showToast("Error al guardar: " + e.message, "err");
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  const eliminarEv = async (id) => {
+    setCargando(true);
+    try {
+      const { error } = await sb.from("eventos").delete().eq("id", id);
+      if (error) throw error;
+      showToast("Registro eliminado con éxito.");
+      fetchEventos(sb);
+      setModal(false);
+    } catch(e) {
+      showToast("Fallo al suprimir: " + e.message, "err");
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  const handleCerrarSesion = () => {
+    setIngresado(false);
+    setPantalla("login");
+    showToast("Terminal desconectado de la sesión.");
+  };
+
+  // MOTOR ADAVANCED DE EXPORTACIÓN JURÍDICA PDF NATIVA
+  const exportarAgendaPDF = () => {
+    showToast("Compilando reporte corporativo PDF...");
+    const area = document.getElementById("pdf-render-area");
+    area.style.display = "block";
+
+    const fHoy = hoyStr();
+    const evsHoy = eventos.filter(e => e.date === fHoy);
+    const auds = eventos.filter(e => e.type === "audiencia");
+
+    area.innerHTML = `
+      <div style="padding: 30px; font-family: 'Georgia', serif; color: #111; background: #fff; min-height: 100vh;">
+        <div style="border-bottom: 2px solid #C9A84C; padding-bottom: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <h1 style="font-size: 22px; margin: 0; font-weight: bold; letter-spacing: 1px;">MARIANA SÁNCHEZ & ASOCIADOS</h1>
+            <p style="font-size: 10px; color: #666; margin: 2px 0 0 0; text-transform: uppercase; letter-spacing: 2px;">Estudio Jurídico - Agenda Corporativa Premium</p>
+          </div>
+          <div style="text-align: right; font-size: 11px; color: #444;">
+            <strong>Fecha de Emisión:</strong> ${new Date().toLocaleDateString("es-AR")}<br>
+            <strong>Canal Alerta:</strong> ${perfilAlertas.email || "No parametrizado"}
+          </div>
+        </div>
+
+        <h2 style="font-size: 16px; border-bottom: 1px solid #ddd; padding-bottom: 4px; color: #9B7A30; margin-top: 20px;">1. AGENDA DEL DÍA DE HOY (${fHoy})</h2>
+        ${evsHoy.length === 0 ? '<p style="font-size:12px; font-style:italic;">Sin compromisos procesales fijados para hoy.</p>' : `
+          <table style="width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 12px;">
+            <thead>
+              <tr style="background: #f5f5f5; border-bottom: 1px solid #ccc;">
+                <th style="padding: 6px; text-align: left; width: 15%;">Hora</th>
+                <th style="padding: 6px; text-align: left; width: 45%;">Carátula / Causa</th>
+                <th style="padding: 6px; text-align: left; width: 20%;">Expediente</th>
+                <th style="padding: 6px; text-align: left; width: 20%;">Organismo</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${evsHoy.map(e => `
+                <tr style="border-bottom: 1px solid #eee;">
+                  <td style="padding: 6px;">${e.startTime} hs</td>
+                  <td style="padding: 6px;"><b>${e.title}</b></td>
+                  <td style="padding: 6px;">${e.expNum || '-'}</td>
+                  <td style="padding: 6px;">${e.court || '-'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `}
+
+        <h2 style="font-size: 16px; border-bottom: 1px solid #ddd; padding-bottom: 4px; color: #9B7A30; margin-top: 30px;">2. PRÓXIMAS AUDIENCIAS FIJADAS</h2>
+        ${auds.length === 0 ? '<p style="font-size:12px; font-style:italic;">No se registran audiencias en el corto plazo.</p>' : `
+          <table style="width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 12px;">
+            <thead>
+              <tr style="background: #f5f5f5; border-bottom: 1px solid #ccc;">
+                <th style="padding: 6px; text-align: left; width: 15%;">Fecha</th>
+                <th style="padding: 6px; text-align: left; width: 15%;">Hora</th>
+                <th style="padding: 6px; text-align: left; width: 50%;">Audiencia</th>
+                <th style="padding: 6px; text-align: left; width: 20%;">Expediente</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${auds.map(e => `
+                <tr style="border-bottom: 1px solid #eee;">
+                  <td style="padding: 6px;">${e.date}</td>
+                  <td style="padding: 6px;">${e.startTime} hs</td>
+                  <td style="padding: 6px;"><b>${e.title}</b><br><span style="font-size:10px; color:#666;">${e.court || ''}</span></td>
+                  <td style="padding: 6px;">${e.expNum || '-'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        `}
+
+        <div style="margin-top: 60px; text-align: center; font-size: 10px; color: #888; border-top: 1px dashed #ccc; padding-top: 10px;">
+          Documento Confidencial generado por el Sistema de Agenda Legal Automatizada de Mariana Sánchez & Asociados.
+        </div>
+      </div>
+    `;
+
+    const opt = {
+      margin: 10,
+      filename: `REPORTE_AGENDA_LEGAL_${fHoy}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().from(area).set(opt).save().then(() => {
+      area.style.display = "none";
+      showToast("PDF descargado correctamente.");
+    });
+  };
+
+  const navegar = (v) => {
+    const n = new Date(curFecha);
+    if (vista==="mes") n.setMonth(n.getMonth()+v);
+    else if (vista==="semana") n.setDate(n.getDate()+(v*7));
+    else n.setDate(n.getDate()+v);
+    setCurFecha(n);
+  };
+
+  const filtrados = filtro ? eventos.filter(e => e.lawyers?.includes(filtro)) : eventos;
+
+  if (pantalla === "config") return <PantallaConfig onConectado={(client)=>{ setSb(client); setPantalla("login"); }} />;
+  if (pantalla === "login" && !ingresado) return <Ingreso alEntrar={()=>setIngresado(true)} />;
+
+  return (
+    <div className="layout fade-in">
+      <Barra 
+        eventos={eventos} 
+        filtro={filtro} 
+        setFiltro={setFiltro} 
+        onCerrarSesion={handleCerrarSesion}
+        perfilAlertas={perfilAlertas}
+        setPerfilAlertas={setPerfilAlertas}
+      />
+      
+      <div className="main">
+        <div className="main-hd">
+          <div style={{display:"flex",alignItems:"center",gap:8}}>
+            <button className="nav-btn" onClick={()=>navegar(-1)}>‹</button>
+            <span className="mes-tit">
+              {vista==="mes" ? `${MESES[curFecha.getMonth()]} ` : ""}
+              <span className="anio-lb">{curFecha.getFullYear()}</span>
+            </span>
+            <button className="nav-btn" onClick={()=>navegar(1)}>›</button>
+            <button className="hoy-btn" onClick={()=>setCurFecha(new Date())}>HOY</button>
+          </div>
+
+          <div className="vtabs">
+            <button className={`vtab ${vista==="mes"?"on":""}`} onClick={()=>setVista("mes")}>Mes</button>
+            <button className={`vtab ${vista==="semana"?"on":""}`} onClick={()=>setVista("semana")}>Semana</button>
+            <button className={`vtab ${vista==="dia"?"on":""}`} onClick={()=>setVista("dia")}>Día</button>
+            <button className={`vtab ${vista==="lista"?"on":""}`} onClick={()=>setVista("lista")}>Historial</button>
+          </div>
+
+          <div className="hd-actions">
+            <button className="pdf-btn" onClick={exportarAgendaPDF}>
+              🖨 Exportar Reporte PDF
+            </button>
+            <button className="add-btn" onClick={()=>{ setEditEv(null); setModal(true); }}>
+              + Nuevo Escrito / Evento
+            </button>
+          </div>
+        </div>
+
+        <div className="cal-scroll">
+          {cargando && <div style={{textAlign:"center", padding:20}}><div className="spin-ring" style={{margin:"0 auto"}}/></div>}
+          {!cargando && vista==="mes" && <VistaMes año={curFecha.getFullYear()} mes={curFecha.getMonth()} eventos={filtrados} alDia={(d)=>{ setCurFecha(new Date(d+"T12:00:00")); setVista("dia"); }} alEv={(e)=>{ setEditEv(e); setModal(true); }}/>}
+          {!cargando && vista==="semana" && <VistaSemana fecha={curFecha} eventos={filtrados} alEv={(e)=>{ setEditEv(e); setModal(true); }} alSlot={(d)=>{ setEditEv({date:d}); setModal(true); }}/>}
+          {!cargando && vista==="dia" && <VistaDay fecha={curFecha} eventos={filtrados} alEv={(e)=>{ setEditEv(e); setModal(true); }} alSlot={(d)=>{ setEditEv({date:d}); setModal(true); }}/>}
+          {!cargando && vista==="lista" && <VistaLista eventos={filtrados} alEv={(e)=>{ setEditEv(e); setModal(true); }}/>}
+        </div>
+      </div>
+
+      {modal && <ModalEv evento={editEv} alCerrar={()=>setModal(false)} alGuardar={guardarEv} alEliminar={eliminarEv} busy={cargando} />}
+      {toast && <div className={`toast ${toast.type}`}>{toast.msg}</div>}
+    </div>
+  );
+}
+
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(<App />);
 </script>
