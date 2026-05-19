@@ -1,7 +1,7 @@
 {
-  "name": "González & Asociados — Agenda",
-  "short_name": "Agenda Legal",
-  "description": "Sistema de gestión de agenda para estudio jurídico González & Asociados",
+  "name": "Mariana Sánchez & Asociados — Agenda",
+  "short_name": "Agenda MS&A",
+  "description": "Sistema de gestión de agenda — Mariana Sánchez & Asociados, Estudio Jurídico",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
@@ -11,41 +11,17 @@
   "lang": "es-AR",
   "categories": ["productivity", "business"],
   "icons": [
-    {
-      "src": "icon-192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "icon-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "apple-touch-icon.png",
-      "sizes": "180x180",
-      "type": "image/png",
-      "purpose": "any"
-    }
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
+    { "src": "apple-touch-icon.png", "sizes": "180x180", "type": "image/png", "purpose": "any" }
   ],
   "shortcuts": [
     {
       "name": "Nuevo Evento",
       "short_name": "Nuevo",
-      "description": "Crear un nuevo evento en la agenda",
-      "url": "./index.html?action=nuevo",
-      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
-    },
-    {
-      "name": "Ver Alertas",
-      "short_name": "Alertas",
-      "description": "Ver eventos con alertas activas",
-      "url": "./index.html?action=alertas",
+      "url": "./index.html",
       "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
     }
   ],
-  "screenshots": [],
   "prefer_related_applications": false
 }

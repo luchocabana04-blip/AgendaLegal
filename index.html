@@ -3,11 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>González &amp; Asociados — Agenda</title>
+  <title>Mariana Sánchez &amp; Asociados — Agenda</title>
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#C9A84C">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="application-name" content="Agenda Legal">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Agenda Legal">
@@ -19,6 +18,7 @@
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
     :root{
@@ -26,24 +26,21 @@
       --bd:#2A3860;--bd2:#1A2440;
       --gold:#C9A84C;--gold2:#E8C870;--gold3:#9B7A30;
       --tx:#DDD8CC;--tx2:#8A9AB8;--tx3:#35486A;
+      --green:#3DAA6A;--red:#C94C4C;
       --safe-t:env(safe-area-inset-top,0px);
       --safe-b:env(safe-area-inset-bottom,0px);
     }
     html,body,#root{height:100%}
     body{font-family:'Jost',sans-serif;background:var(--bg);color:var(--tx);overflow:hidden;
-      padding-top:var(--safe-t);padding-bottom:var(--safe-b);
-      -webkit-font-smoothing:antialiased}
+      padding-top:var(--safe-t);padding-bottom:var(--safe-b);-webkit-font-smoothing:antialiased}
     *{-webkit-tap-highlight-color:transparent}
     button,a{touch-action:manipulation}
     ::-webkit-scrollbar{width:5px;height:5px}
     ::-webkit-scrollbar-track{background:transparent}
     ::-webkit-scrollbar-thumb{background:var(--bd2);border-radius:3px}
-    ::-webkit-scrollbar-thumb:hover{background:var(--bd)}
-    input,select,textarea{
-      background:var(--s3);border:1px solid var(--bd2);color:var(--tx);
-      font-family:'Jost',sans-serif;border-radius:7px;padding:8px 12px;
-      width:100%;font-size:13.5px;transition:border-color .2s;outline:none;
-      -webkit-appearance:none;appearance:none}
+    input,select,textarea{background:var(--s3);border:1px solid var(--bd2);color:var(--tx);
+      font-family:'Jost',sans-serif;border-radius:7px;padding:9px 13px;width:100%;font-size:13.5px;
+      transition:border-color .2s;outline:none;-webkit-appearance:none;appearance:none}
     input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,.08)}
     input::placeholder,textarea::placeholder{color:var(--tx3)}
     select option{background:var(--s2)}
@@ -54,113 +51,118 @@
     @keyframes fadeIn    {from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
     @keyframes slideUp   {from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
     @keyframes pulsar    {0%,100%{opacity:1;transform:scale(1)}50%{opacity:.55;transform:scale(.9)}}
-    @keyframes loginFade {from{opacity:0;transform:scale(.97) translateY(12px)}to{opacity:1;transform:scale(1) translateY(0)}}
-    @keyframes spin      {from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+    @keyframes loginFade {from{opacity:0;transform:scale(.97) translateY(14px)}to{opacity:1;transform:scale(1) translateY(0)}}
+    @keyframes spin      {to{transform:rotate(360deg)}}
+    @keyframes shimmer   {0%{background-position:-400px 0}100%{background-position:400px 0}}
 
     .fade-in{animation:fadeIn .3s ease}
     .pulsar{animation:pulsar 1.8s infinite}
 
     /* ── SPLASH ── */
     #splash{position:fixed;inset:0;background:var(--bg);z-index:9999;
-      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+      display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
       transition:opacity .5s ease,visibility .5s ease}
-    #splash.oculto{opacity:0;visibility:hidden;pointer-events:none}
+    #splash.out{opacity:0;visibility:hidden;pointer-events:none}
     .sp-sello{width:76px;height:76px;border:2px solid var(--gold);border-radius:50%;
       display:flex;align-items:center;justify-content:center;
-      font-family:'Playfair Display',serif;font-size:18px;color:var(--gold);
+      font-family:'Playfair Display',serif;font-size:12px;color:var(--gold);
       position:relative;box-shadow:0 0 40px rgba(201,168,76,.15);
-      animation:loginFade .8s cubic-bezier(.22,.68,0,1.2)}
+      animation:loginFade .8s cubic-bezier(.22,.68,0,1.2);text-align:center;line-height:1.3;padding:6px}
     .sp-sello::after{content:'';position:absolute;inset:7px;border:1px solid rgba(201,168,76,.25);border-radius:50%}
-    .sp-nm{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--tx);animation:fadeIn .6s .2s both}
-    .sp-sb{font-size:10px;color:var(--gold);letter-spacing:.22em;text-transform:uppercase;animation:fadeIn .6s .3s both}
-    .sp-spin{width:22px;height:22px;border:2px solid var(--bd);border-top-color:var(--gold);
-      border-radius:50%;animation:spin 1s linear infinite;margin-top:6px}
+    .sp-nm{font-family:'Playfair Display',serif;font-size:19px;font-weight:700;color:var(--tx);animation:fadeIn .6s .2s both;text-align:center}
+    .sp-sb{font-size:10px;color:var(--gold);letter-spacing:.2em;text-transform:uppercase;animation:fadeIn .6s .35s both}
+    .sp-spin{width:22px;height:22px;border:2px solid var(--bd);border-top-color:var(--gold);border-radius:50%;animation:spin 1s linear infinite;margin-top:4px}
 
-    /* ── INSTALL BANNER ── */
-    .ibanner{position:fixed;bottom:calc(16px + var(--safe-b));left:50%;transform:translateX(-50%);
-      background:var(--s2);border:1px solid var(--gold3);border-radius:14px;
-      padding:13px 18px;display:flex;align-items:center;gap:12px;
-      box-shadow:0 16px 40px rgba(0,0,0,.55);z-index:500;
-      max-width:400px;width:calc(100% - 32px);animation:slideUp .4s ease}
-    .ibanner-icon{font-size:26px;flex-shrink:0}
-    .ibanner-text{flex:1}
-    .ibanner-title{font-size:13px;font-weight:600;color:var(--tx);margin-bottom:2px}
-    .ibanner-desc{font-size:11px;color:var(--tx2)}
-    .ibanner-btn{padding:8px 14px;background:linear-gradient(135deg,var(--gold3),var(--gold));
-      border:none;border-radius:8px;color:#08060A;font-size:12px;font-weight:700;white-space:nowrap}
-    .ibanner-x{background:none;border:none;color:var(--tx3);font-size:16px;padding:4px;flex-shrink:0}
-
-    /* ── OFFLINE ── */
-    .offline-badge{position:fixed;top:calc(6px + var(--safe-t));left:50%;transform:translateX(-50%);
-      background:#C94C4C;color:#fff;font-size:11px;font-weight:600;
-      padding:4px 14px;border-radius:20px;z-index:400;letter-spacing:.06em;animation:slideUp .3s ease}
-
-    /* ── UPDATE BANNER ── */
-    .ubanner{position:fixed;top:calc(8px + var(--safe-t));left:50%;transform:translateX(-50%);
-      background:var(--s3);border:1px solid var(--gold3);border-radius:10px;
-      padding:10px 14px;display:flex;align-items:center;gap:10px;
-      z-index:500;font-size:12px;animation:slideUp .3s ease;
-      box-shadow:0 8px 24px rgba(0,0,0,.4)}
-    .ubanner-btn{padding:6px 14px;background:var(--gold);border:none;border-radius:6px;
-      color:#000;font-size:11px;font-weight:700}
-
-    /* ── LOGIN ── */
-    .login-bg{height:100vh;display:flex;align-items:center;justify-content:center;
+    /* ── PANTALLA CENTRAL (login / config) ── */
+    .pant-bg{height:100vh;display:flex;align-items:center;justify-content:center;
       background:var(--bg);position:relative;overflow:hidden}
-    .login-bg::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    .pant-bg::before{content:'';position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
       width:800px;height:800px;
-      background:radial-gradient(ellipse,rgba(201,168,76,.065) 0%,transparent 60%);pointer-events:none}
-    .login-bg::after{content:'';position:absolute;inset:0;pointer-events:none;
-      background-image:linear-gradient(rgba(201,168,76,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(201,168,76,.025) 1px,transparent 1px);
+      background:radial-gradient(ellipse,rgba(201,168,76,.06) 0%,transparent 60%);pointer-events:none}
+    .pant-bg::after{content:'';position:absolute;inset:0;pointer-events:none;
+      background-image:linear-gradient(rgba(201,168,76,.024) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(201,168,76,.024) 1px,transparent 1px);
       background-size:68px 68px}
-    .login-card{background:var(--s1);border:1px solid var(--bd2);border-radius:18px;
-      padding:52px 46px;width:min(430px,calc(100vw - 36px));position:relative;z-index:1;
-      box-shadow:0 50px 100px rgba(0,0,0,.7),0 0 0 1px rgba(201,168,76,.07);
-      animation:loginFade .6s cubic-bezier(.22,.68,0,1.2)}
-    .login-card::before{content:'';position:absolute;top:-1px;left:22%;right:22%;height:2px;
+    .card{background:var(--s1);border:1px solid var(--bd2);border-radius:18px;
+      padding:48px 46px;width:min(460px,calc(100vw - 36px));position:relative;z-index:1;
+      box-shadow:0 50px 100px rgba(0,0,0,.72),0 0 0 1px rgba(201,168,76,.07);
+      animation:loginFade .55s cubic-bezier(.22,.68,0,1.2)}
+    .card::before{content:'';position:absolute;top:-1px;left:22%;right:22%;height:2px;
       background:linear-gradient(90deg,transparent,var(--gold),transparent);border-radius:2px}
-    .login-sello{width:70px;height:70px;border:1.5px solid var(--gold);border-radius:50%;
-      margin:0 auto 22px;display:flex;align-items:center;justify-content:center;
-      font-family:'Playfair Display',serif;font-size:16px;color:var(--gold);
-      position:relative;letter-spacing:.04em;
-      box-shadow:0 0 30px rgba(201,168,76,.12),inset 0 0 20px rgba(201,168,76,.04)}
-    .login-sello::after{content:'';position:absolute;inset:6px;border:1px solid rgba(201,168,76,.2);border-radius:50%}
-    .login-firma{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;text-align:center;letter-spacing:.02em;color:var(--tx)}
-    .login-sub{font-size:10px;color:var(--gold);text-align:center;letter-spacing:.22em;text-transform:uppercase;margin-top:5px;margin-bottom:32px}
-    .login-divider{border:none;border-top:1px solid var(--bd2);margin:0 0 20px}
-    .login-cita{font-family:'Georgia',serif;font-style:italic;font-size:13px;color:var(--tx2);text-align:center;line-height:1.75;margin-bottom:28px}
-    .login-btn{width:100%;padding:16px;background:linear-gradient(145deg,var(--gold3),var(--gold));
+    .sello{width:68px;height:68px;border:1.5px solid var(--gold);border-radius:50%;
+      margin:0 auto 20px;display:flex;align-items:center;justify-content:center;
+      font-family:'Playfair Display',serif;font-size:11px;color:var(--gold);
+      position:relative;text-align:center;line-height:1.3;padding:6px;
+      box-shadow:0 0 28px rgba(201,168,76,.12),inset 0 0 18px rgba(201,168,76,.04)}
+    .sello::after{content:'';position:absolute;inset:6px;border:1px solid rgba(201,168,76,.2);border-radius:50%}
+    .firma{font-family:'Playfair Display',serif;font-size:21px;font-weight:700;text-align:center;letter-spacing:.02em;color:var(--tx);line-height:1.3}
+    .firma-sub{font-size:10px;color:var(--gold);text-align:center;letter-spacing:.22em;text-transform:uppercase;margin-top:5px;margin-bottom:28px}
+    .divider{border:none;border-top:1px solid var(--bd2);margin:0 0 20px}
+    .cita{font-family:'Georgia',serif;font-style:italic;font-size:13px;color:var(--tx2);text-align:center;line-height:1.75;margin-bottom:26px}
+    .btn-gold{width:100%;padding:15px;background:linear-gradient(145deg,var(--gold3),var(--gold));
       border:none;border-radius:9px;color:#08060A;font-size:12.5px;font-weight:700;
-      letter-spacing:.2em;text-transform:uppercase;transition:all .35s;
-      box-shadow:0 5px 28px rgba(201,168,76,.3)}
-    .login-btn:hover,.login-btn:focus{box-shadow:0 8px 38px rgba(201,168,76,.45);transform:translateY(-2px);background:linear-gradient(145deg,var(--gold),var(--gold2))}
-    .login-btn:active{transform:translateY(0)}
-    .login-footer{text-align:center;margin-top:24px;font-size:10px;color:var(--tx3);letter-spacing:.04em}
+      letter-spacing:.18em;text-transform:uppercase;transition:all .35s;
+      box-shadow:0 5px 26px rgba(201,168,76,.3)}
+    .btn-gold:hover:not(:disabled){box-shadow:0 8px 36px rgba(201,168,76,.44);transform:translateY(-2px);background:linear-gradient(145deg,var(--gold),var(--gold2))}
+    .btn-gold:active{transform:translateY(0)}
+    .btn-gold:disabled{opacity:.5;cursor:not-allowed}
+    .card-footer{text-align:center;margin-top:20px;font-size:10px;color:var(--tx3);letter-spacing:.04em}
+
+    /* ── CONFIG SCREEN ── */
+    .cfg-hdg{font-size:16px;font-family:'Playfair Display',serif;color:var(--tx);text-align:center;margin-bottom:4px}
+    .cfg-sub{font-size:12px;color:var(--tx2);text-align:center;line-height:1.6;margin-bottom:18px}
+    .cfg-steps{background:var(--s2);border-radius:8px;padding:13px 15px;margin-bottom:16px;
+      font-size:11.5px;color:var(--tx2);line-height:1.85}
+    .cfg-steps b{color:var(--gold)}
+    .f-grp{display:flex;flex-direction:column;margin-bottom:12px}
+    .f-lbl{font-size:10px;color:var(--tx2);text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:5px}
+    .f-hint{font-size:10px;color:var(--tx3);margin-top:4px;line-height:1.5}
+    .f-link{color:var(--gold);text-decoration:none}
+    .f-link:hover{text-decoration:underline}
+    .msg-err{background:rgba(201,76,76,.11);border:1px solid rgba(201,76,76,.33);border-radius:7px;
+      padding:10px 14px;font-size:12px;color:#E07070;margin-bottom:12px;line-height:1.55}
+    .msg-ok{background:rgba(61,170,106,.11);border:1px solid rgba(61,170,106,.33);border-radius:7px;
+      padding:10px 14px;font-size:12px;color:#5DBA8A;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+
+    /* ── LOADING FULL ── */
+    .loading-full{height:100vh;display:flex;flex-direction:column;align-items:center;
+      justify-content:center;gap:18px;background:var(--bg)}
+    .spin-ring{width:30px;height:30px;border:2.5px solid var(--bd);border-top-color:var(--gold);
+      border-radius:50%;animation:spin 1s linear infinite}
 
     /* ── LAYOUT ── */
     .layout{display:grid;grid-template-columns:252px 1fr 286px;height:100vh;overflow:hidden}
 
     /* ── SIDEBAR ── */
     .sidebar{background:var(--s1);border-right:1px solid var(--bd2);display:flex;flex-direction:column;overflow:hidden}
-    .sb-hd{padding:18px 15px 15px;border-bottom:1px solid var(--bd2)}
+    .sb-hd{padding:18px 14px 15px;border-bottom:1px solid var(--bd2)}
     .sb-logo{display:flex;align-items:center;gap:9px}
-    .logo-sello{width:34px;height:34px;border:1.5px solid var(--gold);border-radius:50%;
+    .l-sello{width:36px;height:36px;border:1.5px solid var(--gold);border-radius:50%;
       display:flex;align-items:center;justify-content:center;
-      font-family:'Playfair Display',serif;font-size:9.5px;color:var(--gold);flex-shrink:0;letter-spacing:.03em}
-    .logo-nm{font-family:'Playfair Display',serif;font-size:13px;font-weight:700;color:var(--tx)}
-    .logo-sb{font-size:9px;color:var(--gold);letter-spacing:.18em;text-transform:uppercase;margin-top:1px}
+      font-family:'Playfair Display',serif;font-size:8px;color:var(--gold);
+      flex-shrink:0;text-align:center;line-height:1.25;padding:4px}
+    .l-nm{font-family:'Playfair Display',serif;font-size:12px;font-weight:700;color:var(--tx);line-height:1.3}
+    .l-sb{font-size:9px;color:var(--gold);letter-spacing:.16em;text-transform:uppercase;margin-top:1px}
     .sb-body{flex:1;overflow-y:auto;padding:10px 10px 0}
     .sb-sec{font-size:9px;color:var(--tx3);text-transform:uppercase;letter-spacing:.14em;padding:8px 6px 5px}
     .stat-row{display:flex;align-items:center;justify-content:space-between;padding:8px 11px;background:var(--s2);border-radius:7px;margin-bottom:4px}
-    .stat-lbl{font-size:11.5px;color:var(--tx2)}
+    .stat-lbl{font-size:11px;color:var(--tx2)}
     .stat-val{font-family:'Playfair Display',serif;font-size:20px;color:var(--tx);line-height:1}
     .abg-row{display:flex;align-items:center;gap:9px;padding:6px 7px;border-radius:7px;cursor:pointer;transition:background .14s}
     .abg-row:hover{background:var(--s2)}
-    .abg-row.activo{background:var(--s3)}
+    .abg-row.on{background:var(--s3)}
     .av{width:29px;height:29px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#000;flex-shrink:0}
-    .an{font-size:12.5px;color:var(--tx);font-weight:500;line-height:1.25}
-    .ar{font-size:10px;color:var(--tx2)}
-    .sb-ft{padding:9px 12px;border-top:1px solid var(--bd2);font-size:9.5px;color:var(--tx3);text-align:center}
+    .a-nm{font-size:12px;color:var(--tx);font-weight:500;line-height:1.25}
+    .a-rl{font-size:10px;color:var(--tx2)}
+    .sb-ft{padding:8px 12px;border-top:1px solid var(--bd2)}
+    .sb-date{font-size:9px;color:var(--tx3);text-align:center;margin-bottom:5px}
+    .sync-row{display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:7px}
+    .sync-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;transition:background .4s}
+    .sync-lbl{font-size:9.5px;letter-spacing:.05em;transition:color .4s}
+    .cfg-btn{width:100%;padding:7px;background:var(--s2);border:1px solid var(--bd2);border-radius:6px;
+      color:var(--tx2);font-size:10.5px;cursor:pointer;transition:all .2s;
+      display:flex;align-items:center;justify-content:center;gap:5px}
+    .cfg-btn:hover{border-color:var(--gold3);color:var(--gold)}
 
     /* ── MAIN ── */
     .main{display:flex;flex-direction:column;overflow:hidden;background:var(--bg)}
@@ -171,48 +173,69 @@
     .nav-btn:hover{border-color:var(--gold);color:var(--gold)}
     .mes-tit{font-family:'Playfair Display',serif;font-size:18px;color:var(--tx)}
     .anio-lb{font-size:13px;color:var(--tx2);margin-left:5px}
-    .hoy-btn{background:none;border:1px solid var(--bd2);border-radius:5px;color:var(--tx2);font-size:10px;padding:4px 9px;letter-spacing:.06em;transition:all .2s}
+    .hoy-btn{background:none;border:1px solid var(--bd2);border-radius:5px;color:var(--tx2);
+      font-size:10px;padding:4px 9px;letter-spacing:.06em;transition:all .2s}
     .hoy-btn:hover{border-color:var(--gold3);color:var(--gold)}
     .vtabs{display:flex;gap:2px;background:var(--s2);padding:3px;border-radius:8px}
-    .vtab{padding:5px 12px;border:none;background:transparent;color:var(--tx2);font-size:11px;font-weight:500;border-radius:6px;letter-spacing:.04em;transition:all .15s}
+    .vtab{padding:5px 12px;border:none;background:transparent;color:var(--tx2);font-size:11px;
+      font-weight:500;border-radius:6px;letter-spacing:.04em;transition:all .15s}
     .vtab.on{background:var(--s4);color:var(--gold)}
     .vtab:hover:not(.on){color:var(--tx)}
-    .add-btn{padding:8px 15px;background:linear-gradient(135deg,var(--gold3),var(--gold));border:none;border-radius:7px;color:#08060A;font-size:12px;font-weight:700;letter-spacing:.08em;transition:all .2s;white-space:nowrap}
+    .add-btn{padding:8px 15px;background:linear-gradient(135deg,var(--gold3),var(--gold));border:none;
+      border-radius:7px;color:#08060A;font-size:12px;font-weight:700;letter-spacing:.08em;
+      transition:all .2s;white-space:nowrap}
     .add-btn:hover{box-shadow:0 4px 20px rgba(201,168,76,.4);transform:translateY(-1px)}
     .cal-scroll{flex:1;overflow-y:auto;padding:13px}
 
-    /* ── GRILLA MENSUAL ── */
-    .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--bd2);border:1px solid var(--bd2);border-radius:10px;overflow:hidden}
-    .cal-hdr{background:var(--s1);text-align:center;padding:8px 4px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--tx2)}
-    .cal-cell{background:var(--s1);min-height:102px;padding:6px;cursor:pointer;transition:background .12s;position:relative;display:flex;flex-direction:column}
+    /* ── SKELETON ── */
+    .skel{background:linear-gradient(90deg,var(--s2) 25%,var(--s3) 50%,var(--s2) 75%);
+      background-size:400px 100%;animation:shimmer 1.4s infinite;border-radius:6px}
+    .skel-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;
+      background:var(--bd2);border-radius:10px;overflow:hidden}
+
+    /* ── GRILLA MES ── */
+    .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;background:var(--bd2);
+      border:1px solid var(--bd2);border-radius:10px;overflow:hidden}
+    .cal-hdr{background:var(--s1);text-align:center;padding:8px 4px;font-size:10px;
+      font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--tx2)}
+    .cal-cell{background:var(--s1);min-height:102px;padding:6px;cursor:pointer;
+      transition:background .12s;position:relative;display:flex;flex-direction:column}
     .cal-cell:hover{background:var(--s2)}
     .cal-cell.otra{background:var(--bg)}
     .cal-cell.hoy{background:var(--s2)}
     .cal-cell.hoy::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold)}
-    .dn{font-size:12.5px;font-weight:500;color:var(--tx2);width:24px;height:24px;display:flex;align-items:center;justify-content:center;border-radius:50%;margin-bottom:4px}
+    .dn{font-size:12.5px;font-weight:500;color:var(--tx2);width:24px;height:24px;
+      display:flex;align-items:center;justify-content:center;border-radius:50%;margin-bottom:4px}
     .cal-cell.hoy .dn{background:var(--gold);color:#08060A;font-weight:700}
-    .chip{padding:2px 5px;border-radius:3px;font-size:10px;color:#fff;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;transition:opacity .14s;font-weight:500}
+    .chip{padding:2px 5px;border-radius:3px;font-size:10px;color:#fff;margin-bottom:2px;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;transition:opacity .14s;font-weight:500}
     .chip:hover{opacity:.8}
     .mas{font-size:9px;color:var(--gold);margin-top:1px;font-weight:500;cursor:pointer}
 
     /* ── SEMANA ── */
     .wk-wrap{overflow-y:auto}
-    .wk-hdr{display:grid;grid-template-columns:50px repeat(7,1fr);border-bottom:1px solid var(--bd2);position:sticky;top:0;background:var(--s1);z-index:5}
+    .wk-hdr{display:grid;grid-template-columns:50px repeat(7,1fr);border-bottom:1px solid var(--bd2);
+      position:sticky;top:0;background:var(--s1);z-index:5}
     .wk-dhdr{padding:8px 4px;text-align:center;font-size:11px;color:var(--tx2)}
     .wk-dhdr.hoy-col{color:var(--gold);font-weight:600}
     .wk-body{display:grid;grid-template-columns:50px repeat(7,1fr)}
-    .wk-tlbl{height:54px;display:flex;align-items:flex-start;padding:4px 7px 0 0;justify-content:flex-end;font-size:9px;color:var(--tx3)}
+    .wk-tlbl{height:54px;display:flex;align-items:flex-start;padding:4px 7px 0 0;
+      justify-content:flex-end;font-size:9px;color:var(--tx3)}
     .wk-dcol{border-left:1px solid var(--bd2);position:relative}
     .wk-hcel{height:54px;border-bottom:1px solid var(--bd2);cursor:pointer;transition:background .1s}
     .wk-hcel:hover{background:rgba(201,168,76,.03)}
 
     /* ── DÍA ── */
-    .dia-hdr{padding:10px 13px;border-bottom:1px solid var(--bd2);font-family:'Playfair Display',serif;font-size:15px;color:var(--tx)}
+    .dia-hdr{padding:10px 13px;border-bottom:1px solid var(--bd2);
+      font-family:'Playfair Display',serif;font-size:15px;color:var(--tx)}
 
     /* ── LISTA ── */
     .list-view{display:flex;flex-direction:column;gap:10px}
-    .list-gt{font-family:'Playfair Display',serif;font-size:13px;color:var(--tx2);padding:6px 0 4px;border-bottom:1px solid var(--bd2);margin-bottom:4px}
-    .list-card{background:var(--s1);border:1px solid var(--bd2);border-radius:9px;padding:11px 13px;cursor:pointer;transition:all .2s;display:flex;align-items:flex-start;gap:11px}
+    .list-gt{font-family:'Playfair Display',serif;font-size:13px;color:var(--tx2);
+      padding:6px 0 4px;border-bottom:1px solid var(--bd2);margin-bottom:4px}
+    .list-card{background:var(--s1);border:1px solid var(--bd2);border-radius:9px;
+      padding:11px 13px;cursor:pointer;transition:all .2s;
+      display:flex;align-items:flex-start;gap:11px}
     .list-card:hover{background:var(--s2);border-color:var(--bd);transform:translateX(2px)}
     .list-bar{width:4px;border-radius:2px;min-height:36px;align-self:stretch;flex-shrink:0}
     .list-tit{font-size:13px;font-weight:500;color:var(--tx);margin-bottom:3px}
@@ -221,408 +244,407 @@
     /* ── PANEL DERECHO ── */
     .rpanel{background:var(--s1);border-left:1px solid var(--bd2);display:flex;flex-direction:column;overflow:hidden}
     .rp-tabs{display:flex;border-bottom:1px solid var(--bd2)}
-    .rptab{flex:1;padding:12px 6px;border:none;background:transparent;color:var(--tx2);font-size:10.5px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;border-bottom:2px solid transparent;transition:all .2s}
+    .rptab{flex:1;padding:12px 6px;border:none;background:transparent;color:var(--tx2);
+      font-size:10.5px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;
+      border-bottom:2px solid transparent;transition:all .2s}
     .rptab.on{color:var(--gold);border-bottom-color:var(--gold)}
     .rp-body{flex:1;overflow-y:auto;padding:13px}
-    .up-item{padding:10px 11px;border:1px solid var(--bd2);border-radius:8px;margin-bottom:6px;cursor:pointer;transition:all .2s;position:relative}
+    .up-item{padding:10px 11px;border:1px solid var(--bd2);border-radius:8px;margin-bottom:6px;
+      cursor:pointer;transition:all .2s;position:relative}
     .up-item:hover{background:var(--s2)}
     .up-dot{position:absolute;top:10px;right:10px;width:7px;height:7px;border-radius:50%}
-    .up-tit{font-size:12.5px;font-weight:500;color:var(--tx);margin-bottom:2px;padding-right:18px;line-height:1.35}
+    .up-tit{font-size:12.5px;font-weight:500;color:var(--tx);margin-bottom:2px;
+      padding-right:18px;line-height:1.35}
     .up-fecha{font-size:10.5px;color:var(--tx2)}
     .av-row{display:flex;gap:3px;margin-top:5px}
-    .mav{width:20px;height:20px;border-radius:50%;font-size:8px;font-weight:700;display:flex;align-items:center;justify-content:center;color:#000}
-    .al-item{padding:11px 12px;border-radius:8px;margin-bottom:7px;border:1px solid;cursor:pointer;transition:all .2s}
+    .mav{width:20px;height:20px;border-radius:50%;font-size:8px;font-weight:700;
+      display:flex;align-items:center;justify-content:center;color:#000}
+    .al-item{padding:11px 12px;border-radius:8px;margin-bottom:7px;border:1px solid;
+      cursor:pointer;transition:opacity .2s}
     .al-item:hover{opacity:.85}
     .al-tit{font-size:12.5px;font-weight:600;margin-bottom:3px}
     .al-fecha{font-size:11px;color:var(--tx2)}
-    .al-badge{display:inline-block;padding:2px 9px;border-radius:10px;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-top:5px}
+    .al-badge{display:inline-block;padding:2px 9px;border-radius:10px;font-size:9.5px;
+      font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-top:5px}
     .vacio{text-align:center;padding:36px 14px;color:var(--tx3)}
     .vacio-ic{font-size:30px;margin-bottom:10px}
     .vacio-tx{font-size:12px}
-    .al-cnt{background:#FF4444;border-radius:50%;width:15px;height:15px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;margin-left:4px;vertical-align:middle}
+    .al-cnt{background:#FF4444;border-radius:50%;width:15px;height:15px;display:inline-flex;
+      align-items:center;justify-content:center;font-size:9px;font-weight:700;color:#fff;
+      margin-left:4px;vertical-align:middle}
 
     /* ── MODAL ── */
-    .modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(6px)}
-    .modal-box{background:var(--s1);border:1px solid var(--bd);border-radius:14px;width:min(560px,calc(100vw - 24px));max-height:92vh;overflow-y:auto;box-shadow:0 40px 80px rgba(0,0,0,.8);animation:fadeIn .22s ease}
-    .modal-hd{padding:16px 20px 13px;border-bottom:1px solid var(--bd2);display:flex;align-items:center;justify-content:space-between}
+    .modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.8);display:flex;
+      align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(6px)}
+    .modal-box{background:var(--s1);border:1px solid var(--bd);border-radius:14px;
+      width:min(560px,calc(100vw - 24px));max-height:92vh;overflow-y:auto;
+      box-shadow:0 40px 80px rgba(0,0,0,.8);animation:fadeIn .22s ease}
+    .modal-hd{padding:16px 20px 13px;border-bottom:1px solid var(--bd2);
+      display:flex;align-items:center;justify-content:space-between}
     .modal-tit{font-family:'Playfair Display',serif;font-size:17px;color:var(--tx)}
-    .modal-x{background:none;border:none;color:var(--tx2);font-size:18px;padding:4px;transition:color .2s;line-height:1}
+    .modal-x{background:none;border:none;color:var(--tx2);font-size:18px;padding:4px;
+      transition:color .2s;line-height:1}
     .modal-x:hover{color:var(--tx)}
     .modal-bd{padding:15px 20px;display:flex;flex-direction:column;gap:12px}
-    .modal-ft{padding:12px 20px 16px;border-top:1px solid var(--bd2);display:flex;gap:8px;justify-content:flex-end}
+    .modal-ft{padding:12px 20px 16px;border-top:1px solid var(--bd2);
+      display:flex;gap:8px;justify-content:flex-end}
     .f-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-    .f-grp{display:flex;flex-direction:column}
-    .f-lbl{font-size:10.5px;color:var(--tx2);text-transform:uppercase;letter-spacing:.08em;display:block;margin-bottom:5px}
-    .chk-row{display:flex;align-items:center;gap:8px;padding:7px 9px;border:1px solid var(--bd2);border-radius:6px;cursor:pointer;transition:all .14s;margin-bottom:3px}
+    .m-lbl{font-size:10.5px;color:var(--tx2);text-transform:uppercase;letter-spacing:.08em;
+      display:block;margin-bottom:5px}
+    .chk-row{display:flex;align-items:center;gap:8px;padding:7px 9px;border:1px solid var(--bd2);
+      border-radius:6px;cursor:pointer;transition:all .14s;margin-bottom:3px}
     .chk-row:hover{background:var(--s2)}
     .chk-row.on{background:var(--s2)}
     .chk-lbl{font-size:12.5px;color:var(--tx);line-height:1.2}
     .chk-sub{font-size:10px;color:var(--tx2)}
-    .alertas-grid{display:grid;grid-template-columns:1fr 1fr;gap:3px}
-    .btn-p{padding:9px 20px;background:linear-gradient(135deg,var(--gold3),var(--gold));border:none;border-radius:7px;color:#08060A;font-size:12.5px;font-weight:700;transition:all .2s}
-    .btn-p:hover{box-shadow:0 4px 18px rgba(201,168,76,.38)}
-    .btn-s{padding:9px 20px;background:transparent;border:1px solid var(--bd);border-radius:7px;color:var(--tx2);font-size:12.5px;transition:all .2s}
-    .btn-s:hover{border-color:var(--tx2);color:var(--tx)}
-    .btn-d{padding:9px 20px;background:transparent;border:1px solid #B84040;border-radius:7px;color:#C44C4C;font-size:12.5px;transition:all .2s}
-    .btn-d:hover{background:rgba(180,60,60,.12)}
+    .al-grid{display:grid;grid-template-columns:1fr 1fr;gap:3px}
+    .btn-p{padding:9px 20px;background:linear-gradient(135deg,var(--gold3),var(--gold));border:none;
+      border-radius:7px;color:#08060A;font-size:12.5px;font-weight:700;transition:all .2s}
+    .btn-p:hover:not(:disabled){box-shadow:0 4px 18px rgba(201,168,76,.38)}
+    .btn-p:disabled,.btn-s:disabled,.btn-d:disabled{opacity:.5;cursor:not-allowed}
+    .btn-s{padding:9px 20px;background:transparent;border:1px solid var(--bd);border-radius:7px;
+      color:var(--tx2);font-size:12.5px;transition:all .2s}
+    .btn-s:hover:not(:disabled){border-color:var(--tx2);color:var(--tx)}
+    .btn-d{padding:9px 20px;background:transparent;border:1px solid #B84040;border-radius:7px;
+      color:#C44C4C;font-size:12.5px;transition:all .2s}
+    .btn-d:hover:not(:disabled){background:rgba(180,60,60,.12)}
 
     /* ── TOAST ── */
-    .toast{position:fixed;bottom:calc(20px + var(--safe-b));right:20px;background:var(--s3);
-      border:1px solid var(--gold3);border-radius:9px;padding:11px 18px;font-size:13px;
-      color:var(--tx);z-index:200;box-shadow:0 12px 34px rgba(0,0,0,.5);
-      animation:slideUp .3s ease;pointer-events:none}
+    .toast{position:fixed;bottom:calc(20px + var(--safe-b));right:20px;
+      background:var(--s3);border:1px solid var(--gold3);border-radius:9px;
+      padding:11px 18px;font-size:13px;color:var(--tx);z-index:300;
+      box-shadow:0 12px 34px rgba(0,0,0,.5);animation:slideUp .3s ease;pointer-events:none;max-width:320px}
+    .toast.err{border-color:#993333;background:#180D0D}
+    .toast.ok{border-color:var(--green)}
+
+    /* ── OFFLINE ── */
+    .badge-off{position:fixed;top:calc(6px + var(--safe-t));left:50%;transform:translateX(-50%);
+      background:#C94C4C;color:#fff;font-size:11px;font-weight:600;
+      padding:4px 14px;border-radius:20px;z-index:400;letter-spacing:.06em;animation:slideUp .3s ease}
   </style>
 </head>
 <body>
 
-  <!-- SPLASH SCREEN -->
-  <div id="splash">
-    <div class="sp-sello">G&amp;A</div>
-    <div class="sp-nm">González &amp; Asociados</div>
-    <div class="sp-sb">Estudio Jurídico</div>
-    <div class="sp-spin"></div>
-  </div>
+<div id="splash">
+  <div class="sp-sello">M.S.<br>&amp;A.</div>
+  <div class="sp-nm">Mariana Sánchez &amp; Asociados</div>
+  <div class="sp-sb">Estudio Jurídico</div>
+  <div class="sp-spin"></div>
+</div>
 
-  <div id="root"></div>
+<div id="root"></div>
 
-  <script type="text/babel">
-    const { useState, useEffect, useRef } = React;
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+const { createClient } = window.supabase;
 
-    /* ═══════════════════════════
-       CONSTANTES
-    ═══════════════════════════ */
-    const FIRMA = { nombre:"González & Asociados", sub:"Estudio Jurídico" };
+/* ═══════════════════ CONSTANTES ═══════════════════ */
+const FIRMA = { nombre:"MARIANA SÁNCHEZ & ASOCIADOS", sub:"Estudio Jurídico" };
 
-    const ABOGADOS = [
-      { id:"p",  nombre:"Dra. María González", rol:"Socia Principal",   color:"#C9A84C", ini:"MG", principal:true  },
-      { id:"a1", nombre:"Dr. Carlos Mendoza",  rol:"Abogado Asociado",  color:"#5491C8", ini:"CM", principal:false },
-      { id:"a2", nombre:"Dra. Ana Rivas",      rol:"Abogada Asociada",  color:"#4DAAA0", ini:"AR", principal:false },
-      { id:"a3", nombre:"Dr. Pablo Torres",    rol:"Abogado Asociado",  color:"#8E6DC4", ini:"PT", principal:false },
-      { id:"a4", nombre:"Dra. Laura Vega",     rol:"Abogada Asociada",  color:"#C46D6D", ini:"LV", principal:false },
-    ];
+const ABOGADOS = [
+  { id:"p",  nombre:"Dra. Mariana Sánchez", rol:"Socia Principal",   color:"#C9A84C", ini:"MS", principal:true  },
+  { id:"a1", nombre:"Dr. Carlos Mendoza",   rol:"Abogado Asociado",  color:"#5491C8", ini:"CM", principal:false },
+  { id:"a2", nombre:"Dra. Ana Rivas",       rol:"Abogada Asociada",  color:"#4DAAA0", ini:"AR", principal:false },
+  { id:"a3", nombre:"Dr. Pablo Torres",     rol:"Abogado Asociado",  color:"#8E6DC4", ini:"PT", principal:false },
+  { id:"a4", nombre:"Dra. Laura Vega",      rol:"Abogada Asociada",  color:"#C46D6D", ini:"LV", principal:false },
+];
 
-    const TIPOS = [
-      { id:"audiencia",   label:"Audiencia",   icon:"⚖️" },
-      { id:"reunion",     label:"Reunión",     icon:"🤝" },
-      { id:"vencimiento", label:"Vencimiento", icon:"⏰" },
-      { id:"consulta",    label:"Consulta",    icon:"💼" },
-      { id:"peritaje",    label:"Peritaje",    icon:"🔍" },
-      { id:"otro",        label:"Otro",        icon:"📋" },
-    ];
+const TIPOS = [
+  { id:"audiencia",   label:"Audiencia",   icon:"⚖️" },
+  { id:"reunion",     label:"Reunión",     icon:"🤝" },
+  { id:"vencimiento", label:"Vencimiento", icon:"⏰" },
+  { id:"consulta",    label:"Consulta",    icon:"💼" },
+  { id:"peritaje",    label:"Peritaje",    icon:"🔍" },
+  { id:"otro",        label:"Otro",        icon:"📋" },
+];
 
-    const ALERTAS_OPTS = [
-      { id:"72h", label:"3 días antes",   horas:72  },
-      { id:"48h", label:"2 días antes",   horas:48  },
-      { id:"24h", label:"1 día antes",    horas:24  },
-      { id:"12h", label:"12 horas antes", horas:12  },
-      { id:"3h",  label:"3 horas antes",  horas:3   },
-      { id:"1h",  label:"1 hora antes",   horas:1   },
-      { id:"30m", label:"30 min antes",   horas:0.5 },
-    ];
+const AL_OPTS = [
+  { id:"72h", label:"3 días antes",   h:72  },
+  { id:"48h", label:"2 días antes",   h:48  },
+  { id:"24h", label:"1 día antes",    h:24  },
+  { id:"12h", label:"12 horas antes", h:12  },
+  { id:"3h",  label:"3 horas antes",  h:3   },
+  { id:"1h",  label:"1 hora antes",   h:1   },
+  { id:"30m", label:"30 min antes",   h:.5  },
+];
 
-    const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
-    const DIAS  = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
+const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+const DIAS  = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
 
-    const genId    = () => `e_${Date.now()}_${Math.random().toString(36).slice(2,6)}`;
-    const hoyStr   = () => new Date().toISOString().split("T")[0];
-    const fmtFecha = (ds) => new Date(ds+"T12:00:00").toLocaleDateString("es-AR",{weekday:"long",day:"numeric",month:"long"});
+const genId    = () => `e_${Date.now()}_${Math.random().toString(36).slice(2,6)}`;
+const hoyStr   = () => new Date().toISOString().split("T")[0];
+const fmtFecha = (ds) => new Date(ds+"T12:00:00").toLocaleDateString("es-AR",{weekday:"long",day:"numeric",month:"long"});
 
-    const estadoAlerta = (fecha, hora) => {
-      const ahora = new Date();
-      const dt    = new Date(`${fecha}T${hora||"00:00"}`);
-      const h     = (dt - ahora) / 3600000;
-      if (h < 0)   return null;
-      if (h <= 1)  return { lvl:"critico", color:"#FF3B3B", label:"¡Menos de 1 hora!", pulso:true  };
-      if (h <= 24) return { lvl:"urgente", color:"#FF6633", label:"Hoy",               pulso:true  };
-      if (h <= 48) return { lvl:"alto",    color:"#FF9933", label:"Mañana",            pulso:false };
-      if (h <= 72) return { lvl:"medio",   color:"#C9A84C", label:"En 2-3 días",       pulso:false };
-      return null;
-    };
+const alerta = (fecha, hora) => {
+  const h = (new Date(`${fecha}T${hora||"00:00"}`) - new Date()) / 3600000;
+  if (h<0)   return null;
+  if (h<=1)  return {color:"#FF3B3B",label:"¡Menos de 1 hora!",pulso:true};
+  if (h<=24) return {color:"#FF6633",label:"Hoy",pulso:true};
+  if (h<=48) return {color:"#FF9933",label:"Mañana",pulso:false};
+  if (h<=72) return {color:"#C9A84C",label:"En 2-3 días",pulso:false};
+  return null;
+};
 
-    const colorEvento = (ev) => {
-      const al = estadoAlerta(ev.date, ev.startTime);
-      if (al?.lvl==="critico") return "#FF3B3B";
-      if (al?.lvl==="urgente") return "#FF6633";
-      return ABOGADOS.find(l=>l.id===ev.lawyers?.[0])?.color || "#C9A84C";
-    };
+const colorEv = (ev) => {
+  const a = alerta(ev.date, ev.startTime);
+  if (a?.color==="FF3B3B"||a?.label==="¡Menos de 1 hora!") return "#FF3B3B";
+  if (a?.label==="Hoy") return "#FF6633";
+  return ABOGADOS.find(l=>l.id===ev.lawyers?.[0])?.color||"#C9A84C";
+};
 
-    const mkMuestras = () => {
-      const d = (n) => { const x=new Date(); x.setDate(x.getDate()+n); return x.toISOString().split("T")[0]; };
-      return [
-        { id:genId(), title:"Audiencia – Rodríguez vs. Martínez",      type:"audiencia",   date:d(1),  startTime:"09:00", endTime:"11:30", lawyers:["p","a1"], alerts:["72h","24h","3h"],            court:"Juzgado Civil N°3",     expNum:"EXP-2025-0892", notes:"Llevar expediente completo. Sala 4, piso 3." },
-        { id:genId(), title:"Vencimiento Escrito de Contestación",      type:"vencimiento", date:d(2),  startTime:"17:00", endTime:"17:00", lawyers:["a2"],     alerts:["72h","48h","24h","3h","1h"], court:"",                      expNum:"EXP-2025-0456", notes:"Presentar en mesa de entradas. 3 copias selladas." },
-        { id:genId(), title:"Reunión – Familia García",                 type:"reunion",     date:d(4),  startTime:"14:00", endTime:"15:30", lawyers:["p","a3"], alerts:["24h","1h"],                  court:"",                      expNum:"",              notes:"Sucesión inmobiliaria. Revisar borrador convenio." },
-        { id:genId(), title:"Consulta Inicial – Fernández SA",          type:"consulta",    date:d(7),  startTime:"11:00", endTime:"12:00", lawyers:["a4"],     alerts:["24h"],                       court:"",                      expNum:"",              notes:"Derecho laboral – despidos masivos." },
-        { id:genId(), title:"Peritaje Contable – Caso Herrera",         type:"peritaje",    date:d(10), startTime:"10:00", endTime:"13:00", lawyers:["p","a1","a2"], alerts:["72h","24h"],            court:"Juzgado Comercial N°5", expNum:"EXP-2024-1234", notes:"Con perito contador López." },
-        { id:genId(), title:"Audiencia de Vista de Causa – Caso Pérez", type:"audiencia",   date:d(14), startTime:"08:30", endTime:"12:00", lawyers:["p"],      alerts:["72h","24h","3h"],            court:"Cámara de Apelaciones", expNum:"EXP-2024-0567", notes:"Juicio oral. Preparar alegato final." },
-        { id:genId(), title:"Mediación – Constructora Andina",          type:"reunion",     date:d(5),  startTime:"16:00", endTime:"18:00", lawyers:["a3","a4"], alerts:["48h","24h","1h"],           court:"Centro de Mediación",   expNum:"MED-2025-0023", notes:"Primera audiencia. Propuesta lista." },
-        { id:genId(), title:"Consulta – Divorcio Vincular López",       type:"consulta",    date:d(3),  startTime:"10:30", endTime:"11:30", lawyers:["a2"],     alerts:["24h","1h"],                  court:"",                      expNum:"",              notes:"Segunda entrevista. Traer documentación." },
-      ];
-    };
+/* ── Conversión app ↔ Supabase ── */
+const toDB = ev => ({
+  id: ev.id, title: ev.title, type: ev.type, date: ev.date,
+  start_time: ev.startTime, end_time: ev.endTime,
+  lawyers: ev.lawyers||[], alerts: ev.alerts||[],
+  court: ev.court||'', exp_num: ev.expNum||'', notes: ev.notes||'',
+});
+const fromDB = r => ({
+  id:r.id, title:r.title, type:r.type, date:r.date,
+  startTime:r.start_time, endTime:r.end_time,
+  lawyers:r.lawyers||[], alerts:r.alerts||[],
+  court:r.court||'', expNum:r.exp_num||'', notes:r.notes||'',
+});
 
-    /* ═══════════════════════════
-       HOOK PWA
-    ═══════════════════════════ */
-    function usePWA() {
-      const [deferredPrompt, setDeferredPrompt] = useState(null);
-      const [showInstall,    setShowInstall]    = useState(false);
-      const [isOffline,      setIsOffline]      = useState(!navigator.onLine);
-      const [showUpdate,     setShowUpdate]     = useState(false);
-      const swReg = useRef(null);
+const mkMuestras = () => {
+  const d = n=>{const x=new Date();x.setDate(x.getDate()+n);return x.toISOString().split("T")[0];};
+  return [
+    {id:genId(),title:"Audiencia – Rodríguez vs. Martínez",   type:"audiencia",  date:d(1), startTime:"09:00",endTime:"11:30",lawyers:["p","a1"],alerts:["72h","24h","3h"],court:"Juzgado Civil N°3",   expNum:"EXP-2025-0892",notes:"Llevar expediente completo. Sala 4, piso 3."},
+    {id:genId(),title:"Vencimiento Escrito de Contestación",  type:"vencimiento",date:d(2), startTime:"17:00",endTime:"17:00",lawyers:["a2"],     alerts:["72h","48h","24h","1h"],court:"",               expNum:"EXP-2025-0456",notes:"Presentar en mesa de entradas. 3 copias."},
+    {id:genId(),title:"Reunión – Familia García",             type:"reunion",    date:d(4), startTime:"14:00",endTime:"15:30",lawyers:["p","a3"], alerts:["24h","1h"],court:"",                            expNum:"",             notes:"Sucesión inmobiliaria. Revisar borrador."},
+    {id:genId(),title:"Consulta Inicial – Fernández SA",      type:"consulta",   date:d(7), startTime:"11:00",endTime:"12:00",lawyers:["a4"],     alerts:["24h"],court:"",                                 expNum:"",             notes:"Derecho laboral – despidos masivos."},
+    {id:genId(),title:"Peritaje Contable – Caso Herrera",     type:"peritaje",   date:d(10),startTime:"10:00",endTime:"13:00",lawyers:["p","a1","a2"],alerts:["72h","24h"],court:"Juzgado Comercial N°5",expNum:"EXP-2024-1234",notes:"Con perito contador López."},
+  ];
+};
 
-      useEffect(() => {
-        // Service Worker
-        if ('serviceWorker' in navigator) {
-          navigator.serviceWorker.register('./sw.js')
-            .then(reg => {
-              swReg.current = reg;
-              reg.addEventListener('updatefound', () => {
-                const newSW = reg.installing;
-                newSW.addEventListener('statechange', () => {
-                  if (newSW.state === 'installed' && navigator.serviceWorker.controller) {
-                    setShowUpdate(true);
-                  }
-                });
-              });
-            })
-            .catch(err => console.warn('[PWA] SW no pudo registrarse:', err));
-        }
+/* ═══════════════════ PANTALLA CONFIG ═══════════════════ */
+function PantallaConfig({ onConectado }) {
+  const [url, setUrl] = useState(localStorage.getItem("sb_url")||"");
+  const [key, setKey] = useState(localStorage.getItem("sb_key")||"");
+  const [busy, setBusy] = useState(false);
+  const [err,  setErr]  = useState("");
+  const [ok,   setOk]   = useState(false);
 
-        // Install prompt
-        const handler = (e) => { e.preventDefault(); setDeferredPrompt(e); setShowInstall(true); };
-        window.addEventListener('beforeinstallprompt', handler);
+  const conectar = async () => {
+    setErr(""); setOk(false);
+    if (!url.trim()||!key.trim()) { setErr("Completá los dos campos."); return; }
+    if (!url.includes("supabase")) { setErr("La URL no parece válida. Debe contener 'supabase.co'."); return; }
+    setBusy(true);
+    try {
+      const sb = createClient(url.trim(), key.trim());
+      const { error } = await sb.from("eventos").select("id").limit(1);
+      if (error) {
+        if (error.code==="42P01") throw new Error("La tabla 'eventos' no existe. Ejecutá schema.sql en el SQL Editor de Supabase primero.");
+        if (error.message?.includes("JWT")||error.message?.includes("Invalid API")) throw new Error("Clave inválida. Verificá que copiaste la clave 'anon public'.");
+        throw new Error(error.message);
+      }
+      localStorage.setItem("sb_url", url.trim());
+      localStorage.setItem("sb_key", key.trim());
+      setOk(true);
+      setTimeout(() => onConectado(sb), 900);
+    } catch(e) {
+      setErr(e.message);
+    } finally { setBusy(false); }
+  };
 
-        // Online/Offline
-        const goOffline = () => setIsOffline(true);
-        const goOnline  = () => setIsOffline(false);
-        window.addEventListener('offline', goOffline);
-        window.addEventListener('online',  goOnline);
+  return (
+    <div className="pant-bg">
+      <div className="card">
+        <div className="sello">M.S.<br/>&amp;A.</div>
+        <div className="firma">MARIANA SÁNCHEZ<br/>&amp; ASOCIADOS</div>
+        <div className="firma-sub">Estudio Jurídico</div>
+        <hr className="divider"/>
 
-        // URL params (shortcuts)
-        const params = new URLSearchParams(window.location.search);
-        if (params.get('action') === 'alertas') window._openAlertas = true;
+        <div className="cfg-hdg">Conectar con Supabase</div>
+        <div className="cfg-sub">Base de datos en la nube para sincronización en tiempo real entre dispositivos.</div>
 
-        return () => {
-          window.removeEventListener('beforeinstallprompt', handler);
-          window.removeEventListener('offline', goOffline);
-          window.removeEventListener('online',  goOnline);
-        };
-      }, []);
+        <div className="cfg-steps">
+          <b>Paso 1.</b> Ejecutá <b>schema.sql</b> en Supabase → SQL Editor<br/>
+          <b>Paso 2.</b> Copiá la URL y clave anon de: Settings → API<br/>
+          <b>Paso 3.</b> Pegá los datos aquí y conectá
+        </div>
 
-      const install = async () => {
-        if (!deferredPrompt) return;
-        deferredPrompt.prompt();
-        const result = await deferredPrompt.userChoice;
-        setDeferredPrompt(null);
-        setShowInstall(false);
-      };
+        {err && <div className="msg-err">⚠ {err}</div>}
+        {ok  && <div className="msg-ok">✓ Conexión exitosa. Iniciando…</div>}
 
-      const update = () => {
-        if (swReg.current?.waiting) {
-          swReg.current.waiting.postMessage({ type:'SKIP_WAITING' });
-          window.location.reload();
-        }
-      };
+        <div className="f-grp">
+          <label className="f-lbl">URL del Proyecto *</label>
+          <input value={url} onChange={e=>setUrl(e.target.value)} disabled={busy||ok}
+            placeholder="https://xxxxxxxxxxxx.supabase.co" type="url"/>
+          <span className="f-hint">Supabase Dashboard → Settings → API → <b>Project URL</b></span>
+        </div>
 
-      return { showInstall, setShowInstall, install, isOffline, showUpdate, setShowUpdate, update };
-    }
+        <div className="f-grp">
+          <label className="f-lbl">Clave Anon Pública *</label>
+          <input value={key} onChange={e=>setKey(e.target.value)} disabled={busy||ok}
+            placeholder="eyJhbGciOiJIUzI1NiIs..." type="password"/>
+          <span className="f-hint">Supabase Dashboard → Settings → API → <b>anon public</b></span>
+        </div>
 
-    /* ═══════════════════════════
-       LOGIN
-    ═══════════════════════════ */
-    function Ingreso({ alEntrar }) {
-      return (
-        <div className="login-bg">
-          <div className="login-card">
-            <div className="login-sello">G&amp;A</div>
-            <div className="login-firma">{FIRMA.nombre}</div>
-            <div className="login-sub">{FIRMA.sub}</div>
-            <hr className="login-divider"/>
-            <p className="login-cita">
-              "La justicia es la reina de las virtudes republicanas,<br/>
-              y con ella se sostiene la igualdad y la libertad."
-            </p>
-            <button className="login-btn" onClick={alEntrar}>INGRESAR AL SISTEMA</button>
-            <div className="login-footer">Sistema de Gestión de Agenda · © {new Date().getFullYear()}</div>
+        <button className="btn-gold" onClick={conectar} disabled={busy||ok}>
+          {busy ? "⏳ Verificando…" : ok ? "✓ Conectado" : "CONECTAR CON SUPABASE"}
+        </button>
+
+        <div className="card-footer">
+          ¿Sin cuenta? → <a className="f-link" href="https://supabase.com" target="_blank" rel="noreferrer">supabase.com</a> (plan gratuito disponible)
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════ LOGIN ═══════════════════ */
+function Ingreso({ alEntrar, syncColor, syncLabel }) {
+  return (
+    <div className="pant-bg">
+      <div className="card">
+        <div className="sello">M.S.<br/>&amp;A.</div>
+        <div className="firma">MARIANA SÁNCHEZ<br/>&amp; ASOCIADOS</div>
+        <div className="firma-sub">Estudio Jurídico</div>
+        <hr className="divider"/>
+        <p className="cita">
+          "La justicia es la reina de las virtudes republicanas,<br/>
+          y con ella se sostiene la igualdad y la libertad."
+        </p>
+        <button className="btn-gold" onClick={alEntrar}>INGRESAR AL SISTEMA</button>
+        <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:7,marginTop:16}}>
+          <div style={{width:7,height:7,borderRadius:"50%",background:syncColor,flexShrink:0}}/>
+          <span style={{fontSize:10,color:syncColor,letterSpacing:".06em"}}>{syncLabel}</span>
+        </div>
+        <div className="card-footer" style={{marginTop:8}}>Sistema de Gestión de Agenda · © {new Date().getFullYear()}</div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════ SIDEBAR ═══════════════════ */
+function Barra({ eventos, filtro, setFiltro, syncColor, syncLabel, onCfg }) {
+  const hoy=hoyStr(); const ahora=new Date();
+  const cH=eventos.filter(e=>e.date===hoy).length;
+  const cS=eventos.filter(e=>{const d=new Date(e.date+"T12:00:00");const df=(d-ahora)/86400000;return df>=0&&df<7;}).length;
+  const cA=eventos.filter(e=>alerta(e.date,e.startTime)).length;
+  return (
+    <div className="sidebar">
+      <div className="sb-hd">
+        <div className="sb-logo">
+          <div className="l-sello">M.S.<br/>&amp;A.</div>
+          <div>
+            <div className="l-nm">Mariana Sánchez<br/>&amp; Asociados</div>
+            <div className="l-sb">Estudio Jurídico</div>
           </div>
         </div>
-      );
-    }
-
-    /* ═══════════════════════════
-       SIDEBAR
-    ═══════════════════════════ */
-    function Barra({ eventos, filtro, setFiltro }) {
-      const hoy   = hoyStr();
-      const ahora = new Date();
-      const cntH  = eventos.filter(e=>e.date===hoy).length;
-      const cntS  = eventos.filter(e=>{const d=new Date(e.date+"T12:00:00");const df=(d-ahora)/86400000;return df>=0&&df<7;}).length;
-      const cntA  = eventos.filter(e=>estadoAlerta(e.date,e.startTime)).length;
-      return (
-        <div className="sidebar">
-          <div className="sb-hd">
-            <div className="sb-logo">
-              <div className="logo-sello">G&amp;A</div>
-              <div><div className="logo-nm">{FIRMA.nombre}</div><div className="logo-sb">{FIRMA.sub}</div></div>
-            </div>
-          </div>
-          <div className="sb-body">
-            <div className="sb-sec">Resumen</div>
-            <div className="stat-row"><span className="stat-lbl">Hoy</span><span className="stat-val">{cntH}</span></div>
-            <div className="stat-row"><span className="stat-lbl">Esta semana</span><span className="stat-val">{cntS}</span></div>
-            <div className="stat-row">
-              <span className="stat-lbl" style={{color:cntA>0?"#FF9933":undefined}}>⚠ Alertas</span>
-              <span className="stat-val" style={{color:cntA>0?"#FF6633":undefined}}>{cntA}</span>
-            </div>
-            <div className="sb-sec" style={{marginTop:10}}>Equipo</div>
-            <div className={`abg-row ${filtro===null?"activo":""}`} onClick={()=>setFiltro(null)}>
-              <div className="av" style={{background:"var(--s4)",color:"var(--tx2)",fontSize:11}}>∀</div>
-              <div><div className="an">Todos</div><div className="ar">{eventos.length} eventos</div></div>
-            </div>
-            {ABOGADOS.map(a=>{
-              const cnt=eventos.filter(e=>e.lawyers?.includes(a.id)).length;
-              return (
-                <div key={a.id} className={`abg-row ${filtro===a.id?"activo":""}`} onClick={()=>setFiltro(filtro===a.id?null:a.id)}>
-                  <div className="av" style={{background:a.color}}>{a.ini}</div>
-                  <div>
-                    <div className="an">{a.nombre}{a.principal&&<span style={{color:"var(--gold)",fontSize:10}}> ★</span>}</div>
-                    <div className="ar">{a.rol} · {cnt} ev.</div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-          <div className="sb-ft">{new Date().toLocaleDateString("es-AR",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}</div>
+      </div>
+      <div className="sb-body">
+        <div className="sb-sec">Resumen</div>
+        <div className="stat-row"><span className="stat-lbl">Hoy</span><span className="stat-val">{cH}</span></div>
+        <div className="stat-row"><span className="stat-lbl">Esta semana</span><span className="stat-val">{cS}</span></div>
+        <div className="stat-row">
+          <span className="stat-lbl" style={{color:cA>0?"#FF9933":undefined}}>⚠ Alertas</span>
+          <span className="stat-val" style={{color:cA>0?"#FF6633":undefined}}>{cA}</span>
         </div>
-      );
-    }
-
-    /* ═══════════════════════════
-       VISTAS
-    ═══════════════════════════ */
-    function VistaMes({ año, mes, eventos, alDia, alEvento }) {
-      const primero=new Date(año,mes,1).getDay();
-      const dias=new Date(año,mes+1,0).getDate();
-      const prevDias=new Date(año,mes,0).getDate();
-      const hoy=hoyStr();
-      const celdas=[];
-      for(let i=primero-1;i>=0;i--) celdas.push({dia:prevDias-i,actual:false,fecha:null});
-      for(let d=1;d<=dias;d++){const dt=new Date(año,mes,d);celdas.push({dia:d,actual:true,fecha:dt.toISOString().split("T")[0]});}
-      const resto=42-celdas.length;
-      for(let d=1;d<=resto;d++) celdas.push({dia:d,actual:false,fecha:null});
-      const evsDia=(f)=>f?eventos.filter(e=>e.date===f).sort((a,b)=>a.startTime.localeCompare(b.startTime)):[];
-      return (
-        <div className="cal-grid">
-          {DIAS.map(d=><div key={d} className="cal-hdr">{d}</div>)}
-          {celdas.map((c,i)=>{
-            const evs=evsDia(c.fecha);const esHoy=c.fecha===hoy;
-            return (
-              <div key={i} className={`cal-cell ${!c.actual?"otra":""} ${esHoy?"hoy":""}`} onClick={()=>c.actual&&alDia(c.fecha)}>
-                <div className="dn">{c.dia}</div>
-                {evs.slice(0,3).map(ev=>(
-                  <div key={ev.id} className="chip" style={{background:colorEvento(ev)+"CC"}}
-                    onClick={e=>{e.stopPropagation();alEvento(ev);}} title={ev.title}>
-                    {ev.startTime&&<span style={{opacity:.82}}>{ev.startTime} </span>}{ev.title}
-                  </div>
-                ))}
-                {evs.length>3&&<div className="mas" onClick={e=>e.stopPropagation()}>+{evs.length-3} más</div>}
+        <div className="sb-sec" style={{marginTop:10}}>Equipo</div>
+        <div className={`abg-row ${filtro===null?"on":""}`} onClick={()=>setFiltro(null)}>
+          <div className="av" style={{background:"var(--s4)",color:"var(--tx2)",fontSize:11}}>∀</div>
+          <div><div className="a-nm">Todos</div><div className="a-rl">{eventos.length} eventos</div></div>
+        </div>
+        {ABOGADOS.map(a=>{
+          const cnt=eventos.filter(e=>e.lawyers?.includes(a.id)).length;
+          return (
+            <div key={a.id} className={`abg-row ${filtro===a.id?"on":""}`} onClick={()=>setFiltro(filtro===a.id?null:a.id)}>
+              <div className="av" style={{background:a.color}}>{a.ini}</div>
+              <div>
+                <div className="a-nm">{a.nombre}{a.principal&&<span style={{color:"var(--gold)",fontSize:10}}> ★</span>}</div>
+                <div className="a-rl">{a.rol} · {cnt} ev.</div>
               </div>
-            );
-          })}
+            </div>
+          );
+        })}
+      </div>
+      <div className="sb-ft">
+        <div className="sb-date">{new Date().toLocaleDateString("es-AR",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}</div>
+        <div className="sync-row">
+          <div className="sync-dot" style={{background:syncColor}}/>
+          <span className="sync-lbl" style={{color:syncColor}}>{syncLabel}</span>
         </div>
-      );
-    }
+        <button className="cfg-btn" onClick={onCfg}>⚙ Configurar Supabase</button>
+      </div>
+    </div>
+  );
+}
 
-    function VistaSemana({ fecha, eventos, alEvento, alSlot }) {
-      const iSem=new Date(fecha);iSem.setDate(fecha.getDate()-fecha.getDay());
-      const dias=Array.from({length:7},(_,i)=>{const d=new Date(iSem);d.setDate(iSem.getDate()+i);return d;});
-      const hoy=hoyStr();const hs=Array.from({length:24},(_,i)=>i);
-      return (
-        <div className="wk-wrap" style={{maxHeight:"calc(100vh - 120px)"}}>
-          <div className="wk-hdr">
-            <div style={{background:"var(--s1)"}}/>
-            {dias.map((d,i)=>{const ds=d.toISOString().split("T")[0];return(
-              <div key={i} className={`wk-dhdr ${ds===hoy?"hoy-col":""}`}>
-                <div style={{fontSize:10,textTransform:"uppercase",letterSpacing:".1em"}}>{DIAS[i]}</div>
-                <div style={{fontSize:19,fontFamily:"'Playfair Display',serif",fontWeight:ds===hoy?700:400,marginTop:2}}>{d.getDate()}</div>
+/* ═══════════════════ VISTAS ═══════════════════ */
+function VistaMes({año,mes,eventos,alDia,alEv}) {
+  const pri=new Date(año,mes,1).getDay(), dias=new Date(año,mes+1,0).getDate();
+  const prev=new Date(año,mes,0).getDate(), hoy=hoyStr();
+  const celdas=[];
+  for(let i=pri-1;i>=0;i--) celdas.push({d:prev-i,cur:false,f:null});
+  for(let d=1;d<=dias;d++){const dt=new Date(año,mes,d);celdas.push({d,cur:true,f:dt.toISOString().split("T")[0]});}
+  const r=42-celdas.length; for(let d=1;d<=r;d++) celdas.push({d,cur:false,f:null});
+  const evsDia=f=>f?eventos.filter(e=>e.date===f).sort((a,b)=>a.startTime.localeCompare(b.startTime)):[];
+  return (
+    <div className="cal-grid">
+      {DIAS.map(d=><div key={d} className="cal-hdr">{d}</div>)}
+      {celdas.map((c,i)=>{
+        const evs=evsDia(c.f); const esH=c.f===hoy;
+        return (
+          <div key={i} className={`cal-cell ${!c.cur?"otra":""} ${esH?"hoy":""}`} onClick={()=>c.cur&&alDia(c.f)}>
+            <div className="dn">{c.d}</div>
+            {evs.slice(0,3).map(ev=>(
+              <div key={ev.id} className="chip" style={{background:colorEv(ev)+"CC"}}
+                onClick={e=>{e.stopPropagation();alEv(ev);}} title={ev.title}>
+                {ev.startTime&&<span style={{opacity:.82}}>{ev.startTime} </span>}{ev.title}
               </div>
-            );})}
+            ))}
+            {evs.length>3&&<div className="mas">+{evs.length-3} más</div>}
           </div>
-          <div className="wk-body">
-            <div style={{display:"flex",flexDirection:"column"}}>
-              {hs.map(h=><div key={h} className="wk-tlbl">{h===0?"":String(h).padStart(2,"0")+":00"}</div>)}
-            </div>
-            {dias.map((d,di)=>{
-              const ds=d.toISOString().split("T")[0];const esH=ds===hoy;
-              const dEvs=eventos.filter(e=>e.date===ds);
-              return (
-                <div key={di} className="wk-dcol" style={{background:esH?"rgba(201,168,76,.02)":"transparent"}}>
-                  {hs.map(h=>{
-                    const hEvs=dEvs.filter(e=>parseInt(e.startTime?.split(":")[0]||0)===h);
-                    return (
-                      <div key={h} className="wk-hcel" onClick={()=>alSlot(ds)}>
-                        {hEvs.map(ev=>{
-                          const sm=parseInt(ev.startTime?.split(":")[1]||0);
-                          const eh=parseInt(ev.endTime?.split(":")[0]||h+1);
-                          const em=parseInt(ev.endTime?.split(":")[1]||0);
-                          const dur=Math.max(20,(eh-h)*60+(em-sm));
-                          const col=colorEvento(ev);
-                          return (
-                            <div key={ev.id} onClick={e=>{e.stopPropagation();alEvento(ev);}}
-                              style={{position:"absolute",top:`${(sm/60)*54}px`,left:2,right:2,
-                                height:`${(dur/60)*54-2}px`,background:col+"BB",
-                                borderLeft:`3px solid ${col}`,borderRadius:4,
-                                padding:"2px 5px",fontSize:9.5,color:"#fff",
-                                overflow:"hidden",cursor:"pointer",zIndex:2,minHeight:16}} title={ev.title}>
-                              <div style={{fontWeight:600,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{ev.title}</div>
-                              <div style={{opacity:.8}}>{ev.startTime}</div>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    );
-                  })}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      );
-    }
+        );
+      })}
+    </div>
+  );
+}
 
-    function VistaDay({ fecha, eventos, alEvento, alSlot }) {
-      const ds=fecha.toISOString().split("T")[0];
-      const dEvs=eventos.filter(e=>e.date===ds).sort((a,b)=>a.startTime.localeCompare(b.startTime));
-      const hs=Array.from({length:24},(_,i)=>i);
-      return (
-        <div style={{overflowY:"auto",maxHeight:"calc(100vh - 120px)"}}>
-          <div className="dia-hdr">
-            {fecha.toLocaleDateString("es-AR",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}
-            {ds===hoyStr()&&<span style={{fontSize:11,color:"var(--gold)",marginLeft:12,fontFamily:"'Jost',sans-serif",fontWeight:600,letterSpacing:".1em"}}>HOY</span>}
+function VistaSemana({fecha,eventos,alEv,alSlot}) {
+  const s=new Date(fecha); s.setDate(fecha.getDate()-fecha.getDay());
+  const dias=Array.from({length:7},(_,i)=>{const d=new Date(s);d.setDate(s.getDate()+i);return d;});
+  const hoy=hoyStr(); const hs=Array.from({length:24},(_,i)=>i);
+  return (
+    <div className="wk-wrap" style={{maxHeight:"calc(100vh - 120px)"}}>
+      <div className="wk-hdr">
+        <div style={{background:"var(--s1)"}}/>
+        {dias.map((d,i)=>{const ds=d.toISOString().split("T")[0];return(
+          <div key={i} className={`wk-dhdr ${ds===hoy?"hoy-col":""}`}>
+            <div style={{fontSize:10,textTransform:"uppercase",letterSpacing:".1em"}}>{DIAS[i]}</div>
+            <div style={{fontSize:19,fontFamily:"'Playfair Display',serif",fontWeight:ds===hoy?700:400,marginTop:2}}>{d.getDate()}</div>
           </div>
-          <div style={{display:"grid",gridTemplateColumns:"50px 1fr"}}>
-            <div>
-              {hs.map(h=><div key={h} style={{height:62,display:"flex",alignItems:"flex-start",paddingTop:4,paddingRight:7,justifyContent:"flex-end",fontSize:9,color:"var(--tx3)"}}>{h===0?"":String(h).padStart(2,"0")+":00"}</div>)}
-            </div>
-            <div style={{borderLeft:"1px solid var(--bd2)",position:"relative"}}>
+        );})}
+      </div>
+      <div className="wk-body">
+        <div style={{display:"flex",flexDirection:"column"}}>
+          {hs.map(h=><div key={h} className="wk-tlbl">{h===0?"":String(h).padStart(2,"0")+":00"}</div>)}
+        </div>
+        {dias.map((d,di)=>{
+          const ds=d.toISOString().split("T")[0]; const esH=ds===hoy;
+          const dEvs=eventos.filter(e=>e.date===ds);
+          return (
+            <div key={di} className="wk-dcol" style={{background:esH?"rgba(201,168,76,.02)":"transparent"}}>
               {hs.map(h=>{
                 const hEvs=dEvs.filter(e=>parseInt(e.startTime?.split(":")[0]||0)===h);
                 return (
-                  <div key={h} style={{height:62,borderBottom:"1px solid var(--bd2)",position:"relative",cursor:"pointer"}} onClick={()=>alSlot(ds)}>
+                  <div key={h} className="wk-hcel" onClick={()=>alSlot(ds)}>
                     {hEvs.map(ev=>{
                       const sm=parseInt(ev.startTime?.split(":")[1]||0);
                       const eh=parseInt(ev.endTime?.split(":")[0]||h+1);
                       const em=parseInt(ev.endTime?.split(":")[1]||0);
-                      const dur=Math.max(30,(eh-h)*60+(em-sm));const col=colorEvento(ev);
+                      const dur=Math.max(20,(eh-h)*60+(em-sm)); const col=colorEv(ev);
                       return (
-                        <div key={ev.id} onClick={e=>{e.stopPropagation();alEvento(ev);}}
-                          style={{position:"absolute",top:`${(sm/60)*62}px`,left:4,right:4,
-                            height:`${(dur/60)*62-2}px`,background:col+"BB",
-                            borderLeft:`4px solid ${col}`,borderRadius:6,
-                            padding:"5px 10px",cursor:"pointer",zIndex:2,minHeight:26}}>
-                          <div style={{fontWeight:600,fontSize:12.5,color:"#fff",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{ev.title}</div>
-                          <div style={{fontSize:10.5,color:"rgba(255,255,255,.8)"}}>{ev.startTime}–{ev.endTime}</div>
-                          <div style={{fontSize:10,color:"rgba(255,255,255,.65)",marginTop:1}}>{ev.lawyers?.map(id=>ABOGADOS.find(l=>l.id===id)?.ini).join(", ")}</div>
+                        <div key={ev.id} onClick={e=>{e.stopPropagation();alEv(ev);}}
+                          style={{position:"absolute",top:`${(sm/60)*54}px`,left:2,right:2,
+                            height:`${(dur/60)*54-2}px`,background:col+"BB",
+                            borderLeft:`3px solid ${col}`,borderRadius:4,
+                            padding:"2px 5px",fontSize:9.5,color:"#fff",overflow:"hidden",
+                            cursor:"pointer",zIndex:2,minHeight:16}} title={ev.title}>
+                          <div style={{fontWeight:600,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{ev.title}</div>
+                          <div style={{opacity:.8}}>{ev.startTime}</div>
                         </div>
                       );
                     })}
@@ -630,43 +652,44 @@
                 );
               })}
             </div>
-          </div>
-        </div>
-      );
-    }
+          );
+        })}
+      </div>
+    </div>
+  );
+}
 
-    function VistaLista({ eventos, alEvento }) {
-      const hoy=hoyStr();
-      const sorted=[...eventos].sort((a,b)=>a.date===b.date?a.startTime.localeCompare(b.startTime):a.date.localeCompare(b.date));
-      const grupos=sorted.reduce((acc,ev)=>{(acc[ev.date]||(acc[ev.date]=[])).push(ev);return acc;},{});
-      if(!Object.keys(grupos).length) return <div className="vacio"><div className="vacio-ic">📅</div><div className="vacio-tx">Sin eventos</div></div>;
-      return (
-        <div className="list-view">
-          {Object.entries(grupos).map(([fecha,evs])=>{
-            const esHoy=fecha===hoy;const esPas=fecha<hoy;
+function VistaDay({fecha,eventos,alEv,alSlot}) {
+  const ds=fecha.toISOString().split("T")[0];
+  const dEvs=eventos.filter(e=>e.date===ds).sort((a,b)=>a.startTime.localeCompare(b.startTime));
+  const hs=Array.from({length:24},(_,i)=>i);
+  return (
+    <div style={{overflowY:"auto",maxHeight:"calc(100vh - 120px)"}}>
+      <div className="dia-hdr">
+        {fecha.toLocaleDateString("es-AR",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}
+        {ds===hoyStr()&&<span style={{fontSize:11,color:"var(--gold)",marginLeft:12,fontWeight:600,letterSpacing:".1em"}}>HOY</span>}
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"50px 1fr"}}>
+        <div>{hs.map(h=><div key={h} style={{height:62,display:"flex",alignItems:"flex-start",paddingTop:4,paddingRight:7,justifyContent:"flex-end",fontSize:9,color:"var(--tx3)"}}>{h===0?"":String(h).padStart(2,"0")+":00"}</div>)}</div>
+        <div style={{borderLeft:"1px solid var(--bd2)",position:"relative"}}>
+          {hs.map(h=>{
+            const hEvs=dEvs.filter(e=>parseInt(e.startTime?.split(":")[0]||0)===h);
             return (
-              <div key={fecha}>
-                <div className="list-gt" style={{color:esHoy?"var(--gold)":esPas?"var(--tx3)":undefined}}>
-                  {esHoy?"📍 HOY — ":esPas?"📜 ":"📆 "}
-                  {new Date(fecha+"T12:00:00").toLocaleDateString("es-AR",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}
-                </div>
-                {evs.map(ev=>{
-                  const et=TIPOS.find(t=>t.id===ev.type);const al=estadoAlerta(ev.date,ev.startTime);const col=colorEvento(ev);
+              <div key={h} style={{height:62,borderBottom:"1px solid var(--bd2)",position:"relative",cursor:"pointer"}} onClick={()=>alSlot(ds)}>
+                {hEvs.map(ev=>{
+                  const sm=parseInt(ev.startTime?.split(":")[1]||0);
+                  const eh=parseInt(ev.endTime?.split(":")[0]||h+1);
+                  const em=parseInt(ev.endTime?.split(":")[1]||0);
+                  const dur=Math.max(30,(eh-h)*60+(em-sm)); const col=colorEv(ev);
                   return (
-                    <div key={ev.id} className="list-card" onClick={()=>alEvento(ev)} style={{opacity:esPas?.6:1}}>
-                      <div className="list-bar" style={{background:col}}/>
-                      <div style={{flex:1}}>
-                        <div className="list-tit">{et?.icon} {ev.title}</div>
-                        <div className="list-meta">
-                          {ev.startTime&&<span>🕐 {ev.startTime}{ev.endTime&&ev.endTime!==ev.startTime?` – ${ev.endTime}`:""}</span>}
-                          {ev.court&&<span>🏛 {ev.court}</span>}
-                          {ev.expNum&&<span>📁 {ev.expNum}</span>}
-                        </div>
-                        <div style={{display:"flex",gap:3,marginTop:5,flexWrap:"wrap"}}>
-                          {ev.lawyers?.map(id=>{const a=ABOGADOS.find(x=>x.id===id);return a?<div key={id} className="mav" style={{background:a.color}}>{a.ini}</div>:null;})}
-                        </div>
-                        {al&&<div className="al-badge" style={{background:al.color+"1E",color:al.color,border:`1px solid ${al.color}44`,marginTop:5}}>⚠ {al.label}</div>}
-                      </div>
+                    <div key={ev.id} onClick={e=>{e.stopPropagation();alEv(ev);}}
+                      style={{position:"absolute",top:`${(sm/60)*62}px`,left:4,right:4,
+                        height:`${(dur/60)*62-2}px`,background:col+"BB",
+                        borderLeft:`4px solid ${col}`,borderRadius:6,
+                        padding:"5px 10px",cursor:"pointer",zIndex:2,minHeight:26}}>
+                      <div style={{fontWeight:600,fontSize:12.5,color:"#fff",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{ev.title}</div>
+                      <div style={{fontSize:10.5,color:"rgba(255,255,255,.8)"}}>{ev.startTime}–{ev.endTime}</div>
+                      <div style={{fontSize:10,color:"rgba(255,255,255,.65)",marginTop:1}}>{ev.lawyers?.map(id=>ABOGADOS.find(l=>l.id===id)?.ini).join(", ")}</div>
                     </div>
                   );
                 })}
@@ -674,303 +697,429 @@
             );
           })}
         </div>
-      );
-    }
+      </div>
+    </div>
+  );
+}
 
-    /* ═══════════════════════════
-       PANELES
-    ═══════════════════════════ */
-    function PanelProximos({ eventos, alEvento }) {
-      const hoy=hoyStr();
-      if(!eventos.length) return <div className="vacio"><div className="vacio-ic">✨</div><div className="vacio-tx">Sin eventos próximos</div></div>;
-      return (
-        <div>
-          {eventos.map(ev=>{
-            const al=estadoAlerta(ev.date,ev.startTime);const et=TIPOS.find(t=>t.id===ev.type);const esH=ev.date===hoy;
-            return (
-              <div key={ev.id} className="up-item" onClick={()=>alEvento(ev)}>
-                {al&&<div className={`up-dot ${al.pulso?"pulsar":""}`} style={{background:al.color}}/>}
-                <div className="up-tit">{et?.icon} {ev.title}</div>
-                <div className="up-fecha">{esH?"📍 Hoy":new Date(ev.date+"T12:00:00").toLocaleDateString("es-AR",{weekday:"short",day:"numeric",month:"short"})}{ev.startTime&&` · ${ev.startTime}`}</div>
-                {ev.court&&<div style={{fontSize:10,color:"var(--tx3)",marginTop:2}}>🏛 {ev.court}</div>}
-                {ev.expNum&&<div style={{fontSize:10,color:"var(--tx3)",marginTop:1}}>📁 {ev.expNum}</div>}
-                <div className="av-row">{ev.lawyers?.map(id=>{const a=ABOGADOS.find(x=>x.id===id);return a?<div key={id} className="mav" style={{background:a.color}}>{a.ini}</div>:null;})}</div>
-              </div>
-            );
-          })}
-        </div>
-      );
-    }
-
-    function PanelAlertas({ eventos, alEvento }) {
-      if(!eventos.length) return (
-        <div className="vacio">
-          <div className="vacio-ic">✅</div>
-          <div className="vacio-tx">Sin alertas activas</div>
-          <div style={{fontSize:10.5,marginTop:6,lineHeight:1.6}}>Todos los eventos tienen tiempo suficiente</div>
-        </div>
-      );
-      return (
-        <div>
-          <div style={{fontSize:11,color:"var(--tx2)",marginBottom:12,lineHeight:1.6,borderBottom:"1px solid var(--bd2)",paddingBottom:10}}>
-            {eventos.length} evento{eventos.length!==1?"s":""} requiere{eventos.length===1?"":"n"} atención:
-          </div>
-          {eventos.map(ev=>{
-            const al=estadoAlerta(ev.date,ev.startTime);const et=TIPOS.find(t=>t.id===ev.type);
-            return (
-              <div key={ev.id} className={`al-item ${al?.pulso?"pulsar":""}`} onClick={()=>alEvento(ev)}
-                style={{background:al?.color+"12",borderColor:al?.color+"44",cursor:"pointer"}}>
-                <div className="al-tit" style={{color:al?.color}}>{et?.icon} {ev.title}</div>
-                <div className="al-fecha">{fmtFecha(ev.date)}{ev.startTime&&` · ${ev.startTime}`}</div>
-                {ev.lawyers?.length>0&&<div style={{display:"flex",gap:3,marginTop:5}}>{ev.lawyers.map(id=>{const a=ABOGADOS.find(x=>x.id===id);return a?<div key={id} className="mav" style={{background:a.color}}>{a.ini}</div>:null;})}</div>}
-                <div className="al-badge" style={{background:al?.color+"22",color:al?.color}}>⚠ {al?.label}</div>
-              </div>
-            );
-          })}
-        </div>
-      );
-    }
-
-    /* ═══════════════════════════
-       MODAL
-    ═══════════════════════════ */
-    function ModalEvento({ evento, alGuardar, alEliminar, alCerrar }) {
-      const esEd=!!evento?.id;
-      const [form,setForm]=useState({title:"",type:"audiencia",date:hoyStr(),startTime:"09:00",endTime:"10:00",lawyers:["p"],notes:"",alerts:["72h","24h"],court:"",expNum:"",...evento});
-      const [conf,setConf]=useState(false);
-      const set=(k,v)=>setForm(f=>({...f,[k]:v}));
-      const toggle=(k,v)=>set(k,form[k].includes(v)?form[k].filter(x=>x!==v):[...form[k],v]);
-      const guardar=()=>{
-        if(!form.title.trim()){alert("Por favor ingrese un título.");return;}
-        if(!form.date){alert("Por favor seleccione una fecha.");return;}
-        if(!form.lawyers.length){alert("Asigne al menos un abogado.");return;}
-        alGuardar({...form,id:form.id||genId()});
-      };
-      const et=TIPOS.find(t=>t.id===form.type);
-      return (
-        <div className="modal-ov" onClick={e=>e.target===e.currentTarget&&alCerrar()}>
-          <div className="modal-box">
-            <div className="modal-hd">
-              <div className="modal-tit">{et?.icon} {esEd?"Editar Evento":"Nuevo Evento"}</div>
-              <button className="modal-x" onClick={alCerrar}>✕</button>
+function VistaLista({eventos,alEv}) {
+  const hoy=hoyStr();
+  const sorted=[...eventos].sort((a,b)=>a.date===b.date?a.startTime.localeCompare(b.startTime):a.date.localeCompare(b.date));
+  const grupos=sorted.reduce((acc,ev)=>{(acc[ev.date]||(acc[ev.date]=[])).push(ev);return acc;},{});
+  if(!Object.keys(grupos).length) return <div className="vacio"><div className="vacio-ic">📅</div><div className="vacio-tx">Sin eventos</div></div>;
+  return (
+    <div className="list-view">
+      {Object.entries(grupos).map(([fecha,evs])=>{
+        const esH=fecha===hoy; const esP=fecha<hoy;
+        return (
+          <div key={fecha}>
+            <div className="list-gt" style={{color:esH?"var(--gold)":esP?"var(--tx3)":undefined}}>
+              {esH?"📍 HOY — ":esP?"📜 ":"📆 "}
+              {new Date(fecha+"T12:00:00").toLocaleDateString("es-AR",{weekday:"long",day:"numeric",month:"long",year:"numeric"})}
             </div>
-            <div className="modal-bd">
-              <div className="f-grp">
-                <label className="f-lbl">Título *</label>
-                <input value={form.title} onChange={e=>set("title",e.target.value)} placeholder="Ej: Audiencia – Caso García vs. López"/>
-              </div>
-              <div className="f-row">
-                <div className="f-grp">
-                  <label className="f-lbl">Tipo *</label>
-                  <select value={form.type} onChange={e=>set("type",e.target.value)}>
-                    {TIPOS.map(t=><option key={t.id} value={t.id}>{t.icon} {t.label}</option>)}
-                  </select>
-                </div>
-                <div className="f-grp">
-                  <label className="f-lbl">N° Expediente</label>
-                  <input value={form.expNum} onChange={e=>set("expNum",e.target.value)} placeholder="EXP-2025-XXXX"/>
-                </div>
-              </div>
-              <div className="f-row">
-                <div className="f-grp">
-                  <label className="f-lbl">Fecha *</label>
-                  <input type="date" value={form.date} onChange={e=>set("date",e.target.value)}/>
-                </div>
-                <div className="f-grp">
-                  <label className="f-lbl">Juzgado / Lugar</label>
-                  <input value={form.court} onChange={e=>set("court",e.target.value)} placeholder="Juzgado Civil N°..."/>
-                </div>
-              </div>
-              <div className="f-row">
-                <div className="f-grp">
-                  <label className="f-lbl">Hora Inicio *</label>
-                  <input type="time" value={form.startTime} onChange={e=>set("startTime",e.target.value)}/>
-                </div>
-                <div className="f-grp">
-                  <label className="f-lbl">Hora Fin</label>
-                  <input type="time" value={form.endTime} onChange={e=>set("endTime",e.target.value)}/>
-                </div>
-              </div>
-              <div className="f-grp">
-                <label className="f-lbl">Asignar Abogados *</label>
-                {ABOGADOS.map(a=>(
-                  <div key={a.id} className={`chk-row ${form.lawyers.includes(a.id)?"on":""}`}
-                    style={{borderColor:form.lawyers.includes(a.id)?a.color+"55":undefined}}
-                    onClick={()=>toggle("lawyers",a.id)}>
-                    <input type="checkbox" checked={form.lawyers.includes(a.id)} onChange={()=>{}} style={{accentColor:a.color,width:15,height:15,flexShrink:0}}/>
-                    <div className="av" style={{background:a.color,width:25,height:25,fontSize:9,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",color:"#000",fontWeight:700,flexShrink:0}}>{a.ini}</div>
-                    <div><div className="chk-lbl">{a.nombre}{a.principal&&<span style={{color:"var(--gold)"}}> ★</span>}</div><div className="chk-sub">{a.rol}</div></div>
-                  </div>
-                ))}
-              </div>
-              <div className="f-grp">
-                <label className="f-lbl">⚠ Alertas y Recordatorios</label>
-                <div className="alertas-grid">
-                  {ALERTAS_OPTS.map(a=>(
-                    <div key={a.id} className={`chk-row ${form.alerts.includes(a.id)?"on":""}`} onClick={()=>toggle("alerts",a.id)}>
-                      <input type="checkbox" checked={form.alerts.includes(a.id)} onChange={()=>{}} style={{accentColor:"var(--gold)",width:15,height:15,flexShrink:0}}/>
-                      <span className="chk-lbl" style={{fontSize:12}}>{a.label}</span>
+            {evs.map(ev=>{
+              const et=TIPOS.find(t=>t.id===ev.type); const al=alerta(ev.date,ev.startTime); const col=colorEv(ev);
+              return (
+                <div key={ev.id} className="list-card" onClick={()=>alEv(ev)} style={{opacity:esP?.6:1}}>
+                  <div className="list-bar" style={{background:col}}/>
+                  <div style={{flex:1}}>
+                    <div className="list-tit">{et?.icon} {ev.title}</div>
+                    <div className="list-meta">
+                      {ev.startTime&&<span>🕐 {ev.startTime}{ev.endTime&&ev.endTime!==ev.startTime?` – ${ev.endTime}`:""}</span>}
+                      {ev.court&&<span>🏛 {ev.court}</span>}
+                      {ev.expNum&&<span>📁 {ev.expNum}</span>}
                     </div>
-                  ))}
+                    <div style={{display:"flex",gap:3,marginTop:5,flexWrap:"wrap"}}>
+                      {ev.lawyers?.map(id=>{const a=ABOGADOS.find(x=>x.id===id);return a?<div key={id} className="mav" style={{background:a.color}}>{a.ini}</div>:null;})}
+                    </div>
+                    {al&&<div className="al-badge" style={{background:al.color+"1E",color:al.color,border:`1px solid ${al.color}44`,marginTop:5}}>⚠ {al.label}</div>}
+                  </div>
                 </div>
-              </div>
-              <div className="f-grp">
-                <label className="f-lbl">Notas / Observaciones</label>
-                <textarea value={form.notes} onChange={e=>set("notes",e.target.value)} placeholder="Documentación necesaria, instrucciones..." rows={3}/>
-              </div>
+              );
+            })}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ═══════════════════ PANELES ═══════════════════ */
+function PanelProx({eventos,alEv}) {
+  const hoy=hoyStr();
+  if(!eventos.length) return <div className="vacio"><div className="vacio-ic">✨</div><div className="vacio-tx">Sin eventos próximos</div></div>;
+  return (
+    <div>
+      {eventos.map(ev=>{
+        const al=alerta(ev.date,ev.startTime); const et=TIPOS.find(t=>t.id===ev.type); const esH=ev.date===hoy;
+        return (
+          <div key={ev.id} className="up-item" onClick={()=>alEv(ev)}>
+            {al&&<div className={`up-dot ${al.pulso?"pulsar":""}`} style={{background:al.color}}/>}
+            <div className="up-tit">{et?.icon} {ev.title}</div>
+            <div className="up-fecha">{esH?"📍 Hoy":new Date(ev.date+"T12:00:00").toLocaleDateString("es-AR",{weekday:"short",day:"numeric",month:"short"})}{ev.startTime&&` · ${ev.startTime}`}</div>
+            {ev.court&&<div style={{fontSize:10,color:"var(--tx3)",marginTop:2}}>🏛 {ev.court}</div>}
+            {ev.expNum&&<div style={{fontSize:10,color:"var(--tx3)",marginTop:1}}>📁 {ev.expNum}</div>}
+            <div className="av-row">{ev.lawyers?.map(id=>{const a=ABOGADOS.find(x=>x.id===id);return a?<div key={id} className="mav" style={{background:a.color}}>{a.ini}</div>:null;})}</div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function PanelAl({eventos,alEv}) {
+  if(!eventos.length) return <div className="vacio"><div className="vacio-ic">✅</div><div className="vacio-tx">Sin alertas activas</div></div>;
+  return (
+    <div>
+      <div style={{fontSize:11,color:"var(--tx2)",marginBottom:12,lineHeight:1.6,borderBottom:"1px solid var(--bd2)",paddingBottom:10}}>
+        {eventos.length} evento{eventos.length!==1?"s":""} requiere{eventos.length===1?"":"n"} atención:
+      </div>
+      {eventos.map(ev=>{
+        const al=alerta(ev.date,ev.startTime); const et=TIPOS.find(t=>t.id===ev.type);
+        return (
+          <div key={ev.id} className={`al-item ${al?.pulso?"pulsar":""}`} onClick={()=>alEv(ev)}
+            style={{background:al?.color+"12",borderColor:al?.color+"44",cursor:"pointer"}}>
+            <div className="al-tit" style={{color:al?.color}}>{et?.icon} {ev.title}</div>
+            <div className="al-fecha">{fmtFecha(ev.date)}{ev.startTime&&` · ${ev.startTime}`}</div>
+            {ev.lawyers?.length>0&&<div style={{display:"flex",gap:3,marginTop:5}}>{ev.lawyers.map(id=>{const a=ABOGADOS.find(x=>x.id===id);return a?<div key={id} className="mav" style={{background:a.color}}>{a.ini}</div>:null;})}</div>}
+            <div className="al-badge" style={{background:al?.color+"22",color:al?.color}}>⚠ {al?.label}</div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ═══════════════════ MODAL ═══════════════════ */
+function ModalEv({evento,alGuardar,alEliminar,alCerrar,busy}) {
+  const esEd=!!evento?.id;
+  const [form,setForm]=useState({title:"",type:"audiencia",date:hoyStr(),startTime:"09:00",endTime:"10:00",lawyers:["p"],notes:"",alerts:["72h","24h"],court:"",expNum:"",...evento});
+  const [conf,setConf]=useState(false);
+  const set=(k,v)=>setForm(f=>({...f,[k]:v}));
+  const tog=(k,v)=>set(k,form[k].includes(v)?form[k].filter(x=>x!==v):[...form[k],v]);
+  const guardar=()=>{
+    if(!form.title.trim()){alert("Por favor ingrese un título.");return;}
+    if(!form.date){alert("Seleccione una fecha.");return;}
+    if(!form.lawyers.length){alert("Asigne al menos un abogado.");return;}
+    alGuardar({...form,id:form.id||genId()});
+  };
+  const et=TIPOS.find(t=>t.id===form.type);
+  return (
+    <div className="modal-ov" onClick={e=>e.target===e.currentTarget&&alCerrar()}>
+      <div className="modal-box">
+        <div className="modal-hd">
+          <div className="modal-tit">{et?.icon} {esEd?"Editar Evento":"Nuevo Evento"}</div>
+          <button className="modal-x" onClick={alCerrar}>✕</button>
+        </div>
+        <div className="modal-bd">
+          <div className="f-grp">
+            <label className="m-lbl">Título *</label>
+            <input value={form.title} onChange={e=>set("title",e.target.value)} placeholder="Ej: Audiencia – Caso García vs. López"/>
+          </div>
+          <div className="f-row">
+            <div className="f-grp">
+              <label className="m-lbl">Tipo *</label>
+              <select value={form.type} onChange={e=>set("type",e.target.value)}>
+                {TIPOS.map(t=><option key={t.id} value={t.id}>{t.icon} {t.label}</option>)}
+              </select>
             </div>
-            <div className="modal-ft">
-              {esEd&&!conf&&<button className="btn-d" onClick={()=>setConf(true)}>🗑 Eliminar</button>}
-              {esEd&&conf&&<><button className="btn-d" onClick={()=>alEliminar(form.id)}>¿Confirmar?</button><button className="btn-s" onClick={()=>setConf(false)}>Cancelar</button></>}
-              {!conf&&<><button className="btn-s" onClick={alCerrar}>Cancelar</button><button className="btn-p" onClick={guardar}>{esEd?"Guardar Cambios":"Crear Evento"}</button></>}
+            <div className="f-grp">
+              <label className="m-lbl">N° Expediente</label>
+              <input value={form.expNum} onChange={e=>set("expNum",e.target.value)} placeholder="EXP-2025-XXXX"/>
             </div>
+          </div>
+          <div className="f-row">
+            <div className="f-grp">
+              <label className="m-lbl">Fecha *</label>
+              <input type="date" value={form.date} onChange={e=>set("date",e.target.value)}/>
+            </div>
+            <div className="f-grp">
+              <label className="m-lbl">Juzgado / Lugar</label>
+              <input value={form.court} onChange={e=>set("court",e.target.value)} placeholder="Juzgado Civil N°..."/>
+            </div>
+          </div>
+          <div className="f-row">
+            <div className="f-grp">
+              <label className="m-lbl">Hora Inicio *</label>
+              <input type="time" value={form.startTime} onChange={e=>set("startTime",e.target.value)}/>
+            </div>
+            <div className="f-grp">
+              <label className="m-lbl">Hora Fin</label>
+              <input type="time" value={form.endTime} onChange={e=>set("endTime",e.target.value)}/>
+            </div>
+          </div>
+          <div className="f-grp">
+            <label className="m-lbl">Asignar Abogados *</label>
+            {ABOGADOS.map(a=>(
+              <div key={a.id} className={`chk-row ${form.lawyers.includes(a.id)?"on":""}`}
+                style={{borderColor:form.lawyers.includes(a.id)?a.color+"55":undefined}}
+                onClick={()=>tog("lawyers",a.id)}>
+                <input type="checkbox" checked={form.lawyers.includes(a.id)} onChange={()=>{}} style={{accentColor:a.color,width:15,height:15,flexShrink:0}}/>
+                <div className="av" style={{background:a.color,width:25,height:25,fontSize:9,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",color:"#000",fontWeight:700,flexShrink:0}}>{a.ini}</div>
+                <div><div className="chk-lbl">{a.nombre}{a.principal&&<span style={{color:"var(--gold)"}}> ★</span>}</div><div className="chk-sub">{a.rol}</div></div>
+              </div>
+            ))}
+          </div>
+          <div className="f-grp">
+            <label className="m-lbl">⚠ Alertas y Recordatorios</label>
+            <div className="al-grid">
+              {AL_OPTS.map(a=>(
+                <div key={a.id} className={`chk-row ${form.alerts.includes(a.id)?"on":""}`} onClick={()=>tog("alerts",a.id)}>
+                  <input type="checkbox" checked={form.alerts.includes(a.id)} onChange={()=>{}} style={{accentColor:"var(--gold)",width:15,height:15,flexShrink:0}}/>
+                  <span className="chk-lbl" style={{fontSize:12}}>{a.label}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className="f-grp">
+            <label className="m-lbl">Notas / Observaciones</label>
+            <textarea value={form.notes} onChange={e=>set("notes",e.target.value)} placeholder="Documentación necesaria, instrucciones…" rows={3}/>
           </div>
         </div>
-      );
+        <div className="modal-ft">
+          {esEd&&!conf&&<button className="btn-d" onClick={()=>setConf(true)} disabled={busy}>🗑 Eliminar</button>}
+          {esEd&&conf&&<><button className="btn-d" onClick={()=>alEliminar(form.id)} disabled={busy}>¿Confirmar?</button><button className="btn-s" onClick={()=>setConf(false)}>Cancelar</button></>}
+          {!conf&&<><button className="btn-s" onClick={alCerrar} disabled={busy}>Cancelar</button><button className="btn-p" onClick={guardar} disabled={busy}>{busy?"⏳ Guardando…":esEd?"Guardar Cambios":"Crear Evento"}</button></>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ═══════════════════ APP PRINCIPAL ═══════════════════ */
+function App() {
+  /* Estado de pantalla: config | loading | login | app */
+  const hasCreds = !!(localStorage.getItem("sb_url")&&localStorage.getItem("sb_key"));
+  const [pantalla,  setPantalla]  = useState(hasCreds?"loading":"config");
+  const [sb,        setSb]        = useState(null);
+  const [sync,      setSync]      = useState("desconectado");
+  const [ingresado, setIngresado] = useState(false);
+  const [eventos,   setEventos]   = useState([]);
+  const [cargando,  setCargando]  = useState(false);
+  const [busy,      setBusy]      = useState(false);
+  const [curFecha,  setCurFecha]  = useState(new Date());
+  const [vista,     setVista]     = useState("mes");
+  const [modal,     setModal]     = useState(false);
+  const [editEv,    setEditEv]    = useState(null);
+  const [filtro,    setFiltro]    = useState(null);
+  const [rpTab,     setRpTab]     = useState("proximos");
+  const [toast,     setToast]     = useState(null);
+  const [offline,   setOffline]   = useState(!navigator.onLine);
+  const canalRef = useRef(null);
+
+  const showToast = (msg,tipo="ok") => { setToast({msg,tipo}); setTimeout(()=>setToast(null),3500); };
+
+  /* Service Worker + Splash + Online/Offline */
+  useEffect(()=>{
+    if("serviceWorker" in navigator) navigator.serviceWorker.register("./sw.js").catch(()=>{});
+    window.addEventListener("offline",()=>setOffline(true));
+    window.addEventListener("online", ()=>setOffline(false));
+    setTimeout(()=>{ const el=document.getElementById("splash"); if(el)el.classList.add("out"); },1300);
+  },[]);
+
+  /* Auto-connect si hay credenciales guardadas */
+  useEffect(()=>{
+    if(!hasCreds) return;
+    const url=localStorage.getItem("sb_url");
+    const key=localStorage.getItem("sb_key");
+    iniciarSb(url,key);
+  },[]);
+
+  const iniciarSb = async (url,key) => {
+    setSync("conectando"); setPantalla("loading");
+    try {
+      const client=createClient(url,key);
+      const {error}=await client.from("eventos").select("id").limit(1);
+      if(error) throw error;
+      setSb(client); setSync("sincronizado");
+      await cargarEventos(client);
+      suscribirRT(client);
+      setPantalla("login");
+    } catch(e) {
+      setSync("error");
+      showToast("Error al conectar con Supabase","err");
+      setPantalla("config");
     }
+  };
 
-    /* ═══════════════════════════
-       APP PRINCIPAL
-    ═══════════════════════════ */
-    function App() {
-      const [ingresado,setIngresado]=useState(false);
-      const [eventos,setEventos]=useState(()=>{
-        try{const d=localStorage.getItem("agenda-legal-v3");if(d)return JSON.parse(d);}catch{}
-        return mkMuestras();
-      });
-      const [curFecha,setCurFecha]=useState(new Date());
-      const [vista,setVista]=useState("mes");
-      const [modal,setModal]=useState(false);
-      const [editEv,setEditEv]=useState(null);
-      const [filtro,setFiltro]=useState(null);
-      const [rpTab,setRpTab]=useState("proximos");
-      const [toast,setToast]=useState(null);
-      const { showInstall, setShowInstall, install, isOffline, showUpdate, setShowUpdate, update } = usePWA();
+  const cargarEventos = async (client) => {
+    setCargando(true);
+    try {
+      const {data,error}=await client.from("eventos").select("*").order("date").order("start_time");
+      if(error) throw error;
+      if(data.length===0){
+        const muestras=mkMuestras();
+        await client.from("eventos").insert(muestras.map(toDB));
+        setEventos(muestras);
+      } else {
+        setEventos(data.map(fromDB));
+      }
+    } catch(e) {
+      showToast("Error cargando eventos: "+e.message,"err");
+      setEventos(mkMuestras());
+    } finally { setCargando(false); }
+  };
 
-      useEffect(()=>{try{localStorage.setItem("agenda-legal-v3",JSON.stringify(eventos));}catch{}},[eventos]);
+  const suscribirRT = (client) => {
+    if(canalRef.current) client.removeChannel(canalRef.current);
+    const canal=client.channel("agenda-rt")
+      .on("postgres_changes",{event:"INSERT",schema:"public",table:"eventos"},p=>{
+        setEventos(prev=>prev.find(e=>e.id===p.new.id)?prev:[...prev,fromDB(p.new)]);
+      })
+      .on("postgres_changes",{event:"UPDATE",schema:"public",table:"eventos"},p=>{
+        setEventos(prev=>prev.map(e=>e.id===p.new.id?fromDB(p.new):e));
+      })
+      .on("postgres_changes",{event:"DELETE",schema:"public",table:"eventos"},p=>{
+        setEventos(prev=>prev.filter(e=>e.id!==p.old.id));
+      })
+      .subscribe(s=>setSync(s==="SUBSCRIBED"?"sincronizado":s==="CHANNEL_ERROR"?"error":"conectando"));
+    canalRef.current=canal;
+  };
 
-      // Ocultar splash
-      useEffect(()=>{ const t=setTimeout(()=>{ const el=document.getElementById("splash"); if(el)el.classList.add("oculto"); },1200); return()=>clearTimeout(t); },[]);
+  /* CRUD */
+  const guardarEv = async (ev) => {
+    setBusy(true);
+    try {
+      if(!editEv?.id){
+        const {error}=await sb.from("eventos").insert([toDB(ev)]);
+        if(error) throw error;
+        showToast("✓ Evento creado");
+      } else {
+        const {error}=await sb.from("eventos").update(toDB(ev)).eq("id",ev.id);
+        if(error) throw error;
+        showToast("✓ Evento actualizado");
+      }
+      cerrarModal();
+    } catch(e) { showToast("Error: "+e.message,"err"); }
+    finally { setBusy(false); }
+  };
 
-      // Shortcut URL
-      useEffect(()=>{ if(ingresado&&window._openAlertas){setRpTab("alertas");window._openAlertas=false;} },[ingresado]);
+  const eliminarEv = async (id) => {
+    setBusy(true);
+    try {
+      const {error}=await sb.from("eventos").delete().eq("id",id);
+      if(error) throw error;
+      cerrarModal(); showToast("Evento eliminado");
+    } catch(e) { showToast("Error: "+e.message,"err"); }
+    finally { setBusy(false); }
+  };
 
-      const mostrarToast=(msg)=>{ setToast(msg); setTimeout(()=>setToast(null),3200); };
-      const abrirNuevo=(fecha)=>{ setEditEv({date:fecha||hoyStr(),lawyers:["p"],alerts:["72h","24h"],startTime:"09:00",endTime:"10:00",type:"audiencia",court:"",expNum:"",notes:""}); setModal(true); };
-      const abrirEditar=(ev)=>{ setEditEv(ev); setModal(true); };
-      const cerrarModal=()=>{ setModal(false); setEditEv(null); };
-      const guardarEvento=(ev)=>{ if(editEv?.id){setEventos(p=>p.map(e=>e.id===ev.id?ev:e));mostrarToast("✓ Evento actualizado");}else{setEventos(p=>[...p,ev]);mostrarToast("✓ Evento creado");}cerrarModal(); };
-      const eliminarEvento=(id)=>{ setEventos(p=>p.filter(e=>e.id!==id)); cerrarModal(); mostrarToast("Evento eliminado"); };
+  const abrirNuevo  = f => { setEditEv({date:f||hoyStr(),lawyers:["p"],alerts:["72h","24h"],startTime:"09:00",endTime:"10:00",type:"audiencia",court:"",expNum:"",notes:""}); setModal(true); };
+  const abrirEditar = ev => { setEditEv(ev); setModal(true); };
+  const cerrarModal = () => { setModal(false); setEditEv(null); };
 
-      const navegar=(dir)=>setCurFecha(p=>{
-        const n=new Date(p);
-        if(vista==="mes")n.setMonth(n.getMonth()+dir);
-        else if(vista==="semana")n.setDate(n.getDate()+dir*7);
-        else if(vista==="dia")n.setDate(n.getDate()+dir);
-        else n.setMonth(n.getMonth()+dir);
-        return n;
-      });
-      const irHoy=()=>setCurFecha(new Date());
+  const navegar = dir => setCurFecha(p=>{
+    const n=new Date(p);
+    if(vista==="mes") n.setMonth(n.getMonth()+dir);
+    else if(vista==="semana") n.setDate(n.getDate()+dir*7);
+    else if(vista==="dia")   n.setDate(n.getDate()+dir);
+    else n.setMonth(n.getMonth()+dir);
+    return n;
+  });
 
-      const tituloNav=()=>{
-        if(vista==="mes") return <><span className="mes-tit">{MESES[curFecha.getMonth()]}</span><span className="anio-lb">{curFecha.getFullYear()}</span></>;
-        if(vista==="semana"){
-          const ini=new Date(curFecha);ini.setDate(curFecha.getDate()-curFecha.getDay());
-          const fin=new Date(ini);fin.setDate(ini.getDate()+6);
-          const sm=ini.getMonth()===fin.getMonth();
-          return <span className="mes-tit" style={{fontSize:15}}>{ini.getDate()}{sm?"":` ${MESES[ini.getMonth()]}`} – {fin.getDate()} {MESES[fin.getMonth()]} {fin.getFullYear()}</span>;
-        }
-        if(vista==="dia") return <span className="mes-tit" style={{fontSize:15}}>{curFecha.toLocaleDateString("es-AR",{weekday:"short",day:"numeric",month:"long",year:"numeric"})}</span>;
-        return <><span className="mes-tit">{MESES[curFecha.getMonth()]}</span><span className="anio-lb">{curFecha.getFullYear()}</span></>;
-      };
+  const tituloNav = () => {
+    if(vista==="mes") return <><span className="mes-tit">{MESES[curFecha.getMonth()]}</span><span className="anio-lb">{curFecha.getFullYear()}</span></>;
+    if(vista==="semana"){
+      const ini=new Date(curFecha); ini.setDate(curFecha.getDate()-curFecha.getDay());
+      const fin=new Date(ini); fin.setDate(ini.getDate()+6);
+      const sm=ini.getMonth()===fin.getMonth();
+      return <span className="mes-tit" style={{fontSize:15}}>{ini.getDate()}{sm?"":` ${MESES[ini.getMonth()]}`} – {fin.getDate()} {MESES[fin.getMonth()]} {fin.getFullYear()}</span>;
+    }
+    if(vista==="dia") return <span className="mes-tit" style={{fontSize:15}}>{curFecha.toLocaleDateString("es-AR",{weekday:"short",day:"numeric",month:"long",year:"numeric"})}</span>;
+    return <><span className="mes-tit">{MESES[curFecha.getMonth()]}</span><span className="anio-lb">{curFecha.getFullYear()}</span></>;
+  };
 
-      const filtrados=filtro?eventos.filter(e=>e.lawyers?.includes(filtro)):eventos;
-      const ahora=new Date();
-      const proximos=eventos.filter(e=>new Date(e.date+"T"+(e.startTime||"00:00"))>=ahora).sort((a,b)=>(a.date+a.startTime).localeCompare(b.date+b.startTime)).slice(0,25);
-      const conAlerta=proximos.filter(e=>estadoAlerta(e.date,e.startTime));
+  const syncColor = sync==="sincronizado"?"#3DAA6A":sync==="error"?"#C94C4C":"#C9A84C";
+  const syncLabel = sync==="sincronizado"?"Sincronizado con Supabase":sync==="error"?"Error de sincronización":sync==="conectando"?"Conectando…":"Desconectado";
 
-      if(!ingresado) return (
-        <>
-          <Ingreso alEntrar={()=>setIngresado(true)}/>
-          {showInstall&&(
-            <div className="ibanner">
-              <div className="ibanner-icon">⚖️</div>
-              <div className="ibanner-text">
-                <div className="ibanner-title">Instalar App</div>
-                <div className="ibanner-desc">Acceso rápido desde tu pantalla de inicio</div>
-              </div>
-              <button className="ibanner-btn" onClick={install}>Instalar</button>
-              <button className="ibanner-x" onClick={()=>setShowInstall(false)}>✕</button>
+  const filtrados = filtro?eventos.filter(e=>e.lawyers?.includes(filtro)):eventos;
+  const ahora     = new Date();
+  const proximos  = eventos.filter(e=>new Date(e.date+"T"+(e.startTime||"00:00"))>=ahora)
+    .sort((a,b)=>(a.date+a.startTime).localeCompare(b.date+b.startTime)).slice(0,25);
+  const conAlerta = proximos.filter(e=>alerta(e.date,e.startTime));
+
+  /* ── PANTALLAS ── */
+  if(pantalla==="config") return (
+    <PantallaConfig onConectado={client=>{setSb(client);setSync("sincronizado");cargarEventos(client);suscribirRT(client);setPantalla("login");}}/>
+  );
+
+  if(pantalla==="loading") return (
+    <div className="loading-full">
+      <div className="sp-sello">M.S.<br/>&amp;A.</div>
+      <div style={{fontFamily:"'Playfair Display',serif",fontSize:17,color:"var(--tx)"}}>Conectando con Supabase…</div>
+      <div className="spin-ring"/>
+    </div>
+  );
+
+  if(!ingresado) return (
+    <Ingreso alEntrar={()=>setIngresado(true)} syncColor={syncColor} syncLabel={syncLabel}/>
+  );
+
+  return (
+    <>
+      {offline&&<div className="badge-off">📵 Sin conexión — modo offline</div>}
+
+      <div className="layout">
+        {/* SIDEBAR */}
+        <Barra eventos={eventos} filtro={filtro} setFiltro={setFiltro}
+          syncColor={syncColor} syncLabel={syncLabel}
+          onCfg={()=>{setIngresado(false);setPantalla("config");}}/>
+
+        {/* MAIN */}
+        <div className="main">
+          <div className="main-hd">
+            <div style={{display:"flex",alignItems:"center",gap:9}}>
+              <button className="nav-btn" onClick={()=>navegar(-1)}>‹</button>
+              <span>{tituloNav()}</span>
+              <button className="nav-btn" onClick={()=>navegar(1)}>›</button>
+              <button className="hoy-btn" onClick={()=>setCurFecha(new Date())}>HOY</button>
             </div>
-          )}
-        </>
-      );
-
-      return (
-        <>
-          {isOffline&&<div className="offline-badge">📵 Sin conexión — modo offline</div>}
-          {showUpdate&&(
-            <div className="ubanner">
-              <span style={{color:"var(--tx2)",fontSize:12}}>🔄 Nueva versión disponible</span>
-              <button className="ubanner-btn" onClick={update}>Actualizar</button>
-              <button style={{background:"none",border:"none",color:"var(--tx3)",fontSize:14,padding:"0 4px"}} onClick={()=>setShowUpdate(false)}>✕</button>
+            <div className="vtabs">
+              {[["mes","Mes"],["semana","Sem"],["dia","Día"],["lista","Lista"]].map(([v,l])=>(
+                <button key={v} className={`vtab ${vista===v?"on":""}`} onClick={()=>setVista(v)}>{l}</button>
+              ))}
             </div>
-          )}
-          <div className="layout">
-            <Barra eventos={eventos} filtro={filtro} setFiltro={setFiltro}/>
-            <div className="main">
-              <div className="main-hd">
-                <div style={{display:"flex",alignItems:"center",gap:9}}>
-                  <button className="nav-btn" onClick={()=>navegar(-1)}>‹</button>
-                  <span>{tituloNav()}</span>
-                  <button className="nav-btn" onClick={()=>navegar(1)}>›</button>
-                  <button className="hoy-btn" onClick={irHoy}>HOY</button>
-                </div>
-                <div className="vtabs">
-                  {[["mes","Mes"],["semana","Sem"],["dia","Día"],["lista","Lista"]].map(([v,l])=>(
-                    <button key={v} className={`vtab ${vista===v?"on":""}`} onClick={()=>setVista(v)}>{l}</button>
-                  ))}
-                </div>
-                <button className="add-btn" onClick={()=>abrirNuevo(null)}>+ Nuevo</button>
-              </div>
-              <div className="cal-scroll">
-                {vista==="mes"    &&<VistaMes    año={curFecha.getFullYear()} mes={curFecha.getMonth()} eventos={filtrados} alDia={abrirNuevo} alEvento={abrirEditar}/>}
-                {vista==="semana" &&<VistaSemana fecha={curFecha} eventos={filtrados} alEvento={abrirEditar} alSlot={abrirNuevo}/>}
-                {vista==="dia"    &&<VistaDay    fecha={curFecha} eventos={filtrados} alEvento={abrirEditar} alSlot={abrirNuevo}/>}
-                {vista==="lista"  &&<VistaLista  eventos={filtrados} alEvento={abrirEditar}/>}
-              </div>
-            </div>
-            <div className="rpanel">
-              <div className="rp-tabs">
-                <button className={`rptab ${rpTab==="proximos"?"on":""}`} onClick={()=>setRpTab("proximos")}>Próximos</button>
-                <button className={`rptab ${rpTab==="alertas"?"on":""}`} onClick={()=>setRpTab("alertas")}>
-                  Alertas {conAlerta.length>0&&<span className="al-cnt">{conAlerta.length}</span>}
-                </button>
-              </div>
-              <div className="rp-body">
-                {rpTab==="proximos"&&<PanelProximos eventos={proximos} alEvento={abrirEditar}/>}
-                {rpTab==="alertas" &&<PanelAlertas  eventos={conAlerta} alEvento={abrirEditar}/>}
-              </div>
-            </div>
+            <button className="add-btn" onClick={()=>abrirNuevo(null)}>+ Nuevo</button>
           </div>
-          {modal&&<ModalEvento evento={editEv} alGuardar={guardarEvento} alEliminar={eliminarEvento} alCerrar={cerrarModal}/>}
-          {toast&&<div className="toast">{toast}</div>}
-          {showInstall&&(
-            <div className="ibanner">
-              <div className="ibanner-icon">⚖️</div>
-              <div className="ibanner-text">
-                <div className="ibanner-title">Instalar App</div>
-                <div className="ibanner-desc">Acceso rápido desde tu pantalla de inicio</div>
-              </div>
-              <button className="ibanner-btn" onClick={install}>Instalar</button>
-              <button className="ibanner-x" onClick={()=>setShowInstall(false)}>✕</button>
-            </div>
-          )}
-        </>
-      );
-    }
 
-    ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
-  </script>
+          <div className="cal-scroll">
+            {cargando?(
+              <div className="skel-grid">
+                {Array.from({length:35}).map((_,i)=><div key={i} className="skel" style={{height:102}}/>)}
+              </div>
+            ):(
+              <>
+                {vista==="mes"    &&<VistaMes    año={curFecha.getFullYear()} mes={curFecha.getMonth()} eventos={filtrados} alDia={abrirNuevo} alEv={abrirEditar}/>}
+                {vista==="semana" &&<VistaSemana fecha={curFecha} eventos={filtrados} alEv={abrirEditar} alSlot={abrirNuevo}/>}
+                {vista==="dia"    &&<VistaDay    fecha={curFecha} eventos={filtrados} alEv={abrirEditar} alSlot={abrirNuevo}/>}
+                {vista==="lista"  &&<VistaLista  eventos={filtrados} alEv={abrirEditar}/>}
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* PANEL DERECHO */}
+        <div className="rpanel">
+          <div className="rp-tabs">
+            <button className={`rptab ${rpTab==="proximos"?"on":""}`} onClick={()=>setRpTab("proximos")}>Próximos</button>
+            <button className={`rptab ${rpTab==="alertas"?"on":""}`} onClick={()=>setRpTab("alertas")}>
+              Alertas {conAlerta.length>0&&<span className="al-cnt">{conAlerta.length}</span>}
+            </button>
+          </div>
+          <div className="rp-body">
+            {rpTab==="proximos"&&<PanelProx eventos={proximos} alEv={abrirEditar}/>}
+            {rpTab==="alertas" &&<PanelAl   eventos={conAlerta} alEv={abrirEditar}/>}
+          </div>
+        </div>
+      </div>
+
+      {modal&&<ModalEv evento={editEv} alGuardar={guardarEv} alEliminar={eliminarEv} alCerrar={cerrarModal} busy={busy}/>}
+      {toast&&<div className={`toast ${toast.tipo}`}>{toast.msg}</div>}
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
 </body>
 </html>
