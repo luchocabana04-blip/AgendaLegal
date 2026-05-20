@@ -7,7 +7,7 @@
   "display": "standalone",
   "background_color": "#07090F",
   "theme_color": "#C9A84C",
-  "orientation": "portrait-primary",
+  "orientation": "portrait",
   "lang": "es-AR",
   "categories": ["productivity", "business"],
   "icons": [
