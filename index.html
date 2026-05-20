@@ -191,14 +191,12 @@
     /* AJUSTES RESPONSIVE (CELULAR) */
     @media(max-width: 768px){
       .layout{grid-template-columns:1fr; height:100vh}
-      .sidebar{display:none} /* Sidebar oculta, usamos el Menú Móvil */
+      .sidebar{display:none} 
       .bottom-nav{display:flex}
-      .main{padding-bottom:calc(65px + var(--safe-b))} /* Espacio para el nav bottom */
-      
+      .main{padding-bottom:calc(65px + var(--safe-b))} 
       .main-hd{padding:12px 16px; flex-wrap:wrap; gap:12px}
-      .vtabs{display:none} /* Ocultamos vtabs arriba en mobile, usamos nav de abajo */
+      .vtabs{display:none}
       .mes-tit{font-size:18px}
-      
       .cal-scroll{padding:12px}
       .cal-grid{border-radius:8px}
       .cal-hdr{padding:8px 2px; font-size:10px}
@@ -206,14 +204,12 @@
       .dn{width:20px; height:20px; font-size:12px; margin-bottom:4px}
       .chip{font-size:9.5px; padding:4px 5px; margin-bottom:3px}
       .c-abg{font-size:8px; padding:1px 3px}
-      
       .f-row{grid-template-columns:1fr; gap:12px}
       .modal-box{border-radius:12px; max-height:85vh}
       .list-card{flex-direction:column; align-items:flex-start; gap:10px; padding:14px}
       .lc-time{border-right:none; border-bottom:1px solid var(--bd2); width:100%; text-align:left; padding-bottom:8px; display:flex; gap:10px; align-items:center}
       .btn-wsp{width:100%; justify-content:center; padding:10px}
-      
-      .week-col{min-width:85vw} /* En mobile, la semana ocupa casi toda la pantalla por día */
+      .week-col{min-width:85vw} 
     }
     
     /* TOAST */
@@ -230,9 +226,44 @@
 
 <div id="root"></div>
 
+<script>
+  setTimeout(() => {
+    const s = document.getElementById("splash");
+    if(s && !s.classList.contains("out")) s.classList.add("out");
+  }, 6000);
+</script>
+
 <script type="text/babel">
-const { useState, useEffect } = React;
-const { createClient } = window.supabase;
+const { useState, useEffect, Component } = React;
+
+// 🛡️ PROTECCIÓN 1: Extracción segura de cliente Supabase
+const createClient = window.supabase ? window.supabase.createClient : null;
+
+// 🛡️ PROTECCIÓN 2: Atrapador global de Errores Críticos
+class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, errorInfo: null };
+  }
+  static getDerivedStateFromError(error) { return { hasError: true }; }
+  componentDidCatch(error, errorInfo) {
+    console.error("Crash interceptado:", error);
+    this.setState({ errorInfo: error.toString() });
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{padding:'30px', background:'#07090F', height:'100vh', color:'#fff', display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center', textAlign:'center'}}>
+          <h2 style={{color:'#C94C4C', marginBottom:'15px'}}>La interfaz se bloqueó.</h2>
+          <p style={{fontSize:'14px', color:'#8A9AB8', marginBottom:'25px'}}>Los datos temporales del teléfono están corruptos. Limpia el sistema con este botón.</p>
+          <button onClick={() => { localStorage.clear(); window.location.reload(); }} style={{padding:'14px 24px', background:'#C9A84C', color:'#000', fontWeight:'bold', borderRadius:'8px', border:'none', cursor:'pointer'}}>Limpiar Memoria y Reiniciar</button>
+          <pre style={{marginTop:'30px', fontSize:'10px', color:'#C94C4C', background:'#141C33', padding:'10px', borderRadius:'6px', maxWidth:'100%', overflow:'auto', textAlign:'left'}}>{this.state.errorInfo}</pre>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 const TIPOS = [
   { id:"audiencia",   label:"Audiencia",   cls:"type-audiencia" },
@@ -245,17 +276,27 @@ const TIPOS = [
 const DIAS = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
 const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 
-// FIX FECHAS: Generar ISO String compensando Zona Horaria (Seguro)
+// 🛡️ PROTECCIÓN 3: Formateo de fechas a prueba de fallos
 const toLocalISODate = (d) => {
-  const z = d.getTimezoneOffset() * 60000;
-  return (new Date(d - z)).toISOString().slice(0, 10);
+  try {
+    const dateObj = new Date(d);
+    const z = dateObj.getTimezoneOffset() * 60000;
+    return (new Date(dateObj.getTime() - z)).toISOString().slice(0, 10);
+  } catch(e) { return new Date().toISOString().slice(0, 10); }
 };
 const hoyStr = () => toLocalISODate(new Date());
 
 const getLocalSafe = (key, fallback) => {
+  try { const val = localStorage.getItem(key); return val ? JSON.parse(val) : fallback; } catch(e) { return fallback; }
+};
+
+// 🛡️ PROTECCIÓN 4: Extracción de Arrays Segura (Evita Crash de Mapas)
+const getLocalSafeArray = (key, fallback) => {
   try {
     const val = localStorage.getItem(key);
-    return val ? JSON.parse(val) : fallback;
+    if (!val) return fallback;
+    const parsed = JSON.parse(val);
+    return Array.isArray(parsed) ? parsed : fallback;
   } catch(e) { return fallback; }
 };
 
@@ -269,12 +310,11 @@ function App() {
   const [sb, setSb] = useState(null);
   const [toast, setToast] = useState(null);
   
-  // ESTADOS DE DATOS
+  // ESTADOS DE DATOS CON EXTRACCIÓN SEGURA
   const [eventos, setEventos] = useState([]);
-  const [abogados, setAbogados] = useState(() => getLocalSafe("agenda_abg", defAbogados));
+  const [abogados, setAbogados] = useState(() => getLocalSafeArray("agenda_abg", defAbogados));
   const [alertas, setAlertas] = useState(() => getLocalSafe("agenda_alerts", {email:"", wsp:""}));
   
-  // ESTADOS UI
   const [vista, setVista] = useState("mes");
   const [curFecha, setCurFecha] = useState(new Date());
   const [filtroAbg, setFiltroAbg] = useState(null);
@@ -288,17 +328,9 @@ function App() {
   useEffect(() => { localStorage.setItem("agenda_alerts", JSON.stringify(alertas)); }, [alertas]);
 
   useEffect(() => {
-    console.log("INIT");
-    
-    // 4) Timeout de seguridad: Si en 5 segundos no resolvió, forzamos la entrada al sistema
     const safetyTimeout = setTimeout(() => {
-      console.warn("TIMEOUT DE SEGURIDAD ALCANZADO: Forzando entrada al sistema");
-      const splash = document.getElementById("splash");
-      if (splash && !splash.classList.contains("out")) {
-        splash.classList.add("out");
-      }
+      document.getElementById("splash")?.classList.add("out");
       setLoading(false);
-      showToast("Conexión inestable. Ingresando en modo local.");
     }, 5000);
 
     const init = async () => {
@@ -306,24 +338,20 @@ function App() {
         const url = localStorage.getItem("sb_url");
         const key = localStorage.getItem("sb_key");
         
-        if (url && key) {
-          console.log("SUPABASE OK");
+        if (url && key && createClient) {
           const client = createClient(url, key);
           setSb(client);
-          // La app no se bloqueará esperando gracias a las medidas en fetchEventos
           await fetchEventos(client); 
         }
       } catch (e) {
         console.error("Error init DB:", e);
       } finally {
-        console.log("LOADING END");
-        clearTimeout(safetyTimeout); // Limpiamos el timeout si terminó a tiempo
+        clearTimeout(safetyTimeout);
         setTimeout(() => document.getElementById("splash")?.classList.add("out"), 600);
       }
     };
-    
     init();
-  }, []); // Dependencias vacías: Evita bucles infinitos de renderizado
+  }, []); 
 
   const showToast = (msg) => {
     setToast(msg);
@@ -333,37 +361,30 @@ function App() {
   const fetchEventos = async (client) => {
     setLoading(true);
     try {
-      // 2) y 3) Promise.race para evitar que la petición a Supabase se cuelgue para siempre
       const fetchPromise = client.from("eventos").select("*");
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error("Timeout de servidor")), 4500)
-      );
-      
+      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 4500));
       const response = await Promise.race([fetchPromise, timeoutPromise]);
       const { data, error } = response;
-
       if (error) throw error;
       
       if (data) {
         setEventos(data.map(d => ({
           id: d.id, title: d.title || "Causa sin título", type: d.type || "audiencia",
           date: d.date || hoyStr(), startTime: d.start_time || "09:00",
-          endTime: d.end_time || "10:00", lawyers: d.lawyers || [],
+          endTime: d.end_time || "10:00", 
+          lawyers: Array.isArray(d.lawyers) ? d.lawyers : (d.lawyers ? [d.lawyers] : []), // 🛡️ Evita crash si la DB devuelve strings
           notes: d.notes || "", court: d.court || "", expNum: d.exp_num || ""
         })));
-        console.log("EVENTOS OK");
       }
     } catch(e) { 
-      console.error("Error obteniendo eventos:", e.message); 
-      showToast("Error de red. Mostrando datos locales disponibles.");
+      showToast("Modo sin conexión o inestable.");
     } finally { 
-      // 1) setLoading(false) asegurado incondicionalmente
       setLoading(false); 
     }
   };
 
   const guardarEv = async (f) => {
-    if(!sb) return alert("Base de datos no conectada.");
+    if(!sb) return showToast("Base de datos no conectada.");
     const payload = {
       id: f.id || `e_${Date.now()}`, title: f.title, type: f.type, date: f.date,
       start_time: f.startTime, end_time: f.endTime, lawyers: f.lawyers,
@@ -371,44 +392,33 @@ function App() {
     };
     try {
       await sb.from("eventos").upsert(payload);
-      setModalEv(null);
-      showToast("Evento guardado correctamente.");
-      fetchEventos(sb);
+      setModalEv(null); showToast("Guardado OK."); fetchEventos(sb);
     } catch(e) { showToast("Error al guardar."); }
   };
 
   const eliminarEv = async (id) => {
+    if(!sb) return;
     if(confirm("¿Seguro que deseas eliminar esta causa?")) {
-      try { await sb.from("eventos").delete().eq("id", id); setModalEv(null); showToast("Evento eliminado."); fetchEventos(sb); } catch(e) {}
+      try { await sb.from("eventos").delete().eq("id", id); setModalEv(null); showToast("Eliminado."); fetchEventos(sb); } catch(e) {}
     }
   };
 
-  // CERRAR SESIÓN SEGURA
   const cerrarSesion = () => {
-    setPantalla("login");
-    setFiltroAbg(null);
-    setVista("mes");
-    setModalMenuMobile(false);
+    setPantalla("login"); setFiltroAbg(null); setVista("mes"); setModalMenuMobile(false);
   };
 
-  // OBTENER DÍAS DE LA SEMANA ACTUAL
   const getWeekDays = (date) => {
     const d = new Date(date);
     const day = d.getDay();
-    const diff = d.getDate() - day; // Domingo como primer día
-    const sunday = new Date(d.setDate(diff));
+    const sunday = new Date(d.setDate(d.getDate() - day));
     return Array.from({length: 7}).map((_, i) => {
-        const nd = new Date(sunday);
-        nd.setDate(sunday.getDate() + i);
-        return nd;
+        const nd = new Date(sunday); nd.setDate(sunday.getDate() + i); return nd;
     });
   };
 
-  // VISTAS
   const renderCalendario = () => {
     const filtrados = filtroAbg ? eventos.filter(e=>e.lawyers?.includes(filtroAbg)) : eventos;
     
-    // --- VISTA MES ---
     if(vista === "mes") {
       const año = curFecha.getFullYear(); const mes = curFecha.getMonth();
       const pri = new Date(año,mes,1).getDay(); const dias = new Date(año,mes+1,0).getDate();
@@ -423,11 +433,11 @@ function App() {
           {DIAS.map(d=><div key={d} className="cal-hdr">{d}</div>)}
           {cels.map((c,idx)=>{
             const ds = `${año}-${String(c.m+1).padStart(2,"0")}-${String(c.d).padStart(2,"0")}`;
-            const des = filtrados.filter(e=>e.date===ds).sort((a,b)=>a.startTime.localeCompare(b.startTime));
+            // 🛡️ PROTECCIÓN 5: Conversión a string antes de ordenar (Evita crash por localeCompare)
+            const des = filtrados.filter(e=>e.date===ds).sort((a,b)=>String(a.startTime||"").localeCompare(String(b.startTime||"")));
             const isHoy = ds === hoyStr();
             const MAX_VISIBLES = 2;
             const visibles = des.slice(0, MAX_VISIBLES);
-            const extra = des.length - MAX_VISIBLES;
 
             return (
               <div key={idx} className={`cal-cell ${c.otra?"otra":""} ${isHoy?"hoy":""}`} onClick={()=>!c.otra && (setCurFecha(new Date(ds+"T12:00:00")), setVista("dia"))}>
@@ -443,7 +453,7 @@ function App() {
                       </div>
                     )
                   })}
-                  {extra > 0 && <div className="chip-more">+{extra} más</div>}
+                  {des.length > MAX_VISIBLES && <div className="chip-more">+{des.length - MAX_VISIBLES} más</div>}
                 </div>
               </div>
             );
@@ -452,20 +462,16 @@ function App() {
       );
     }
 
-    // --- VISTA SEMANA ---
     if(vista === "semana") {
-      const weekDays = getWeekDays(curFecha);
       return (
         <div className="week-grid fade-in">
-           {weekDays.map(wd => {
+           {getWeekDays(curFecha).map(wd => {
                const ds = toLocalISODate(wd);
-               const dayEvs = filtrados.filter(e=>e.date===ds).sort((a,b)=>a.startTime.localeCompare(b.startTime));
+               const dayEvs = filtrados.filter(e=>e.date===ds).sort((a,b)=>String(a.startTime||"").localeCompare(String(b.startTime||"")));
                const isHoy = ds === hoyStr();
                return (
                    <div className="week-col" key={ds}>
-                      <div className={`week-hdr ${isHoy?"hoy":""}`}>
-                        {DIAS[wd.getDay()]} <span>{wd.getDate()} {MESES[wd.getMonth()].substring(0,3)}</span>
-                      </div>
+                      <div className={`week-hdr ${isHoy?"hoy":""}`}>{DIAS[wd.getDay()]} <span>{wd.getDate()} {MESES[wd.getMonth()].substring(0,3)}</span></div>
                       <div className="week-body">
                          {dayEvs.map(ev => {
                             const tObj = TIPOS.find(t=>t.id===ev.type) || TIPOS[4];
@@ -485,32 +491,24 @@ function App() {
       )
     }
 
-    // --- VISTA DÍA ---
     if(vista === "dia") {
       const ds = toLocalISODate(curFecha);
-      const dEvs = filtrados.filter(e=>e.date===ds).sort((a,b)=>a.startTime.localeCompare(b.startTime));
+      const dEvs = filtrados.filter(e=>e.date===ds).sort((a,b)=>String(a.startTime||"").localeCompare(String(b.startTime||"")));
       return (
         <div className="fade-in">
           <div style={{fontSize:18, fontWeight:600, marginBottom:20, paddingBottom:12, borderBottom:"1px solid var(--bd2)", color:"var(--gold)"}}>
             {curFecha.toLocaleDateString("es-AR",{weekday:"long",day:"numeric",month:"long", year:"numeric"})}
           </div>
-          {dEvs.length===0 ? <div style={{textAlign:"center", color:"var(--tx3)", padding:40, background:"var(--s1)", borderRadius:12, border:"1px dashed var(--bd2)"}}>Sin compromisos programados para este día.</div> : 
+          {dEvs.length===0 ? <div style={{textAlign:"center", color:"var(--tx3)", padding:40, background:"var(--s1)", borderRadius:12, border:"1px dashed var(--bd2)"}}>Sin compromisos.</div> : 
             dEvs.map(ev=>{
                const tObj = TIPOS.find(t=>t.id===ev.type) || TIPOS[4];
                const abg = abogados.find(a=>a.id===(ev.lawyers?.[0]));
                return (
                   <div key={ev.id} className="list-card" onClick={()=>setModalEv(ev)}>
-                    <div className="lc-time">
-                       <div className="lc-hs">{ev.startTime}</div>
-                       <div style={{fontSize:11, color:'var(--tx2)', marginTop:2}}>Hs.</div>
-                    </div>
+                    <div className="lc-time"><div className="lc-hs">{ev.startTime}</div><div style={{fontSize:11, color:'var(--tx2)', marginTop:2}}>Hs.</div></div>
                     <div className="lc-body">
                       <div className="lc-tit">{ev.title} <span className={`lc-badge ${tObj.id}`}>{tObj.label}</span></div>
-                      <div className="lc-meta">
-                         <span>⚖️ {ev.court||"S/D"}</span>
-                         <span>📁 Exp: {ev.expNum||"S/D"}</span>
-                         <span style={{color:abg?.color}}>👤 {abg?.nombre||"Sin Asignar"}</span>
-                      </div>
+                      <div className="lc-meta"><span>⚖️ {ev.court||"S/D"}</span><span>📁 Exp: {ev.expNum||"S/D"}</span><span style={{color:abg?.color}}>👤 {abg?.nombre||"Sin Asignar"}</span></div>
                     </div>
                   </div>
                )
@@ -520,20 +518,16 @@ function App() {
       );
     }
 
-    // --- VISTA LISTA ---
     if(vista === "lista") {
-      const allEvs = [...filtrados].sort((a,b)=>a.date.localeCompare(b.date));
+      const allEvs = [...filtrados].sort((a,b)=>String(a.date||"").localeCompare(String(b.date||"")));
       return (
         <div className="fade-in">
           {allEvs.map(ev=>{
             const tObj = TIPOS.find(t=>t.id===ev.type) || TIPOS[4];
-            const dStr = new Date(ev.date+"T12:00:00").toLocaleDateString("es-AR",{day:"2-digit",month:"short"});
+            const dStr = new Date((ev.date||hoyStr())+"T12:00:00").toLocaleDateString("es-AR",{day:"2-digit",month:"short"});
             return (
               <div key={ev.id} className="list-card" onClick={()=>setModalEv(ev)}>
-                <div className="lc-time" style={{width:80}}>
-                   <div style={{fontSize:13, color:'var(--tx)'}}>{dStr}</div>
-                   <div className="lc-hs" style={{fontSize:14}}>{ev.startTime}</div>
-                </div>
+                <div className="lc-time" style={{width:80}}><div style={{fontSize:13, color:'var(--tx)'}}>{dStr}</div><div className="lc-hs" style={{fontSize:14}}>{ev.startTime}</div></div>
                 <div className="lc-body">
                   <div className="lc-tit">{ev.title} <span className={`lc-badge ${tObj.id}`}>{tObj.label}</span></div>
                   <div className="lc-meta">Exp: {ev.expNum||"S/D"} | Juzgado: {ev.court||"S/D"}</div>
@@ -546,32 +540,23 @@ function App() {
     }
   };
 
-  // PANTALLAS DE ACCESO
   if (pantalla === "config") {
     return (
       <div className="pant-bg fade-in" style={{padding:20}}>
         <div className="card" style={{width:"100%", maxWidth:420, textAlign:"center"}}>
           <h2 style={{color:"var(--gold)", marginBottom:10}}>Conectar Base de Datos</h2>
-          <p style={{fontSize:13, color:"var(--tx2)", marginBottom:20, lineHeight:1.5}}>Ingresa las credenciales de Supabase del estudio para habilitar la sincronización en tiempo real.</p>
+          <p style={{fontSize:13, color:"var(--tx2)", marginBottom:20, lineHeight:1.5}}>Ingresa las credenciales de Supabase del estudio.</p>
           <input id="inUrl" placeholder="URL del Proyecto (https://...)" defaultValue={localStorage.getItem("sb_url")} style={{marginBottom:12}}/>
           <input id="inKey" type="password" placeholder="Anon Key" defaultValue={localStorage.getItem("sb_key")} style={{marginBottom:24}}/>
-          
           <button className="btn-gold" style={{marginBottom:12}} onClick={()=>{
-            const u = document.getElementById("inUrl").value;
-            const k = document.getElementById("inKey").value;
+            const u = document.getElementById("inUrl").value; const k = document.getElementById("inKey").value;
             if(!u || !k) return alert("Completa ambos campos.");
-            localStorage.setItem("sb_url", u);
-            localStorage.setItem("sb_key", k);
-            window.location.reload();
+            localStorage.setItem("sb_url", u); localStorage.setItem("sb_key", k); window.location.reload();
           }}>Guardar y Conectar</button>
-          
           <button className="btn-s" style={{width:"100%"}} onClick={()=>setPantalla("login")}>Volver</button>
-
           <hr className="divider"/>
           <button style={{background:"none", color:"var(--red)", fontSize:12, textDecoration:"underline"}} onClick={()=>{
-             if(confirm("¿Borrar credenciales de este dispositivo?")) {
-                localStorage.removeItem("sb_url"); localStorage.removeItem("sb_key"); setPantalla("login");
-             }
+             if(confirm("¿Borrar credenciales?")) { localStorage.removeItem("sb_url"); localStorage.removeItem("sb_key"); setPantalla("login"); }
           }}>Limpiar Credenciales</button>
         </div>
       </div>
@@ -601,21 +586,13 @@ function App() {
     );
   }
 
-  // INTERFAZ PRINCIPAL APP
   return (
     <div className="layout fade-in">
-      
-      {/* SIDEBAR PC */}
       <div className="sidebar">
-        <div className="sb-hd">
-          <div className="l-sello">M.S.</div>
-          <div><div className="l-nm">Mariana Sánchez</div><div className="l-sb">Suite Legal</div></div>
-        </div>
+        <div className="sb-hd"><div className="l-sello">M.S.</div><div><div className="l-nm">Mariana Sánchez</div><div className="l-sb">Suite Legal</div></div></div>
         <div className="sb-body">
           <div className="sb-sec"><span>Miembros del Estudio</span> <button style={{background:"none", color:"var(--gold)", fontSize:16}} onClick={()=>setModalEquipo(true)}>⚙️</button></div>
-          <div className={`abg-row ${filtroAbg===null?"on":""}`} onClick={()=>setFiltroAbg(null)}>
-            <div className="av" style={{background:"var(--s4)",color:"var(--tx)"}}>∀</div><div className="a-nm">Todo el Bufete</div>
-          </div>
+          <div className={`abg-row ${filtroAbg===null?"on":""}`} onClick={()=>setFiltroAbg(null)}><div className="av" style={{background:"var(--s4)",color:"var(--tx)"}}>∀</div><div className="a-nm">Todo el Bufete</div></div>
           {abogados.map(a=>(
             <div key={a.id} className={`abg-row ${filtroAbg===a.id?"on":""}`} onClick={()=>setFiltroAbg(a.id)}>
               <div className="av" style={{background:a.color}}>{a.ini}</div><div className="a-nm">{a.nombre}</div>
@@ -628,34 +605,23 @@ function App() {
         </div>
       </div>
 
-      {/* MAIN AREA */}
       <div className="main">
         <div className="main-hd">
           <div className="hd-left">
             <button className="nav-btn" onClick={()=>setCurFecha(new Date(curFecha.getFullYear(), curFecha.getMonth(), curFecha.getDate() - (vista==='mes'?30:7)))}>‹</button>
-            <div className="mes-tit">
-               {vista==='semana' ? `${MESES[curFecha.getMonth()]} ${curFecha.getFullYear()}` : `${MESES[curFecha.getMonth()]} ${curFecha.getFullYear()}`}
-            </div>
+            <div className="mes-tit">{MESES[curFecha.getMonth()]} {curFecha.getFullYear()}</div>
             <button className="nav-btn" onClick={()=>setCurFecha(new Date(curFecha.getFullYear(), curFecha.getMonth(), curFecha.getDate() + (vista==='mes'?30:7)))}>›</button>
             <button className="nav-btn" style={{background:"transparent", color:"var(--gold)", width:"auto", padding:"0 12px", border:"1px solid var(--gold3)"}} onClick={()=>setCurFecha(new Date())}>HOY</button>
           </div>
-          
           <div className="vtabs">
-            {[
-              {id:"mes", label:"MES"},
-              {id:"semana", label:"SEMANA"},
-              {id:"dia", label:"DÍA"},
-              {id:"lista", label:"LISTA"}
-            ].map(v=><button key={v.id} className={`vtab ${vista===v.id?"on":""}`} onClick={()=>setVista(v.id)}>{v.label}</button>)}
+            {[{id:"mes", label:"MES"},{id:"semana", label:"SEMANA"},{id:"dia", label:"DÍA"},{id:"lista", label:"LISTA"}].map(v=><button key={v.id} className={`vtab ${vista===v.id?"on":""}`} onClick={()=>setVista(v.id)}>{v.label}</button>)}
           </div>
         </div>
-
         <div className="cal-scroll">
           {loading ? <div style={{textAlign:"center", padding:40}}><div className="sp-spin" style={{margin:"0 auto"}}></div></div> : renderCalendario()}
         </div>
       </div>
 
-      {/* BOTTOM NAV (MOBILE) */}
       <div className="bottom-nav">
         <div className={`bn-item ${vista==="mes"?"on":""}`} onClick={()=>setVista("mes")}><span className="bn-icon">📅</span>Mes</div>
         <div className={`bn-item ${vista==="semana"?"on":""}`} onClick={()=>setVista("semana")}><span className="bn-icon">🗓️</span>Semana</div>
@@ -664,10 +630,9 @@ function App() {
         <div className="bn-item" onClick={()=>setModalMenuMobile(true)}><span className="bn-icon">☰</span>Menú</div>
       </div>
 
-      {/* MODAL MENU MOBILE */}
       {modalMenuMobile && (
         <div className="modal-ov" style={{alignItems:'flex-end', padding:0}} onClick={e=>e.target===e.currentTarget&&setModalMenuMobile(false)}>
-          <div className="modal-box" style={{borderBottomLeftRadius:0, borderBottomRightRadius:0, width:'100%', margin:0, paddingBottom:var(--safe-b)}}>
+          <div className="modal-box" style={{borderBottomLeftRadius:0, borderBottomRightRadius:0, width:'100%', margin:0, paddingBottom:"var(--safe-b)"}}>
             <div className="modal-hd"><div className="modal-tit">Menú del Estudio</div><button style={{background:'none',color:'var(--tx2)',fontSize:20}} onClick={()=>setModalMenuMobile(false)}>✕</button></div>
             <div className="modal-bd" style={{gap:16}}>
                 <button className="btn-s" style={{width:'100%', textAlign:'left', padding:'16px', fontSize:14}} onClick={()=>{setModalMenuMobile(false); setModalEquipo(true);}}>👥 Gestión de Abogados</button>
@@ -679,58 +644,35 @@ function App() {
         </div>
       )}
 
-      {/* MODAL EVENTO */}
       {modalEv && (
         <div className="modal-ov" onClick={e=>e.target===e.currentTarget&&setModalEv(null)}>
           <div className="modal-box">
-            <div className="modal-hd">
-              <div className="modal-tit">{modalEv.id ? "Editar Causa" : "Nueva Causa / Evento"}</div>
-              <button style={{background:"none", color:"var(--tx2)", fontSize:22}} onClick={()=>setModalEv(null)}>✕</button>
-            </div>
+            <div className="modal-hd"><div className="modal-tit">{modalEv.id ? "Editar Causa" : "Nueva Causa / Evento"}</div><button style={{background:"none", color:"var(--tx2)", fontSize:22}} onClick={()=>setModalEv(null)}>✕</button></div>
             <div className="modal-bd">
               <div className="f-grp"><label className="m-lbl">Carátula *</label><input defaultValue={modalEv.title} id="ev_t" placeholder="Ej: Perez c/ Gómez s/ Daños"/></div>
-              
               <div className="f-row">
-                <div className="f-grp">
-                  <label className="m-lbl">Tipo de Evento</label>
-                  <select id="ev_type" defaultValue={modalEv.type || "audiencia"}>
-                    {TIPOS.map(t=><option key={t.id} value={t.id}>{t.label}</option>)}
-                  </select>
-                </div>
-                <div className="f-grp">
-                  <label className="m-lbl">Abogado Asignado</label>
-                  <select id="ev_abg" defaultValue={modalEv.lawyers?.[0]||"p"}>
-                    {abogados.map(a=><option key={a.id} value={a.id}>{a.nombre}</option>)}
-                  </select>
-                </div>
+                <div className="f-grp"><label className="m-lbl">Tipo</label><select id="ev_type" defaultValue={modalEv.type || "audiencia"}>{TIPOS.map(t=><option key={t.id} value={t.id}>{t.label}</option>)}</select></div>
+                <div className="f-grp"><label className="m-lbl">Abogado</label><select id="ev_abg" defaultValue={modalEv.lawyers?.[0]||"p"}>{abogados.map(a=><option key={a.id} value={a.id}>{a.nombre}</option>)}</select></div>
               </div>
-
               <div className="f-row">
-                <div className="f-grp"><label className="m-lbl">N° Expediente</label><input defaultValue={modalEv.expNum} id="ev_exp"/></div>
-                <div className="f-grp"><label className="m-lbl">Juzgado / Fuero</label><input defaultValue={modalEv.court} id="ev_c"/></div>
+                <div className="f-grp"><label className="m-lbl">N° Exp</label><input defaultValue={modalEv.expNum} id="ev_exp"/></div>
+                <div className="f-grp"><label className="m-lbl">Juzgado</label><input defaultValue={modalEv.court} id="ev_c"/></div>
               </div>
               <div className="f-row">
                 <div className="f-grp"><label className="m-lbl">Fecha</label><input type="date" defaultValue={modalEv.date} id="ev_d"/></div>
-                <div className="f-grp"><label className="m-lbl">Hora de Inicio</label><input type="time" defaultValue={modalEv.startTime||"09:00"} id="ev_h"/></div>
+                <div className="f-grp"><label className="m-lbl">Hora</label><input type="time" defaultValue={modalEv.startTime||"09:00"} id="ev_h"/></div>
               </div>
-              
-              <div className="f-grp"><label className="m-lbl">Anotaciones Privadas</label><textarea defaultValue={modalEv.notes} id="ev_n" placeholder="Links a Zoom, detalles del cliente..."/></div>
+              <div className="f-grp"><label className="m-lbl">Anotaciones</label><textarea defaultValue={modalEv.notes} id="ev_n"/></div>
             </div>
             <div className="modal-ft">
               {modalEv.id && <button className="btn-d" onClick={()=>eliminarEv(modalEv.id)}>Eliminar</button>}
               <button className="btn-s" onClick={()=>setModalEv(null)}>Cancelar</button>
-              <button className="btn-p" onClick={()=>guardarEv({
-                ...modalEv, title:document.getElementById("ev_t").value, type:document.getElementById("ev_type").value,
-                expNum:document.getElementById("ev_exp").value, court:document.getElementById("ev_c").value, 
-                date:document.getElementById("ev_d").value, startTime:document.getElementById("ev_h").value, 
-                lawyers:[document.getElementById("ev_abg").value], notes:document.getElementById("ev_n").value
-              })}>Guardar Causa</button>
+              <button className="btn-p" onClick={()=>guardarEv({...modalEv, title:document.getElementById("ev_t").value, type:document.getElementById("ev_type").value, expNum:document.getElementById("ev_exp").value, court:document.getElementById("ev_c").value, date:document.getElementById("ev_d").value, startTime:document.getElementById("ev_h").value, lawyers:[document.getElementById("ev_abg").value], notes:document.getElementById("ev_n").value})}>Guardar</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* MODAL EQUIPO */}
       {modalEquipo && (
         <div className="modal-ov" onClick={e=>e.target===e.currentTarget&&setModalEquipo(false)}>
           <div className="modal-box">
@@ -738,69 +680,52 @@ function App() {
             <div className="modal-bd">
               {abogados.map((a)=>(
                 <div key={a.id} style={{display:"flex", gap:12, alignItems:"center", background:"var(--s2)", padding:12, borderRadius:10, border:"1px solid var(--bd2)"}}>
-                  <div className="av" style={{background:a.color}}>{a.ini}</div>
-                  <div style={{flex:1, fontSize:14, fontWeight:500}}>{a.nombre}</div>
-                  <button className="btn-d" style={{padding:"6px 12px", marginRight:0}} onClick={()=>{
-                    if(confirm("¿Eliminar a "+a.nombre+" del estudio?")) setAbogados(abogados.filter(x=>x.id!==a.id));
-                  }}>Borrar</button>
+                  <div className="av" style={{background:a.color}}>{a.ini}</div><div style={{flex:1, fontSize:14, fontWeight:500}}>{a.nombre}</div>
+                  <button className="btn-d" style={{padding:"6px 12px", marginRight:0}} onClick={()=>{if(confirm("¿Eliminar?")) setAbogados(abogados.filter(x=>x.id!==a.id));}}>Borrar</button>
                 </div>
               ))}
               <div style={{borderTop:"1px solid var(--bd2)", paddingTop:20, marginTop:8}}>
                 <div style={{fontSize:13, color:"var(--gold)", marginBottom:14, fontWeight:"700", textTransform:"uppercase"}}>+ Nuevo Miembro</div>
-                <div className="f-grp" style={{marginBottom:12}}><input id="n_nom" placeholder="Nombre completo (ej: Dr. Juan Pérez)"/></div>
+                <div className="f-grp" style={{marginBottom:12}}><input id="n_nom" placeholder="Nombre completo"/></div>
                 <div className="f-row">
-                  <div className="f-grp"><input id="n_ini" placeholder="Iniciales (ej: JP)" maxLength={3}/></div>
-                  <div className="f-grp">
-                    <select id="n_col">
-                      <option value="#C9A84C">Socio (Dorado)</option>
-                      <option value="#5491C8">Asociado (Azul)</option>
-                      <option value="#3DAA6A">Junior (Verde)</option>
-                      <option value="#8E6DC4">Especial (Violeta)</option>
-                    </select>
-                  </div>
+                  <div className="f-grp"><input id="n_ini" placeholder="Iniciales" maxLength={3}/></div>
+                  <div className="f-grp"><select id="n_col"><option value="#C9A84C">Socio (Dorado)</option><option value="#5491C8">Asociado (Azul)</option><option value="#3DAA6A">Junior (Verde)</option><option value="#8E6DC4">Especial (Violeta)</option></select></div>
                 </div>
                 <button className="btn-s" style={{width:"100%", marginTop:12}} onClick={()=>{
                   const nom = document.getElementById("n_nom").value; const ini = document.getElementById("n_ini").value;
                   if(!nom || !ini) return alert("Completa nombre e iniciales.");
                   setAbogados([...abogados, {id:"a_"+Date.now(), nombre:nom, ini:ini.toUpperCase(), color:document.getElementById("n_col").value}]);
                   document.getElementById("n_nom").value = ""; document.getElementById("n_ini").value = "";
-                }}>Añadir al Equipo</button>
+                }}>Añadir</button>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* MODAL ALERTAS WSP */}
       {modalAlertas && (
         <div className="modal-ov" onClick={e=>e.target===e.currentTarget&&setModalAlertas(false)}>
           <div className="modal-box">
-            <div className="modal-hd"><div className="modal-tit">Alertas y Notificaciones</div><button style={{background:"none",color:"var(--tx2)", fontSize:22}} onClick={()=>setModalAlertas(false)}>✕</button></div>
+            <div className="modal-hd"><div className="modal-tit">Alertas WhatsApp</div><button style={{background:"none",color:"var(--tx2)", fontSize:22}} onClick={()=>setModalAlertas(false)}>✕</button></div>
             <div className="modal-bd">
-              <p style={{fontSize:13, color:"var(--tx2)", lineHeight:1.6}}>Configura el número principal para el envío de recordatorios por WhatsApp a clientes o asistentes.</p>
-              <div className="f-grp">
-                <label className="m-lbl">Número WhatsApp</label>
-                <input value={alertas.wsp} onChange={e=>setAlertas({...alertas, wsp:e.target.value})} placeholder="Ej: 5491123456789"/>
-              </div>
+              <div className="f-grp"><label className="m-lbl">Número WhatsApp</label><input value={alertas.wsp} onChange={e=>setAlertas({...alertas, wsp:e.target.value})} placeholder="Ej: 5491123456789"/></div>
               <button className="btn-wsp" style={{justifyContent:"center", padding:"14px", fontSize:13, width:"100%", marginTop:8}} onClick={()=>{
                 if(!alertas.wsp) return alert("Ingresa un número primero.");
-                window.open(`https://wa.me/${alertas.wsp.replace(/[^0-9]/g,'')}?text=Prueba%20de%20conexion%20-%20Mariana%20Sanchez%20y%20Asociados`, '_blank');
-              }}>Probar Conexión WhatsApp</button>
+                window.open(`https://wa.me/${alertas.wsp.replace(/[^0-9]/g,'')}?text=Prueba`, '_blank');
+              }}>Probar Conexión</button>
             </div>
-            <div className="modal-ft"><button className="btn-p" onClick={()=>setModalAlertas(false)}>Guardar y Cerrar</button></div>
+            <div className="modal-ft"><button className="btn-p" onClick={()=>setModalAlertas(false)}>Cerrar</button></div>
           </div>
         </div>
       )}
 
-      {/* TOAST NOTIFICATIONS */}
       {toast && <div className="toast">{toast}</div>}
-
     </div>
   );
 }
 
 const root = ReactDOM.createRoot(document.getElementById("root")); 
-root.render(<App />);
+root.render(<ErrorBoundary><App /></ErrorBoundary>);
 </script>
 </body>
 </html>
