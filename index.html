@@ -288,23 +288,42 @@ function App() {
   useEffect(() => { localStorage.setItem("agenda_alerts", JSON.stringify(alertas)); }, [alertas]);
 
   useEffect(() => {
+    console.log("INIT");
+    
+    // 4) Timeout de seguridad: Si en 5 segundos no resolvió, forzamos la entrada al sistema
+    const safetyTimeout = setTimeout(() => {
+      console.warn("TIMEOUT DE SEGURIDAD ALCANZADO: Forzando entrada al sistema");
+      const splash = document.getElementById("splash");
+      if (splash && !splash.classList.contains("out")) {
+        splash.classList.add("out");
+      }
+      setLoading(false);
+      showToast("Conexión inestable. Ingresando en modo local.");
+    }, 5000);
+
     const init = async () => {
       try {
         const url = localStorage.getItem("sb_url");
         const key = localStorage.getItem("sb_key");
+        
         if (url && key) {
+          console.log("SUPABASE OK");
           const client = createClient(url, key);
           setSb(client);
-          await fetchEventos(client);
+          // La app no se bloqueará esperando gracias a las medidas en fetchEventos
+          await fetchEventos(client); 
         }
       } catch (e) {
-        console.error("Error init DB", e);
+        console.error("Error init DB:", e);
       } finally {
+        console.log("LOADING END");
+        clearTimeout(safetyTimeout); // Limpiamos el timeout si terminó a tiempo
         setTimeout(() => document.getElementById("splash")?.classList.add("out"), 600);
       }
     };
+    
     init();
-  }, []);
+  }, []); // Dependencias vacías: Evita bucles infinitos de renderizado
 
   const showToast = (msg) => {
     setToast(msg);
@@ -314,17 +333,33 @@ function App() {
   const fetchEventos = async (client) => {
     setLoading(true);
     try {
-      const { data, error } = await client.from("eventos").select("*");
-      if (!error && data) {
+      // 2) y 3) Promise.race para evitar que la petición a Supabase se cuelgue para siempre
+      const fetchPromise = client.from("eventos").select("*");
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error("Timeout de servidor")), 4500)
+      );
+      
+      const response = await Promise.race([fetchPromise, timeoutPromise]);
+      const { data, error } = response;
+
+      if (error) throw error;
+      
+      if (data) {
         setEventos(data.map(d => ({
           id: d.id, title: d.title || "Causa sin título", type: d.type || "audiencia",
           date: d.date || hoyStr(), startTime: d.start_time || "09:00",
           endTime: d.end_time || "10:00", lawyers: d.lawyers || [],
           notes: d.notes || "", court: d.court || "", expNum: d.exp_num || ""
         })));
+        console.log("EVENTOS OK");
       }
-    } catch(e) { console.error("Error DB", e); }
-    finally { setLoading(false); }
+    } catch(e) { 
+      console.error("Error obteniendo eventos:", e.message); 
+      showToast("Error de red. Mostrando datos locales disponibles.");
+    } finally { 
+      // 1) setLoading(false) asegurado incondicionalmente
+      setLoading(false); 
+    }
   };
 
   const guardarEv = async (f) => {
