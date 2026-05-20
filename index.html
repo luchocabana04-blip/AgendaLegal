@@ -8,8 +8,8 @@
   <link rel="manifest" href="./manifest.json">
   <meta name="theme-color" content="#07090F">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-web-app-capable" content="yes">
+  <meta name="apple-web-app-status-bar-style" content="black-translucent">
   <link rel="apple-touch-icon" href="./apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
 
@@ -194,9 +194,11 @@
       .sidebar{display:none} 
       .bottom-nav{display:flex}
       .main{padding-bottom:calc(65px + var(--safe-b))} 
+      
       .main-hd{padding:12px 16px; flex-wrap:wrap; gap:12px}
-      .vtabs{display:none}
+      .vtabs{display:none} 
       .mes-tit{font-size:18px}
+      
       .cal-scroll{padding:12px}
       .cal-grid{border-radius:8px}
       .cal-hdr{padding:8px 2px; font-size:10px}
@@ -204,11 +206,13 @@
       .dn{width:20px; height:20px; font-size:12px; margin-bottom:4px}
       .chip{font-size:9.5px; padding:4px 5px; margin-bottom:3px}
       .c-abg{font-size:8px; padding:1px 3px}
+      
       .f-row{grid-template-columns:1fr; gap:12px}
       .modal-box{border-radius:12px; max-height:85vh}
       .list-card{flex-direction:column; align-items:flex-start; gap:10px; padding:14px}
       .lc-time{border-right:none; border-bottom:1px solid var(--bd2); width:100%; text-align:left; padding-bottom:8px; display:flex; gap:10px; align-items:center}
       .btn-wsp{width:100%; justify-content:center; padding:10px}
+      
       .week-col{min-width:85vw} 
     }
     
@@ -226,44 +230,9 @@
 
 <div id="root"></div>
 
-<script>
-  setTimeout(() => {
-    const s = document.getElementById("splash");
-    if(s && !s.classList.contains("out")) s.classList.add("out");
-  }, 6000);
-</script>
-
 <script type="text/babel">
-const { useState, useEffect, Component } = React;
-
-// 🛡️ PROTECCIÓN 1: Extracción segura de cliente Supabase
-const createClient = window.supabase ? window.supabase.createClient : null;
-
-// 🛡️ PROTECCIÓN 2: Atrapador global de Errores Críticos
-class ErrorBoundary extends Component {
-  constructor(props) {
-    super(props);
-    this.state = { hasError: false, errorInfo: null };
-  }
-  static getDerivedStateFromError(error) { return { hasError: true }; }
-  componentDidCatch(error, errorInfo) {
-    console.error("Crash interceptado:", error);
-    this.setState({ errorInfo: error.toString() });
-  }
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div style={{padding:'30px', background:'#07090F', height:'100vh', color:'#fff', display:'flex', flexDirection:'column', justifyContent:'center', alignItems:'center', textAlign:'center'}}>
-          <h2 style={{color:'#C94C4C', marginBottom:'15px'}}>La interfaz se bloqueó.</h2>
-          <p style={{fontSize:'14px', color:'#8A9AB8', marginBottom:'25px'}}>Los datos temporales del teléfono están corruptos. Limpia el sistema con este botón.</p>
-          <button onClick={() => { localStorage.clear(); window.location.reload(); }} style={{padding:'14px 24px', background:'#C9A84C', color:'#000', fontWeight:'bold', borderRadius:'8px', border:'none', cursor:'pointer'}}>Limpiar Memoria y Reiniciar</button>
-          <pre style={{marginTop:'30px', fontSize:'10px', color:'#C94C4C', background:'#141C33', padding:'10px', borderRadius:'6px', maxWidth:'100%', overflow:'auto', textAlign:'left'}}>{this.state.errorInfo}</pre>
-        </div>
-      );
-    }
-    return this.props.children;
-  }
-}
+const { useState, useEffect } = React;
+const { createClient } = window.supabase;
 
 const TIPOS = [
   { id:"audiencia",   label:"Audiencia",   cls:"type-audiencia" },
@@ -276,27 +245,16 @@ const TIPOS = [
 const DIAS = ["Dom","Lun","Mar","Mié","Jue","Vie","Sáb"];
 const MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
 
-// 🛡️ PROTECCIÓN 3: Formateo de fechas a prueba de fallos
 const toLocalISODate = (d) => {
-  try {
-    const dateObj = new Date(d);
-    const z = dateObj.getTimezoneOffset() * 60000;
-    return (new Date(dateObj.getTime() - z)).toISOString().slice(0, 10);
-  } catch(e) { return new Date().toISOString().slice(0, 10); }
+  const z = d.getTimezoneOffset() * 60000;
+  return (new Date(d - z)).toISOString().slice(0, 10);
 };
 const hoyStr = () => toLocalISODate(new Date());
 
 const getLocalSafe = (key, fallback) => {
-  try { const val = localStorage.getItem(key); return val ? JSON.parse(val) : fallback; } catch(e) { return fallback; }
-};
-
-// 🛡️ PROTECCIÓN 4: Extracción de Arrays Segura (Evita Crash de Mapas)
-const getLocalSafeArray = (key, fallback) => {
   try {
     const val = localStorage.getItem(key);
-    if (!val) return fallback;
-    const parsed = JSON.parse(val);
-    return Array.isArray(parsed) ? parsed : fallback;
+    return val ? JSON.parse(val) : fallback;
   } catch(e) { return fallback; }
 };
 
@@ -310,11 +268,27 @@ function App() {
   const [sb, setSb] = useState(null);
   const [toast, setToast] = useState(null);
   
-  // ESTADOS DE DATOS CON EXTRACCIÓN SEGURA
+  // ESTADOS DE DATOS
   const [eventos, setEventos] = useState([]);
-  const [abogados, setAbogados] = useState(() => getLocalSafeArray("agenda_abg", defAbogados));
-  const [alertas, setAlertas] = useState(() => getLocalSafe("agenda_alerts", {email:"", wsp:""}));
+  const [abogados, setAbogados] = useState(() => getLocalSafe("agenda_abg", defAbogados));
   
+  // CONFIGURACIÓN DE ALERTAS (Módulo 1: Guardado combinado en localStorage)
+  const [alertasConfig, setAlertasConfig] = useState(() => {
+    const saved = localStorage.getItem('msa_config_alertas_v2');
+    return saved ? JSON.parse(saved) : {
+      wsp: '',
+      emailDestino: '',
+      diasAnticipacion: '1', 
+      diasCustom: '5',
+      alertasActivas: true,
+      emailjsServiceId: '',
+      emailjsTemplateId: '',
+      emailjsPublicKey: '',
+      ultimaAlerta: 'Ninguna en esta sesión'
+    };
+  });
+
+  // ESTADOS UI
   const [vista, setVista] = useState("mes");
   const [curFecha, setCurFecha] = useState(new Date());
   const [filtroAbg, setFiltroAbg] = useState(null);
@@ -325,33 +299,184 @@ function App() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => { localStorage.setItem("agenda_abg", JSON.stringify(abogados)); }, [abogados]);
-  useEffect(() => { localStorage.setItem("agenda_alerts", JSON.stringify(alertas)); }, [alertas]);
+  
+  // Sincronizar automáticamente la configuración de alertas en localStorage
+  useEffect(() => { 
+    localStorage.setItem('msa_config_alertas_v2', JSON.stringify(alertasConfig)); 
+  }, [alertasConfig]);
 
   useEffect(() => {
-    const safetyTimeout = setTimeout(() => {
-      document.getElementById("splash")?.classList.add("out");
-      setLoading(false);
-    }, 5000);
-
     const init = async () => {
       try {
         const url = localStorage.getItem("sb_url");
         const key = localStorage.getItem("sb_key");
-        
-        if (url && key && createClient) {
+        if (url && key) {
           const client = createClient(url, key);
           setSb(client);
-          await fetchEventos(client); 
+          await fetchEventos(client);
         }
       } catch (e) {
-        console.error("Error init DB:", e);
+        console.error("Error init DB", e);
       } finally {
-        clearTimeout(safetyTimeout);
         setTimeout(() => document.getElementById("splash")?.classList.add("out"), 600);
       }
     };
     init();
-  }, []); 
+  }, []);
+
+  // MOTOR DE ESCANEO DE EVENTOS PRÓXIMOS (Evita loops y errores silenciosos)
+  useEffect(() => {
+    if (!alertasConfig.alertasActivas || !eventos || eventos.length === 0) return;
+
+    const ejecutarEscaneo = () => {
+      console.log("M.S. & Asoc. — Analizando compromisos jurídicos entrantes...");
+      try {
+        const hoy = new Date();
+        hoy.setHours(0, 0, 0, 0);
+
+        let diasTarget = parseInt(alertasConfig.diasAnticipacion);
+        if (alertasConfig.diasAnticipacion === 'custom') {
+          diasTarget = parseInt(alertasConfig.diasCustom || 0);
+        }
+
+        const enviadasHistorico = JSON.parse(localStorage.getItem('msa_enviadas_ids_v2') || '[]');
+        let nuevasEnviadas = [...enviadasHistorico];
+        let alertaDisparada = false;
+
+        eventos.forEach(evento => {
+          if (nuevasEnviadas.includes(evento.id)) return; 
+
+          const fechaEv = new Date(evento.date + 'T00:00:00');
+          const diffTiempo = fechaEv - hoy;
+          const diffDias = Math.ceil(diffTiempo / (1000 * 60 * 60 * 24));
+
+          if (diffDias === diasTarget) {
+            console.log(`[ALERTA AUTOMÁTICA] Evento detectado: ${evento.title}`);
+            
+            // Envío automatizado en segundo plano si hay dirección seteada
+            if (alertasConfig.emailDestino) {
+              enviarEmailReal(evento, "Automatizado");
+            }
+            
+            nuevasEnviadas.push(evento.id);
+            alertaDisparada = true;
+          }
+        });
+
+        if (alertaDisparada) {
+          localStorage.setItem('msa_enviadas_ids_v2', JSON.stringify(nuevasEnviadas));
+          setAlertasConfig(prev => ({
+            ...prev, 
+            ultimaAlerta: `Notificación despachada: ${new Date().toLocaleTimeString()}`
+          }));
+        } else {
+          setAlertasConfig(prev => ({
+            ...prev, 
+            ultimaAlerta: `Último escaneo sin pendientes: ${new Date().toLocaleTimeString()}`
+          }));
+        }
+      } catch (error) {
+        console.error("Error en escáner de alertas:", error);
+      }
+    };
+
+    ejecutarEscaneo();
+    const intervaloEscaneo = setInterval(ejecutarEscaneo, 1800000); // 30 minutos
+    return () => clearInterval(intervaloEscaneo);
+  }, [eventos, alertasConfig.alertasActivas, alertasConfig.diasAnticipacion, alertasConfig.diasCustom]);
+
+  // SOLUCIÓN COMPLETA WHATSAPP (Mobile, Desktop, Limpieza de números de Argentina)
+  const enviarWhatsAppReal = (evento, modo = "Manual") => {
+    if (!alertasConfig.wsp) {
+      alert("Por favor, introduce un número telefónico en el panel.");
+      return;
+    }
+
+    let numLimpio = alertasConfig.wsp.replace(/\D/g, ''); 
+    if (numLimpio.startsWith('0')) numLimpio = numLimpio.substring(1);
+    if (!numLimpio.startsWith('54')) {
+      if (numLimpio.startsWith('9')) {
+        numLimpio = '54' + numLimpio;
+      } else {
+        numLimpio = '549' + numLimpio; 
+      }
+    }
+
+    const abogadoAsignado = abogados.find(a => a.id === (evento.lawyers?.[0]))?.nombre || "Sin especificar";
+
+    const mensaje = 
+`🏛️ *M.S. & ASOCIADOS — SUITE LEGAL*
+*RECORDATORIO DE COMPROMISO PROCESAL*
+
+Se le notifica la agenda programada para el siguiente evento jurídico:
+
+⚖️ *Carátula:* ${evento.title.toUpperCase()}
+📅 *Fecha:* ${evento.date.split('-').reverse().join('/')}
+⏰ *Horario:* ${evento.startTime || 'N/D'} hs
+📂 *N° Expediente:* ${evento.expNum || 'Sin especificar'}
+🏛️ *Juzgado / Fuero:* ${evento.court || 'No asignado'}
+👤 *Profesional a cargo:* ${abogadoAsignado}
+
+📌 *Anotaciones:* ${evento.notes || 'Sin observaciones adicionales.'}
+
+---
+_Sistema de Notificaciones Automáticas — M.S. & Asociados_`;
+
+    const urlWsp = `https://api.whatsapp.com/send?phone=${numLimpio}&text=${encodeURIComponent(mensaje)}`;
+    console.log("Abriendo pasarela universal de WhatsApp para:", numLimpio);
+    
+    const newWindow = window.open(urlWsp, '_blank', 'noopener,noreferrer');
+    if (newWindow) newWindow.opener = null;
+  };
+
+  // CANAL DE ENVÍO DE CORREO ELECTRÓNICO REAL (EmailJS HTTP API)
+  const enviarEmailReal = async (evento, origen = "Test") => {
+    if (!alertasConfig.emailDestino || !alertasConfig.emailjsServiceId) {
+      if (origen === "Test") alert("Por favor, ingresa los parámetros de EmailJS en el panel de configuración.");
+      return false;
+    }
+
+    const abogadoAsignado = abogados.find(a => a.id === (evento.lawyers?.[0]))?.nombre || "Sin asignar";
+
+    const payload = {
+      service_id: alertasConfig.emailjsServiceId,
+      template_id: alertasConfig.emailjsTemplateId,
+      user_id: alertasConfig.emailjsPublicKey, 
+      template_params: {
+        to_email: alertasConfig.emailDestino,
+        subject: `[ALERTA JURÍDICA] ${evento.title} — M.S. & Asociados`,
+        title: evento.title,
+        date: evento.date.split('-').reverse().join('/'),
+        time: `${evento.startTime} hs`,
+        court: evento.court || 'No especificado',
+        exp_num: evento.expNum || 'N/C',
+        lawyer: abogadoAsignado,
+        notes: evento.notes || 'Sin observaciones.',
+        origen_envio: origen
+      }
+    };
+
+    try {
+      const response = await fetch('https://api.emailjs.com/api/v1.0/email/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (response.ok) {
+        console.log(`Correo enviado exitosamente. Origen: ${origen}`);
+        if (origen === "Test") alert("¡Correo de prueba despachado con éxito!");
+        return true;
+      } else {
+        const errText = await response.text();
+        throw new Error(errText);
+      }
+    } catch (err) {
+      console.error("Fallo crítico en el despacho del correo electrónico:", err);
+      if (origen === "Test") alert("Error en el envío. Verifique la consola de desarrollo del navegador.");
+      return false;
+    }
+  };
 
   const showToast = (msg) => {
     setToast(msg);
@@ -361,30 +486,21 @@ function App() {
   const fetchEventos = async (client) => {
     setLoading(true);
     try {
-      const fetchPromise = client.from("eventos").select("*");
-      const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout")), 4500));
-      const response = await Promise.race([fetchPromise, timeoutPromise]);
-      const { data, error } = response;
-      if (error) throw error;
-      
-      if (data) {
+      const { data, error } = await client.from("eventos").select("*");
+      if (!error && data) {
         setEventos(data.map(d => ({
           id: d.id, title: d.title || "Causa sin título", type: d.type || "audiencia",
           date: d.date || hoyStr(), startTime: d.start_time || "09:00",
-          endTime: d.end_time || "10:00", 
-          lawyers: Array.isArray(d.lawyers) ? d.lawyers : (d.lawyers ? [d.lawyers] : []), // 🛡️ Evita crash si la DB devuelve strings
+          endTime: d.end_time || "10:00", lawyers: d.lawyers || [],
           notes: d.notes || "", court: d.court || "", expNum: d.exp_num || ""
         })));
       }
-    } catch(e) { 
-      showToast("Modo sin conexión o inestable.");
-    } finally { 
-      setLoading(false); 
-    }
+    } catch(e) { console.error("Error DB", e); }
+    finally { setLoading(false); }
   };
 
   const guardarEv = async (f) => {
-    if(!sb) return showToast("Base de datos no conectada.");
+    if(!sb) return alert("Base de datos no conectada.");
     const payload = {
       id: f.id || `e_${Date.now()}`, title: f.title, type: f.type, date: f.date,
       start_time: f.startTime, end_time: f.endTime, lawyers: f.lawyers,
@@ -392,27 +508,34 @@ function App() {
     };
     try {
       await sb.from("eventos").upsert(payload);
-      setModalEv(null); showToast("Guardado OK."); fetchEventos(sb);
+      setModalEv(null);
+      showToast("Evento guardado correctamente.");
+      fetchEventos(sb);
     } catch(e) { showToast("Error al guardar."); }
   };
 
   const eliminarEv = async (id) => {
-    if(!sb) return;
     if(confirm("¿Seguro que deseas eliminar esta causa?")) {
-      try { await sb.from("eventos").delete().eq("id", id); setModalEv(null); showToast("Eliminado."); fetchEventos(sb); } catch(e) {}
+      try { await sb.from("eventos").delete().eq("id", id); setModalEv(null); showToast("Evento eliminado."); fetchEventos(sb); } catch(e) {}
     }
   };
 
   const cerrarSesion = () => {
-    setPantalla("login"); setFiltroAbg(null); setVista("mes"); setModalMenuMobile(false);
+    setPantalla("login");
+    setFiltroAbg(null);
+    setVista("mes");
+    setModalMenuMobile(false);
   };
 
   const getWeekDays = (date) => {
     const d = new Date(date);
     const day = d.getDay();
-    const sunday = new Date(d.setDate(d.getDate() - day));
+    const diff = d.getDate() - day; 
+    const sunday = new Date(d.setDate(diff));
     return Array.from({length: 7}).map((_, i) => {
-        const nd = new Date(sunday); nd.setDate(sunday.getDate() + i); return nd;
+        const nd = new Date(sunday);
+        nd.setDate(sunday.getDate() + i);
+        return nd;
     });
   };
 
@@ -433,11 +556,11 @@ function App() {
           {DIAS.map(d=><div key={d} className="cal-hdr">{d}</div>)}
           {cels.map((c,idx)=>{
             const ds = `${año}-${String(c.m+1).padStart(2,"0")}-${String(c.d).padStart(2,"0")}`;
-            // 🛡️ PROTECCIÓN 5: Conversión a string antes de ordenar (Evita crash por localeCompare)
-            const des = filtrados.filter(e=>e.date===ds).sort((a,b)=>String(a.startTime||"").localeCompare(String(b.startTime||"")));
+            const des = filtrados.filter(e=>e.date===ds).sort((a,b)=>a.startTime.localeCompare(b.startTime));
             const isHoy = ds === hoyStr();
             const MAX_VISIBLES = 2;
             const visibles = des.slice(0, MAX_VISIBLES);
+            const extra = des.length - MAX_VISIBLES;
 
             return (
               <div key={idx} className={`cal-cell ${c.otra?"otra":""} ${isHoy?"hoy":""}`} onClick={()=>!c.otra && (setCurFecha(new Date(ds+"T12:00:00")), setVista("dia"))}>
@@ -453,7 +576,7 @@ function App() {
                       </div>
                     )
                   })}
-                  {des.length > MAX_VISIBLES && <div className="chip-more">+{des.length - MAX_VISIBLES} más</div>}
+                  {extra > 0 && <div className="chip-more">+{extra} más</div>}
                 </div>
               </div>
             );
@@ -463,15 +586,18 @@ function App() {
     }
 
     if(vista === "semana") {
+      const weekDays = getWeekDays(curFecha);
       return (
         <div className="week-grid fade-in">
-           {getWeekDays(curFecha).map(wd => {
+           {weekDays.map(wd => {
                const ds = toLocalISODate(wd);
-               const dayEvs = filtrados.filter(e=>e.date===ds).sort((a,b)=>String(a.startTime||"").localeCompare(String(b.startTime||"")));
+               const dayEvs = filtrados.filter(e=>e.date===ds).sort((a,b)=>a.startTime.localeCompare(b.startTime));
                const isHoy = ds === hoyStr();
                return (
                    <div className="week-col" key={ds}>
-                      <div className={`week-hdr ${isHoy?"hoy":""}`}>{DIAS[wd.getDay()]} <span>{wd.getDate()} {MESES[wd.getMonth()].substring(0,3)}</span></div>
+                      <div className={`week-hdr ${isHoy?"hoy":""}`}>
+                        {DIAS[wd.getDay()]} <span>{wd.getDate()} {MESES[wd.getMonth()].substring(0,3)}</span>
+                      </div>
                       <div className="week-body">
                          {dayEvs.map(ev => {
                             const tObj = TIPOS.find(t=>t.id===ev.type) || TIPOS[4];
@@ -493,22 +619,36 @@ function App() {
 
     if(vista === "dia") {
       const ds = toLocalISODate(curFecha);
-      const dEvs = filtrados.filter(e=>e.date===ds).sort((a,b)=>String(a.startTime||"").localeCompare(String(b.startTime||"")));
+      const dEvs = filtrados.filter(e=>e.date===ds).sort((a,b)=>a.startTime.localeCompare(b.startTime));
       return (
         <div className="fade-in">
           <div style={{fontSize:18, fontWeight:600, marginBottom:20, paddingBottom:12, borderBottom:"1px solid var(--bd2)", color:"var(--gold)"}}>
             {curFecha.toLocaleDateString("es-AR",{weekday:"long",day:"numeric",month:"long", year:"numeric"})}
           </div>
-          {dEvs.length===0 ? <div style={{textAlign:"center", color:"var(--tx3)", padding:40, background:"var(--s1)", borderRadius:12, border:"1px dashed var(--bd2)"}}>Sin compromisos.</div> : 
+          {dEvs.length===0 ? <div style={{textAlign:"center", color:"var(--tx3)", padding:40, background:"var(--s1)", borderRadius:12, border:"1px dashed var(--bd2)"}}>Sin compromisos programados para este día.</div> : 
             dEvs.map(ev=>{
                const tObj = TIPOS.find(t=>t.id===ev.type) || TIPOS[4];
                const abg = abogados.find(a=>a.id===(ev.lawyers?.[0]));
                return (
-                  <div key={ev.id} className="list-card" onClick={()=>setModalEv(ev)}>
-                    <div className="lc-time"><div className="lc-hs">{ev.startTime}</div><div style={{fontSize:11, color:'var(--tx2)', marginTop:2}}>Hs.</div></div>
+                  <div key={ev.id} className="list-card" style={{position:'relative'}}>
+                    <div className="lc-time">
+                       <div className="lc-hs">{ev.startTime}</div>
+                       <div style={{fontSize:11, color:'var(--tx2)', marginTop:2}}>Hs.</div>
+                    </div>
                     <div className="lc-body">
                       <div className="lc-tit">{ev.title} <span className={`lc-badge ${tObj.id}`}>{tObj.label}</span></div>
-                      <div className="lc-meta"><span>⚖️ {ev.court||"S/D"}</span><span>📁 Exp: {ev.expNum||"S/D"}</span><span style={{color:abg?.color}}>👤 {abg?.nombre||"Sin Asignar"}</span></div>
+                      <div className="lc-meta">
+                         <span>⚖️ {ev.court||"S/D"}</span>
+                         <span>📁 Exp: {ev.expNum||"S/D"}</span>
+                         <span style={{color:abg?.color}}>👤 {abg?.nombre||"Sin Asignar"}</span>
+                      </div>
+                      
+                      {/* ACCESO RÁPIDO DE WHATSAPP CORPORATIVO EN LA MISMA FILA */}
+                      <div style={{marginTop:8}}>
+                         <button className="btn-wsp" onClick={(e)=>{ e.stopPropagation(); enviarWhatsAppReal(ev); }}>
+                           💬 Enviar Recordatorio Manual
+                         </button>
+                      </div>
                     </div>
                   </div>
                )
@@ -519,15 +659,18 @@ function App() {
     }
 
     if(vista === "lista") {
-      const allEvs = [...filtrados].sort((a,b)=>String(a.date||"").localeCompare(String(b.date||"")));
+      const allEvs = [...filtrados].sort((a,b)=>a.date.localeCompare(b.date));
       return (
         <div className="fade-in">
           {allEvs.map(ev=>{
             const tObj = TIPOS.find(t=>t.id===ev.type) || TIPOS[4];
-            const dStr = new Date((ev.date||hoyStr())+"T12:00:00").toLocaleDateString("es-AR",{day:"2-digit",month:"short"});
+            const dStr = new Date(ev.date+"T12:00:00").toLocaleDateString("es-AR",{day:"2-digit",month:"short"});
             return (
               <div key={ev.id} className="list-card" onClick={()=>setModalEv(ev)}>
-                <div className="lc-time" style={{width:80}}><div style={{fontSize:13, color:'var(--tx)'}}>{dStr}</div><div className="lc-hs" style={{fontSize:14}}>{ev.startTime}</div></div>
+                <div className="lc-time" style={{width:80}}>
+                   <div style={{fontSize:13, color:'var(--tx)'}}>{dStr}</div>
+                   <div className="lc-hs" style={{fontSize:14}}>{ev.startTime}</div>
+                </div>
                 <div className="lc-body">
                   <div className="lc-tit">{ev.title} <span className={`lc-badge ${tObj.id}`}>{tObj.label}</span></div>
                   <div className="lc-meta">Exp: {ev.expNum||"S/D"} | Juzgado: {ev.court||"S/D"}</div>
@@ -545,18 +688,26 @@ function App() {
       <div className="pant-bg fade-in" style={{padding:20}}>
         <div className="card" style={{width:"100%", maxWidth:420, textAlign:"center"}}>
           <h2 style={{color:"var(--gold)", marginBottom:10}}>Conectar Base de Datos</h2>
-          <p style={{fontSize:13, color:"var(--tx2)", marginBottom:20, lineHeight:1.5}}>Ingresa las credenciales de Supabase del estudio.</p>
+          <p style={{fontSize:13, color:"var(--tx2)", marginBottom:20, lineHeight:1.5}}>Ingresa las credenciales de Supabase del estudio para habilitar la sincronización en tiempo real.</p>
           <input id="inUrl" placeholder="URL del Proyecto (https://...)" defaultValue={localStorage.getItem("sb_url")} style={{marginBottom:12}}/>
           <input id="inKey" type="password" placeholder="Anon Key" defaultValue={localStorage.getItem("sb_key")} style={{marginBottom:24}}/>
+          
           <button className="btn-gold" style={{marginBottom:12}} onClick={()=>{
-            const u = document.getElementById("inUrl").value; const k = document.getElementById("inKey").value;
+            const u = document.getElementById("inUrl").value;
+            const k = document.getElementById("inKey").value;
             if(!u || !k) return alert("Completa ambos campos.");
-            localStorage.setItem("sb_url", u); localStorage.setItem("sb_key", k); window.location.reload();
+            localStorage.setItem("sb_url", u);
+            localStorage.setItem("sb_key", k);
+            window.location.reload();
           }}>Guardar y Conectar</button>
+          
           <button className="btn-s" style={{width:"100%"}} onClick={()=>setPantalla("login")}>Volver</button>
+
           <hr className="divider"/>
           <button style={{background:"none", color:"var(--red)", fontSize:12, textDecoration:"underline"}} onClick={()=>{
-             if(confirm("¿Borrar credenciales?")) { localStorage.removeItem("sb_url"); localStorage.removeItem("sb_key"); setPantalla("login"); }
+             if(confirm("¿Borrar credenciales de este dispositivo?")) {
+                localStorage.removeItem("sb_url"); localStorage.removeItem("sb_key"); setPantalla("login");
+             }
           }}>Limpiar Credenciales</button>
         </div>
       </div>
@@ -588,11 +739,18 @@ function App() {
 
   return (
     <div className="layout fade-in">
+      
+      {/* SIDEBAR PC */}
       <div className="sidebar">
-        <div className="sb-hd"><div className="l-sello">M.S.</div><div><div className="l-nm">Mariana Sánchez</div><div className="l-sb">Suite Legal</div></div></div>
+        <div className="sb-hd">
+          <div className="l-sello">M.S.</div>
+          <div><div className="l-nm">Mariana Sánchez</div><div className="l-sb">Suite Legal</div></div>
+        </div>
         <div className="sb-body">
           <div className="sb-sec"><span>Miembros del Estudio</span> <button style={{background:"none", color:"var(--gold)", fontSize:16}} onClick={()=>setModalEquipo(true)}>⚙️</button></div>
-          <div className={`abg-row ${filtroAbg===null?"on":""}`} onClick={()=>setFiltroAbg(null)}><div className="av" style={{background:"var(--s4)",color:"var(--tx)"}}>∀</div><div className="a-nm">Todo el Bufete</div></div>
+          <div className={`abg-row ${filtroAbg===null?"on":""}`} onClick={()=>setFiltroAbg(null)}>
+            <div className="av" style={{background:"var(--s4)",color:"var(--tx)"}}>∀</div><div className="a-nm">Todo el Bufete</div>
+          </div>
           {abogados.map(a=>(
             <div key={a.id} className={`abg-row ${filtroAbg===a.id?"on":""}`} onClick={()=>setFiltroAbg(a.id)}>
               <div className="av" style={{background:a.color}}>{a.ini}</div><div className="a-nm">{a.nombre}</div>
@@ -600,28 +758,39 @@ function App() {
           ))}
         </div>
         <div style={{padding:16, borderTop:"1px solid var(--bd2)", display:"flex", flexDirection:"column", gap:10, background:"var(--s1)"}}>
-          <button className="btn-s" style={{width:"100%"}} onClick={()=>setModalAlertas(true)}>🔔 Alertas WhatsApp</button>
+          <button className="btn-s" style={{width:"100%", color:'var(--gold2)', borderColor:'var(--gold3)'}} onClick={()=>setModalAlertas(true)}>🔔 Panel Alertas Premium</button>
           <button className="btn-s" style={{width:"100%", color:"var(--red)", borderColor:"var(--red)"}} onClick={cerrarSesion}>🚪 Cerrar Sesión</button>
         </div>
       </div>
 
+      {/* MAIN AREA */}
       <div className="main">
         <div className="main-hd">
           <div className="hd-left">
             <button className="nav-btn" onClick={()=>setCurFecha(new Date(curFecha.getFullYear(), curFecha.getMonth(), curFecha.getDate() - (vista==='mes'?30:7)))}>‹</button>
-            <div className="mes-tit">{MESES[curFecha.getMonth()]} {curFecha.getFullYear()}</div>
+            <div className="mes-tit">
+               {vista==='semana' ? `${MESES[curFecha.getMonth()]} ${curFecha.getFullYear()}` : `${MESES[curFecha.getMonth()]} ${curFecha.getFullYear()}`}
+            </div>
             <button className="nav-btn" onClick={()=>setCurFecha(new Date(curFecha.getFullYear(), curFecha.getMonth(), curFecha.getDate() + (vista==='mes'?30:7)))}>›</button>
             <button className="nav-btn" style={{background:"transparent", color:"var(--gold)", width:"auto", padding:"0 12px", border:"1px solid var(--gold3)"}} onClick={()=>setCurFecha(new Date())}>HOY</button>
           </div>
+          
           <div className="vtabs">
-            {[{id:"mes", label:"MES"},{id:"semana", label:"SEMANA"},{id:"dia", label:"DÍA"},{id:"lista", label:"LISTA"}].map(v=><button key={v.id} className={`vtab ${vista===v.id?"on":""}`} onClick={()=>setVista(v.id)}>{v.label}</button>)}
+            {[
+              {id:"mes", label:"MES"},
+              {id:"semana", label:"SEMANA"},
+              {id:"dia", label:"DÍA"},
+              {id:"lista", label:"LISTA"}
+            ].map(v=><button key={v.id} className={`vtab ${vista===v.id?"on":""}`} onClick={()=>setVista(v.id)}>{v.label}</button>)}
           </div>
         </div>
+
         <div className="cal-scroll">
           {loading ? <div style={{textAlign:"center", padding:40}}><div className="sp-spin" style={{margin:"0 auto"}}></div></div> : renderCalendario()}
         </div>
       </div>
 
+      {/* BOTTOM NAV (MOBILE) */}
       <div className="bottom-nav">
         <div className={`bn-item ${vista==="mes"?"on":""}`} onClick={()=>setVista("mes")}><span className="bn-icon">📅</span>Mes</div>
         <div className={`bn-item ${vista==="semana"?"on":""}`} onClick={()=>setVista("semana")}><span className="bn-icon">🗓️</span>Semana</div>
@@ -630,13 +799,14 @@ function App() {
         <div className="bn-item" onClick={()=>setModalMenuMobile(true)}><span className="bn-icon">☰</span>Menú</div>
       </div>
 
+      {/* MODAL MENU MOBILE */}
       {modalMenuMobile && (
         <div className="modal-ov" style={{alignItems:'flex-end', padding:0}} onClick={e=>e.target===e.currentTarget&&setModalMenuMobile(false)}>
-          <div className="modal-box" style={{borderBottomLeftRadius:0, borderBottomRightRadius:0, width:'100%', margin:0, paddingBottom:"var(--safe-b)"}}>
+          <div className="modal-box" style={{borderBottomLeftRadius:0, borderBottomRightRadius:0, width:'100%', margin:0, paddingBottom:'var(--safe-b)'}}>
             <div className="modal-hd"><div className="modal-tit">Menú del Estudio</div><button style={{background:'none',color:'var(--tx2)',fontSize:20}} onClick={()=>setModalMenuMobile(false)}>✕</button></div>
             <div className="modal-bd" style={{gap:16}}>
                 <button className="btn-s" style={{width:'100%', textAlign:'left', padding:'16px', fontSize:14}} onClick={()=>{setModalMenuMobile(false); setModalEquipo(true);}}>👥 Gestión de Abogados</button>
-                <button className="btn-s" style={{width:'100%', textAlign:'left', padding:'16px', fontSize:14}} onClick={()=>{setModalMenuMobile(false); setModalAlertas(true);}}>🔔 Configurar Alertas WSP</button>
+                <button className="btn-s" style={{width:'100%', textAlign:'left', padding:'16px', fontSize:14, color:'var(--gold)'}} onClick={()=>{setModalMenuMobile(false); setModalAlertas(true);}}>🔔 Panel Alertas Premium</button>
                 <hr className="divider" style={{margin:'0', borderColor:'var(--bd2)'}}/>
                 <button className="btn-s" style={{width:'100%', textAlign:'left', padding:'16px', fontSize:14, color:'var(--red)', borderColor:'var(--red)'}} onClick={cerrarSesion}>🚪 Cerrar Sesión Segura</button>
             </div>
@@ -644,35 +814,66 @@ function App() {
         </div>
       )}
 
+      {/* MODAL EVENTO */}
       {modalEv && (
         <div className="modal-ov" onClick={e=>e.target===e.currentTarget&&setModalEv(null)}>
           <div className="modal-box">
-            <div className="modal-hd"><div className="modal-tit">{modalEv.id ? "Editar Causa" : "Nueva Causa / Evento"}</div><button style={{background:"none", color:"var(--tx2)", fontSize:22}} onClick={()=>setModalEv(null)}>✕</button></div>
+            <div className="modal-hd">
+              <div className="modal-tit">{modalEv.id ? "Editar Causa" : "Nueva Causa / Evento"}</div>
+              <button style={{background:"none", color:"var(--tx2)", fontSize:22}} onClick={()=>setModalEv(null)}>✕</button>
+            </div>
             <div className="modal-bd">
               <div className="f-grp"><label className="m-lbl">Carátula *</label><input defaultValue={modalEv.title} id="ev_t" placeholder="Ej: Perez c/ Gómez s/ Daños"/></div>
+              
               <div className="f-row">
-                <div className="f-grp"><label className="m-lbl">Tipo</label><select id="ev_type" defaultValue={modalEv.type || "audiencia"}>{TIPOS.map(t=><option key={t.id} value={t.id}>{t.label}</option>)}</select></div>
-                <div className="f-grp"><label className="m-lbl">Abogado</label><select id="ev_abg" defaultValue={modalEv.lawyers?.[0]||"p"}>{abogados.map(a=><option key={a.id} value={a.id}>{a.nombre}</option>)}</select></div>
+                <div className="f-grp">
+                  <label className="m-lbl">Tipo de Evento</label>
+                  <select id="ev_type" defaultValue={modalEv.type || "audiencia"}>
+                    {TIPOS.map(t=><option key={t.id} value={t.id}>{t.label}</option>)}
+                  </select>
+                </div>
+                <div className="f-grp">
+                  <label className="m-lbl">Abogado Asignado</label>
+                  <select id="ev_abg" defaultValue={modalEv.lawyers?.[0]||"p"}>
+                    {abogados.map(a=><option key={a.id} value={a.id}>{a.nombre}</option>)}
+                  </select>
+                </div>
               </div>
+
               <div className="f-row">
-                <div className="f-grp"><label className="m-lbl">N° Exp</label><input defaultValue={modalEv.expNum} id="ev_exp"/></div>
-                <div className="f-grp"><label className="m-lbl">Juzgado</label><input defaultValue={modalEv.court} id="ev_c"/></div>
+                <div className="f-grp"><label className="m-lbl">N° Expediente</label><input defaultValue={modalEv.expNum} id="ev_exp"/></div>
+                <div className="f-grp"><label className="m-lbl">Juzgado / Fuero</label><input defaultValue={modalEv.court} id="ev_c"/></div>
               </div>
               <div className="f-row">
                 <div className="f-grp"><label className="m-lbl">Fecha</label><input type="date" defaultValue={modalEv.date} id="ev_d"/></div>
-                <div className="f-grp"><label className="m-lbl">Hora</label><input type="time" defaultValue={modalEv.startTime||"09:00"} id="ev_h"/></div>
+                <div className="f-grp"><label className="m-lbl">Hora de Inicio</label><input type="time" defaultValue={modalEv.startTime||"09:00"} id="ev_h"/></div>
               </div>
-              <div className="f-grp"><label className="m-lbl">Anotaciones</label><textarea defaultValue={modalEv.notes} id="ev_n"/></div>
+              
+              <div className="f-grp"><label className="m-lbl">Anotaciones Privadas</label><textarea defaultValue={modalEv.notes} id="ev_n" placeholder="Links a Zoom, detalles del cliente..."/></div>
             </div>
             <div className="modal-ft">
               {modalEv.id && <button className="btn-d" onClick={()=>eliminarEv(modalEv.id)}>Eliminar</button>}
+              
+              {/* ACCESO RÁPIDO WHATSAPP DIRECTAMENTE DESDE EL MODAL DE EDICIÓN */}
+              {modalEv.id && (
+                <button className="btn-wsp" style={{marginRight:8}} onClick={()=>enviarWhatsAppReal(modalEv)}>
+                  💬 Enviar Recordatorio
+                </button>
+              )}
+              
               <button className="btn-s" onClick={()=>setModalEv(null)}>Cancelar</button>
-              <button className="btn-p" onClick={()=>guardarEv({...modalEv, title:document.getElementById("ev_t").value, type:document.getElementById("ev_type").value, expNum:document.getElementById("ev_exp").value, court:document.getElementById("ev_c").value, date:document.getElementById("ev_d").value, startTime:document.getElementById("ev_h").value, lawyers:[document.getElementById("ev_abg").value], notes:document.getElementById("ev_n").value})}>Guardar</button>
+              <button className="btn-p" onClick={()=>guardarEv({
+                ...modalEv, title:document.getElementById("ev_t").value, type:document.getElementById("ev_type").value,
+                expNum:document.getElementById("ev_exp").value, court:document.getElementById("ev_c").value, 
+                date:document.getElementById("ev_d").value, startTime:document.getElementById("ev_h").value, 
+                lawyers:[document.getElementById("ev_abg").value], notes:document.getElementById("ev_n").value
+              })}>Guardar Causa</button>
             </div>
           </div>
         </div>
       )}
 
+      {/* MODAL EQUIPO */}
       {modalEquipo && (
         <div className="modal-ov" onClick={e=>e.target===e.currentTarget&&setModalEquipo(false)}>
           <div className="modal-box">
@@ -680,52 +881,176 @@ function App() {
             <div className="modal-bd">
               {abogados.map((a)=>(
                 <div key={a.id} style={{display:"flex", gap:12, alignItems:"center", background:"var(--s2)", padding:12, borderRadius:10, border:"1px solid var(--bd2)"}}>
-                  <div className="av" style={{background:a.color}}>{a.ini}</div><div style={{flex:1, fontSize:14, fontWeight:500}}>{a.nombre}</div>
-                  <button className="btn-d" style={{padding:"6px 12px", marginRight:0}} onClick={()=>{if(confirm("¿Eliminar?")) setAbogados(abogados.filter(x=>x.id!==a.id));}}>Borrar</button>
+                  <div className="av" style={{background:a.color}}>{a.ini}</div>
+                  <div style={{flex:1, fontSize:14, fontWeight:500}}>{a.nombre}</div>
+                  <button className="btn-d" style={{padding:"6px 12px", marginRight:0}} onClick={()=>{
+                    if(confirm("¿Eliminar a "+a.nombre+" del estudio?")) setAbogados(abogados.filter(x=>x.id!==a.id));
+                  }}>Borrar</button>
                 </div>
               ))}
               <div style={{borderTop:"1px solid var(--bd2)", paddingTop:20, marginTop:8}}>
                 <div style={{fontSize:13, color:"var(--gold)", marginBottom:14, fontWeight:"700", textTransform:"uppercase"}}>+ Nuevo Miembro</div>
-                <div className="f-grp" style={{marginBottom:12}}><input id="n_nom" placeholder="Nombre completo"/></div>
+                <div className="f-grp" style={{marginBottom:12}}><input id="n_nom" placeholder="Nombre completo (ej: Dr. Juan Pérez)"/></div>
                 <div className="f-row">
-                  <div className="f-grp"><input id="n_ini" placeholder="Iniciales" maxLength={3}/></div>
-                  <div className="f-grp"><select id="n_col"><option value="#C9A84C">Socio (Dorado)</option><option value="#5491C8">Asociado (Azul)</option><option value="#3DAA6A">Junior (Verde)</option><option value="#8E6DC4">Especial (Violeta)</option></select></div>
+                  <div className="f-grp"><input id="n_ini" placeholder="Iniciales (ej: JP)" maxLength={3}/></div>
+                  <div className="f-grp">
+                    <select id="n_col">
+                      <option value="#C9A84C">Socio (Dorado)</option>
+                      <option value="#5491C8">Asociado (Azul)</option>
+                      <option value="#3DAA6A">Junior (Verde)</option>
+                      <option value="#8E6DC4">Especial (Violeta)</option>
+                    </select>
+                  </div>
                 </div>
                 <button className="btn-s" style={{width:"100%", marginTop:12}} onClick={()=>{
                   const nom = document.getElementById("n_nom").value; const ini = document.getElementById("n_ini").value;
                   if(!nom || !ini) return alert("Completa nombre e iniciales.");
                   setAbogados([...abogados, {id:"a_"+Date.now(), nombre:nom, ini:ini.toUpperCase(), color:document.getElementById("n_col").value}]);
                   document.getElementById("n_nom").value = ""; document.getElementById("n_ini").value = "";
-                }}>Añadir</button>
+                }}>Añadir al Equipo</button>
               </div>
             </div>
           </div>
         </div>
       )}
 
+      {/* 5) MODAL CONFIGURACIÓN ALERTAS PROFESIONALES REDISEÑADO COMPLETO */}
       {modalAlertas && (
         <div className="modal-ov" onClick={e=>e.target===e.currentTarget&&setModalAlertas(false)}>
-          <div className="modal-box">
-            <div className="modal-hd"><div className="modal-tit">Alertas WhatsApp</div><button style={{background:"none",color:"var(--tx2)", fontSize:22}} onClick={()=>setModalAlertas(false)}>✕</button></div>
-            <div className="modal-bd">
-              <div className="f-grp"><label className="m-lbl">Número WhatsApp</label><input value={alertas.wsp} onChange={e=>setAlertas({...alertas, wsp:e.target.value})} placeholder="Ej: 5491123456789"/></div>
-              <button className="btn-wsp" style={{justifyContent:"center", padding:"14px", fontSize:13, width:"100%", marginTop:8}} onClick={()=>{
-                if(!alertas.wsp) return alert("Ingresa un número primero.");
-                window.open(`https://wa.me/${alertas.wsp.replace(/[^0-9]/g,'')}?text=Prueba`, '_blank');
-              }}>Probar Conexión</button>
+          <div className="modal-box" style={{background:'#0D111A', border:'1px solid #C9A84C', maxWidth:550}}>
+            <div className="modal-hd" style={{borderBottom:'1px solid rgba(201,168,76,0.2)'}}>
+              <div className="modal-tit" style={{fontFamily:'"Playfair Display", serif', color:'#C9A84C', fontSize:20}}>
+                Control de Alertas & Notificaciones Premium
+              </div>
+              <button style={{background:"none", color:"var(--tx2)", fontSize:22}} onClick={()=>setModalAlertas(false)}>✕</button>
             </div>
-            <div className="modal-ft"><button className="btn-p" onClick={()=>setModalAlertas(false)}>Cerrar</button></div>
+            
+            <div className="modal-bd" style={{gap:20, padding:'24px'}}>
+              
+              {/* Switch General de Estado */}
+              <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', background:'rgba(201,168,76,0.05)', padding:'12px 16px', borderRadius:8, border:'1px solid rgba(201,168,76,0.1)'}}>
+                <div>
+                  <div style={{color:'#F5F5F7', fontSize:14, fontWeight:500}}>Estado General del Motor</div>
+                  <div style={{color:'rgba(245,245,247,0.6)', fontSize:12}}>Habilita o pausa el escaneo automático del estudio</div>
+                </div>
+                <input 
+                  type="checkbox" 
+                  checked={alertasConfig.alertasActivas} 
+                  onChange={e => setAlertasConfig({...alertasConfig, alertasActivas: e.target.checked})}
+                  style={{width:20, height:20, accentColor:'#C9A84C', cursor:'pointer'}}
+                />
+              </div>
+
+              {/* 2) Selector de Días de Anticipación */}
+              <div className="f-grp" style={{display:'flex', flexDirection:'column', gap:6}}>
+                <label className="m-lbl" style={{color:'#C9A84C', fontSize:12}}>Anticipación de Alerta Automatizada</label>
+                <select 
+                  value={alertasConfig.diasAnticipacion} 
+                  onChange={e => setAlertasConfig({...alertasConfig, diasAnticipacion: e.target.value})}
+                  style={{background:'#131924', border:'1px solid rgba(255,255,255,0.1)', color:'#F5F5F7'}}
+                >
+                  <option value="0">El mismo día del compromiso</option>
+                  <option value="1">1 día antes</option>
+                  <option value="2">2 días antes</option>
+                  <option value="3">3 días antes</option>
+                  <option value="7">7 días antes (Una semana)</option>
+                  <option value="custom">Plazo personalizado...</option>
+                </select>
+                
+                {alertasConfig.diasAnticipacion === 'custom' && (
+                  <div style={{marginTop:6, display:'flex', alignItems:'center', gap:10}}>
+                    <input 
+                      type="number" 
+                      value={alertasConfig.diasCustom}
+                      onChange={e => setAlertasConfig({...alertasConfig, diasCustom: e.target.value})}
+                      style={{background:'#131924', border:'1px solid rgba(255,255,255,0.1)', color:'#F5F5F7', width:80}}
+                    />
+                    <span style={{color:'rgba(245,245,247,0.7)', fontSize:13}}>días antes del vencimiento.</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Canal de WhatsApp Corporativo */}
+              <div style={{border:'1px solid rgba(255,255,255,0.05)', padding:16, borderRadius:8, background:'#111520'}}>
+                <label className="m-lbl" style={{color:'#C9A84C', display:'block', marginBottom:8}}>Canal WhatsApp de Destino</label>
+                <input 
+                  value={alertasConfig.wsp} 
+                  onChange={e=>setAlertasConfig({...alertasConfig, wsp:e.target.value})} 
+                  placeholder="Ej: 54 9 11 2345 6789"
+                  style={{background:'#0D111A', marginBottom:10}}
+                />
+                <button 
+                  className="btn-wsp" 
+                  onClick={() => enviarWhatsAppReal({title: "Causa Test Informativo", date: hoyStr(), startTime: "10:00", court: "Juzgado Comercial 1", expNum: "EXP-9923/2026", notes: "Línea de enlace verificada exitosamente."})}
+                >
+                  💬 Probar Canal WhatsApp
+                </button>
+              </div>
+
+              {/* 4) Canal de Correo Electrónico Real (EmailJS) */}
+              <div style={{border:'1px solid rgba(255,255,255,0.05)', padding:16, borderRadius:8, background:'#111520', display:'flex', flexDirection:'column', gap:10}}>
+                <label className="m-lbl" style={{color:'#C9A84C'}}>Servicio de Email Corporativo</label>
+                
+                <input 
+                  value={alertasConfig.emailDestino} 
+                  onChange={e=>setAlertasConfig({...alertasConfig, emailDestino:e.target.value})} 
+                  placeholder="Email receptor (ej: alertas@estudiomsa.com)"
+                  style={{background:'#0D111A'}}
+                />
+
+                <div style={{display:'grid', gridTemplateColumns:'1fr 1fr', gap:10}}>
+                  <input 
+                    value={alertasConfig.emailjsServiceId} 
+                    onChange={e=>setAlertasConfig({...alertasConfig, emailjsServiceId:e.target.value})} 
+                    placeholder="EmailJS Service ID"
+                    style={{background:'#0D111A', fontSize:12}}
+                  />
+                  <input 
+                    value={alertasConfig.emailjsTemplateId} 
+                    onChange={e=>setAlertasConfig({...alertasConfig, emailjsTemplateId:e.target.value})} 
+                    placeholder="EmailJS Template ID"
+                    style={{background:'#0D111A', fontSize:12}}
+                  />
+                </div>
+                
+                <input 
+                  value={alertasConfig.emailjsPublicKey} 
+                  onChange={e=>setAlertasConfig({...alertasConfig, emailjsPublicKey:e.target.value})} 
+                  placeholder="EmailJS Public Key (User ID)"
+                  style={{background:'#0D111A', fontSize:12}}
+                />
+
+                <button 
+                  className="btn-s" 
+                  style={{alignSelf:'flex-start', color:'var(--gold)'}}
+                  onClick={() => enviarEmailReal({title: "Audiencia Informativa Test", date: hoyStr(), startTime: "09:00", court: "Cámara Civil Sala A", expNum: "7743/2026", notes: "Prueba de integración de correo."}, "Test")}
+                >
+                  📧 Enviar Email de Prueba
+                </button>
+              </div>
+
+              {/* Monitoreo del Estado del Escáner */}
+              <div style={{fontSize:11, color:'rgba(245,245,247,0.4)', textAlign:'center', marginTop:4, borderTop:'1px solid rgba(255,255,255,0.05)', paddingTop:10}}>
+                {alertasConfig.ultimaAlerta}
+              </div>
+
+            </div>
+            <div className="modal-ft" style={{background:'#090D14', borderTop:'1px solid rgba(201,168,76,0.1)'}}>
+              <button className="btn-p" onClick={()=>setModalAlertas(false)}>Guardar Configuración</button>
+            </div>
           </div>
         </div>
       )}
 
+      {/* TOAST NOTIFICATIONS */}
       {toast && <div className="toast">{toast}</div>}
+
     </div>
   );
 }
 
 const root = ReactDOM.createRoot(document.getElementById("root")); 
-root.render(<ErrorBoundary><App /></ErrorBoundary>);
+root.render(<App />);
 </script>
 </body>
 </html>
